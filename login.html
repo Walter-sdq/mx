@@ -162,6 +162,15 @@
                         return;
                     }
                     
+                    // Check email verification
+                    if (!user.emailVerified) {
+                        showToast('Please verify your email address before logging in', 'error');
+                        setTimeout(() => {
+                            window.location.href = `verify.html?email=${encodeURIComponent(email)}`;
+                        }, 2000);
+                        return;
+                    }
+                    
                     // Verify password
                     const isValid = await CryptoUtils.verifyPassword(password, user.passwordHash);
                     if (!isValid) {
@@ -175,9 +184,23 @@
                     // Create session
                     SessionManager.createSession(user, rememberMe);
 
+                    // Add welcome notification for first login
+                    const existingNotifications = state.getNotifications(user._id);
+                    if (existingNotifications.length === 0) {
+                        state.addNotification({
+                            _id: state.generateId(),
+                            toUserId: user._id,
+                            title: 'Welcome to MaxProfit!',
+                            body: 'Your account has been verified and activated. Start exploring our trading platform!',
+                            type: 'welcome',
+                            read: false,
+                            createdAt: Date.now()
+                        });
+                    }
+
                     showToast('Login successful! Redirecting...', 'success');
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
+                        window.location.href = user.role === 'admin' ? 'admin.html' : 'dashboard.html';
                     }, 1000);
 
                 } catch (error) {

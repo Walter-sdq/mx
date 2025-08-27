@@ -1,6 +1,12 @@
 // Dashboard JavaScript - Mobile Trading App
+import { SessionManager } from './session.js';
+import { state } from './state.js';
+import { liveSupportManager } from './liveSupport.js';
+import { formatCurrency, getRelativeTime, showToast } from './utils.js';
+
 class TradingDashboard {
     constructor() {
+        this.currentUser = null;
         this.currentPage = 'home';
         this.isBalanceVisible = true;
         this.watchlist = [];
@@ -12,14 +18,78 @@ class TradingDashboard {
     }
 
     init() {
+        this.loadUserData();
         this.updateTime();
         this.setupEventListeners();
-        this.loadMockData();
+        this.loadUserData();
         this.updateUI();
         this.startRealTimeUpdates();
         
         // Update time every minute
         setInterval(() => this.updateTime(), 60000);
+    }
+    
+    loadUserData() {
+        const session = SessionManager.getSession();
+        if (!session) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        this.currentUser = state.getUserById(session.userId);
+        if (!this.currentUser) {
+            window.location.href = 'login.html';
+            return;
+        }
+        
+        // Update UI with user data
+        this.updateUserInterface();
+        this.loadUserTransactions();
+        this.loadUserNotifications();
+    }
+    
+    updateUserInterface() {
+        if (!this.currentUser) return;
+        
+        // Update username
+        const usernameEl = document.getElementById('username');
+        if (usernameEl) usernameEl.textContent = this.currentUser.fullName;
+        
+        // Update portfolio balance
+        this.updatePortfolioFromUser();
+    }
+    
+    updatePortfolioFromUser() {
+        if (!this.currentUser) return;
+        
+        const { USD, BTC, ETH } = this.currentUser.balances;
+        const prices = state.getPrices();
+        const totalValue = USD + (BTC * prices['BTC/USD']) + (ETH * prices['ETH/USD']);
+        
+        const balanceEl = document.getElementById('portfolioBalance');
+        if (balanceEl && this.isBalanceVisible) {
+            balanceEl.textContent = formatCurrency(totalValue);
+        }
+        
+        // Update quick stats
+        const stats = document.querySelectorAll('.stat-value');
+        if (stats.length >= 3) {
+            stats[0].textContent = formatCurrency(USD);
+            stats[1].textContent = formatCurrency(0); // P&L starts at 0
+            stats[2].textContent = formatCurrency(0); // Margin used starts at 0
+        }
+    }
+    
+    loadUserTransactions() {
+        if (!this.currentUser) return;
+        
+        this.transactions = state.getTransactions(this.currentUser._id);
+    }
+    
+    loadUserNotifications() {
+        if (!this.currentUser) return;
+        
+        this.notifications = state.getNotifications(this.currentUser._id);
     }
 
     setupEventListeners() {
@@ -169,7 +239,23 @@ class TradingDashboard {
             case 'notifications':
                 this.loadNotifications();
                 break;
+            case 'support':
+                this.loadLiveSupport();
+                break;
         }
+    }
+    
+    loadLiveSupport() {
+        // Initialize live support manager
+        liveSupportManager.renderActivities();
+        
+        // Update stats
+        const stats = liveSupportManager.getTotalStats();
+        const activeUsersEl = document.getElementById('active-users');
+        const totalVolumeEl = document.getElementById('total-volume');
+        
+        if (activeUsersEl) activeUsersEl.textContent = stats.activeUsers.toLocaleString();
+        if (totalVolumeEl) totalVolumeEl.textContent = formatCurrency(stats.totalDeposits, 'USD', 0);
     }
 
     updateTime() {
@@ -213,8 +299,15 @@ class TradingDashboard {
         }
     }
 
-    loadMockData() {
-        // Mock watchlist data
+    updateUI() {
+        this.updateWatchlist();
+        this.updatePositions();
+        this.updateRecentActivity();
+        this.updatePortfolioFromUser();
+    }
+    
+    updateWatchlist() {
+        // Real watchlist data from prices
         this.watchlist = [
             { symbol: 'EUR/USD', name: 'Euro/US Dollar', price: 1.0847, change: -0.0023, changePercent: -0.21 },
             { symbol: 'GBP/USD', name: 'British Pound/US Dollar', price: 1.2634, change: 0.0045, changePercent: 0.36 },
@@ -222,102 +315,22 @@ class TradingDashboard {
             { symbol: 'BTC/USD', name: 'Bitcoin/US Dollar', price: 43250.00, change: 1250.00, changePercent: 2.98 },
             { symbol: 'ETH/USD', name: 'Ethereum/US Dollar', price: 2485.50, change: -45.30, changePercent: -1.79 }
         ];
-
-        // Mock positions data
+        
+        this.renderWatchlist();
+    }
+    
+    updatePositions() {
+        // Load user's actual positions
+        if (!this.currentUser) return;
+        
         this.positions = [
-            {
-                symbol: 'EUR/USD',
-                type: 'BUY',
-                volume: 1.0,
-                openPrice: 1.0825,
-                currentPrice: 1.0847,
-                pnl: 22.00,
-                pnlPercent: 0.20
-            },
-            {
-                symbol: 'GBP/USD',
-                type: 'SELL',
-                volume: 0.5,
-                openPrice: 1.2689,
-                currentPrice: 1.2634,
-                pnl: 27.50,
-                pnlPercent: 0.43
-            }
+            // Positions start empty - only admin can create
         ];
-
-        // Mock transactions data
-        this.transactions = [
-            {
-                id: '1',
-                type: 'deposit',
-                title: 'Bank Transfer Deposit',
-                subtitle: 'Completed • Today 14:32',
-                amount: 5000.00,
-                status: 'completed'
-            },
-            {
-                id: '2',
-                type: 'trade',
-                title: 'EUR/USD BUY',
-                subtitle: '1.0 lot • Today 12:15',
-                amount: 22.00,
-                status: 'profit'
-            },
-            {
-                id: '3',
-                type: 'withdrawal',
-                title: 'Bank Withdrawal',
-                subtitle: 'Pending • Yesterday 16:45',
-                amount: -1500.00,
-                status: 'pending'
-            },
-            {
-                id: '4',
-                type: 'trade',
-                title: 'GBP/USD SELL',
-                subtitle: '0.5 lot • Yesterday 10:22',
-                amount: 27.50,
-                status: 'profit'
-            }
-        ];
-
-        // Mock notifications data
-        this.notifications = [
-            {
-                id: '1',
-                type: 'success',
-                title: 'Trade Executed',
-                message: 'Your EUR/USD BUY order has been executed at 1.0825',
-                time: '2 minutes ago',
-                read: false
-            },
-            {
-                id: '2',
-                type: 'info',
-                title: 'Deposit Confirmed',
-                message: 'Your deposit of $5,000 has been processed successfully',
-                time: '1 hour ago',
-                read: false
-            },
-            {
-                id: '3',
-                type: 'warning',
-                title: 'Margin Call Warning',
-                message: 'Your account margin level is approaching 50%',
-                time: '3 hours ago',
-                read: true
-            }
-        ];
+        
+        this.renderPositions();
     }
-
-    updateUI() {
-        this.updateWatchlist();
-        this.updatePositions();
-        this.updateRecentActivity();
-        this.updatePortfolioSummary();
-    }
-
-    updateWatchlist() {
+    
+    renderWatchlist() {
         const container = document.getElementById('watchlistContainer');
         if (!container) return;
 
@@ -337,7 +350,7 @@ class TradingDashboard {
         `).join('');
     }
 
-    updatePositions() {
+    renderPositions() {
         const container = document.getElementById('positionsList');
         const countElement = document.getElementById('positionCount');
         
@@ -369,6 +382,8 @@ class TradingDashboard {
     }
 
     updateRecentActivity() {
+        if (!this.currentUser) return;
+        
         const container = document.getElementById('recentActivity');
         if (!container) return;
 
@@ -380,8 +395,8 @@ class TradingDashboard {
                     <i class="fas fa-${this.getTransactionIcon(transaction.type)}"></i>
                 </div>
                 <div class="activity-details">
-                    <div class="activity-title">${transaction.title}</div>
-                    <div class="activity-subtitle">${transaction.subtitle}</div>
+                    <div class="activity-title">${transaction.note || transaction.type}</div>
+                    <div class="activity-subtitle">${getRelativeTime(transaction.createdAt)}</div>
                 </div>
                 <div class="activity-amount ${transaction.amount >= 0 ? 'positive' : 'negative'}">
                     ${transaction.amount >= 0 ? '+' : ''}$${Math.abs(transaction.amount).toFixed(2)}
@@ -390,39 +405,9 @@ class TradingDashboard {
         `).join('');
     }
 
-    updatePortfolioSummary() {
-        // This would normally fetch real data from an API
-        const summary = {
-            balance: 24567.89,
-            change: 1234.56,
-            changePercent: 5.3,
-            available: 12450.00,
-            pnlToday: 892.34,
-            marginUsed: 5200.00
-        };
-
-        // Update balance change
-        const changeElement = document.getElementById('balanceChange');
-        if (changeElement) {
-            const isPositive = summary.change >= 0;
-            changeElement.className = `balance-change ${isPositive ? 'positive' : 'negative'}`;
-            changeElement.innerHTML = `
-                <i class="fas fa-arrow-${isPositive ? 'up' : 'down'}"></i>
-                <span>${isPositive ? '+' : ''}$${Math.abs(summary.change).toFixed(2)} (${isPositive ? '+' : ''}${summary.changePercent.toFixed(1)}%) today</span>
-            `;
-        }
-
-        // Update quick stats
-        const stats = document.querySelectorAll('.stat-value');
-        if (stats.length >= 3) {
-            stats[0].textContent = `$${summary.available.toFixed(2)}`;
-            stats[1].textContent = `+$${summary.pnlToday.toFixed(2)}`;
-            stats[1].className = 'stat-value positive';
-            stats[2].textContent = `$${summary.marginUsed.toFixed(2)}`;
-        }
-    }
-
     loadTransactions() {
+        if (!this.currentUser) return;
+        
         const container = document.getElementById('transactionsList');
         if (!container) return;
 
@@ -432,8 +417,8 @@ class TradingDashboard {
                     <i class="fas fa-${this.getTransactionIcon(transaction.type)}"></i>
                 </div>
                 <div class="transaction-details">
-                    <div class="transaction-title">${transaction.title}</div>
-                    <div class="transaction-subtitle">${transaction.subtitle}</div>
+                    <div class="transaction-title">${transaction.note || transaction.type}</div>
+                    <div class="transaction-subtitle">${getRelativeTime(transaction.createdAt)} • ${transaction.status}</div>
                 </div>
                 <div class="transaction-amount">
                     <div class="amount-primary ${transaction.amount >= 0 ? 'positive' : 'negative'}">
@@ -446,18 +431,20 @@ class TradingDashboard {
     }
 
     loadNotifications() {
+        if (!this.currentUser) return;
+        
         const container = document.getElementById('notificationsList');
         if (!container) return;
 
         container.innerHTML = this.notifications.map(notification => `
             <div class="notification-item ${!notification.read ? 'unread' : ''}">
-                <div class="notification-icon ${notification.type}">
+                <div class="notification-icon ${notification.type || 'info'}">
                     <i class="fas fa-${this.getNotificationIcon(notification.type)}"></i>
                 </div>
                 <div class="notification-content">
                     <div class="notification-title">${notification.title}</div>
-                    <div class="notification-message">${notification.message}</div>
-                    <div class="notification-time">${notification.time}</div>
+                    <div class="notification-message">${notification.body}</div>
+                    <div class="notification-time">${getRelativeTime(notification.createdAt)}</div>
                 </div>
             </div>
         `).join('');
@@ -617,13 +604,11 @@ class TradingDashboard {
     }
 
     showDepositModal() {
-        console.log('Show deposit modal');
-        // Implementation would show a deposit modal
+        window.location.href = 'deposit.html';
     }
 
     showWithdrawModal() {
-        console.log('Show withdraw modal');
-        // Implementation would show a withdraw modal
+        window.location.href = 'withdraw.html';
     }
 
     showTransferModal() {
@@ -633,8 +618,7 @@ class TradingDashboard {
 
     logout() {
         if (confirm('Are you sure you want to logout?')) {
-            // Clear session and redirect to login
-            sessionStorage.clear();
+            SessionManager.clearSession();
             window.location.href = 'login.html';
         }
     }

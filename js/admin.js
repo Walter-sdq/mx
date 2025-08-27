@@ -331,7 +331,7 @@ class AdminDashboard {
     if (!tbody) return;
     
     if (this.users.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="8" class="text-center">No users found</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="9" class="text-center">No users found</td></tr>';
       return;
     }
     
@@ -352,6 +352,12 @@ class AdminDashboard {
         <td class="balance-display">${formatCurrency(user.balances?.USD || 0)}</td>
         <td class="balance-display">${(user.balances?.BTC || 0).toFixed(8)}</td>
         <td class="balance-display">${(user.balances?.ETH || 0).toFixed(6)}</td>
+        <td>
+          <span class="verification-badge ${user.emailVerified ? 'verified' : 'unverified'}">
+            <i class="fas fa-${user.emailVerified ? 'check-circle' : 'times-circle'}"></i>
+            ${user.emailVerified ? 'Verified' : 'Unverified'}
+          </span>
+        </td>
         <td>${formatDateTime(user.createdAt)}</td>
         <td>${user.lastLoginAt ? getRelativeTime(user.lastLoginAt) : 'Never'}</td>
         <td>

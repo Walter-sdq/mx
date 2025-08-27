@@ -187,10 +187,20 @@
                     <div class="admin-activity">
                         <div class="activity-header">
                             <h3>Recent System Activity</h3>
-                            <button class="btn btn-outline" onclick="refreshActivity()">
-                                <i class="fas fa-refresh"></i>
-                                Refresh
-                            </button>
+                            <div class="activity-actions">
+                                <button class="btn btn-outline" onclick="admin.exportUserData()">
+                                    <i class="fas fa-download"></i>
+                                    Export Users
+                                </button>
+                                <button class="btn btn-outline" onclick="admin.exportTransactionData()">
+                                    <i class="fas fa-file-export"></i>
+                                    Export Transactions
+                                </button>
+                                <button class="btn btn-outline" onclick="admin.refreshActivity()">
+                                    <i class="fas fa-refresh"></i>
+                                    Refresh
+                                </button>
+                            </div>
                         </div>
                         <div class="activity-list" id="admin-activity-list">
                             <!-- Activity items will be populated here -->
@@ -220,6 +230,7 @@
                                         <th class="sortable" data-sort="balances.USD">USD Balance</th>
                                         <th class="sortable" data-sort="balances.BTC">BTC Balance</th>
                                         <th class="sortable" data-sort="balances.ETH">ETH Balance</th>
+                                        <th class="sortable" data-sort="emailVerified">Verified</th>
                                         <th class="sortable" data-sort="createdAt">Joined</th>
                                         <th class="sortable" data-sort="lastLoginAt">Last Login</th>
                                         <th>Actions</th>

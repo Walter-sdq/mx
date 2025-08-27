@@ -86,19 +86,109 @@ class LandingPage {
   
   setupHeroChart() {
     const canvas = document.getElementById('hero-chart');
+    const liveCanvas = document.getElementById('hero-live-chart');
     if (!canvas) return;
     
-    // Generate sample data for BTC
-    const data = generateSampleData(50, 42850, 0.02);
-    
-    this.heroChart = createMiniChart(canvas, data, {
-      color: '#4caf50',
-      backgroundColor: 'rgba(76, 175, 80, 0.1)'
-    });
+    // Initialize live chart with real-time data
+    if (liveCanvas) {
+      this.initLiveChart(liveCanvas);
+    } else {
+      // Fallback to mini chart
+      const data = generateSampleData(50, 42850, 0.02);
+      this.heroChart = createMiniChart(canvas, data, {
+        color: '#4caf50',
+        backgroundColor: 'rgba(76, 175, 80, 0.1)'
+      });
+    }
     
     // Subscribe to BTC price updates
     priceEngine.subscribe('BTC/USD', (priceData) => {
       this.updateHeroPrice(priceData);
+      this.updateBTCStats(priceData);
+    });
+  }
+  
+  initLiveChart(canvas) {
+    const ctx = canvas.getContext('2d');
+    
+    // Generate initial data
+    const data = generateSampleData(30, 42850, 0.02);
+    
+    this.heroChart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        datasets: [{
+          data: data,
+          borderColor: '#4caf50',
+          backgroundColor: 'rgba(76, 175, 80, 0.1)',
+          fill: true,
+          borderWidth: 3,
+          tension: 0.2,
+          pointRadius: 0,
+          pointHoverRadius: 6,
+          pointHoverBackgroundColor: '#4caf50',
+          pointHoverBorderColor: '#ffffff',
+          pointHoverBorderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index'
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+            titleColor: '#ffffff',
+            bodyColor: '#ffffff',
+            borderColor: '#4caf50',
+            borderWidth: 1,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              title: function(context) {
+                return new Date(context[0].parsed.x).toLocaleTimeString();
+              },
+              label: function(context) {
+                return `$${context.parsed.y.toLocaleString()}`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: {
+            type: 'time',
+            display: true,
+            grid: { display: false },
+            ticks: { 
+              color: '#666666', 
+              maxTicksLimit: 4,
+              font: { size: 10 }
+            }
+          },
+          y: {
+            display: true,
+            position: 'right',
+            grid: { 
+              color: 'rgba(255, 255, 255, 0.1)',
+              drawBorder: false
+            },
+            ticks: {
+              color: '#666666',
+              font: { size: 10 },
+              callback: function(value) {
+                return '$' + value.toLocaleString();
+              }
+            }
+          }
+        },
+        elements: {
+          point: { radius: 0 }
+        }
+      }
     });
   }
   
@@ -113,7 +203,7 @@ class LandingPage {
     if (changeElement) {
       const formatted = formatPriceChange(priceData.change, priceData.changePercent);
       changeElement.textContent = formatted.percent;
-      changeElement.className = `change ${formatted.isPositive ? 'positive' : 'negative'}`;
+      changeElement.className = `price-change ${formatted.isPositive ? 'positive' : 'negative'}`;
     }
     
     // Update chart
@@ -132,6 +222,28 @@ class LandingPage {
       }
       
       this.heroChart.update('none');
+    }
+  }
+  
+  updateBTCStats(priceData) {
+    // Update 24h stats (simulated)
+    const highEl = document.getElementById('btc-high');
+    const lowEl = document.getElementById('btc-low');
+    const volumeEl = document.getElementById('btc-volume');
+    
+    if (highEl) {
+      const high = priceData.price * (1 + Math.random() * 0.02);
+      highEl.textContent = `$${high.toFixed(0)}`;
+    }
+    
+    if (lowEl) {
+      const low = priceData.price * (1 - Math.random() * 0.02);
+      lowEl.textContent = `$${low.toFixed(0)}`;
+    }
+    
+    if (volumeEl) {
+      const volume = (Math.random() * 3 + 1).toFixed(1);
+      volumeEl.textContent = `$${volume}B`;
     }
   }
   

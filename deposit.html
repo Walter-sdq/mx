@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deposit Funds - MaxProfit Trading</title>
+    <meta name="description" content="Deposit funds to your MaxProfit trading account">
+    
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Simplified header for deposit page -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <a href="dashboard.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="page-title">Deposit Funds</h1>
+            </div>
+            
+            <div class="topbar-right">
+                <button class="theme-toggle" id="theme-toggle">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="deposit-container">
+                <!-- Current Balance Display -->
+                <div class="balance-overview">
+                    <div class="balance-card">
+                        <h3>Current Balance</h3>
+                        <div class="balance-amount" id="current-balance">$15,430.25</div>
+                        <div class="balance-breakdown">
+                            <div class="breakdown-item">
+                                <span>USD</span>
+                                <span id="usd-balance">$15,430.25</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>BTC</span>
+                                <span id="btc-balance">0.21340580</span>
+                            </div>
+                            <div class="breakdown-item">
+                                <span>ETH</span>
+                                <span id="eth-balance">3.45672100</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposit Methods -->
+                <div class="deposit-methods">
+                    <h3>Choose Deposit Method</h3>
+                    <div class="methods-grid">
+                        <div class="method-card active" data-method="card">
+                            <div class="method-icon">
+                                <i class="fas fa-credit-card"></i>
+                            </div>
+                            <div class="method-info">
+                                <h4>Credit/Debit Card</h4>
+                                <p>Instant deposit • 2.9% fee</p>
+                            </div>
+                            <div class="method-badge">Instant</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="bank">
+                            <div class="method-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div class="method-info">
+                                <h4>Bank Transfer</h4>
+                                <p>1-3 business days • No fees</p>
+                            </div>
+                            <div class="method-badge">Free</div>
+                        </div>
+                        
+                        <div class="method-card" data-method="crypto">
+                            <div class="method-icon">
+                                <i class="fab fa-bitcoin"></i>
+                            </div>
+                            <div class="method-info">
+                                <h4>Cryptocurrency</h4>
+                                <p>10-60 minutes • Network fees</p>
+                            </div>
+                            <div class="method-badge">Crypto</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Deposit Form -->
+                <div class="deposit-form-container">
+                    <form class="deposit-form" id="deposit-form">
+                        <div class="form-group">
+                            <label for="deposit-amount">Deposit Amount</label>
+                            <div class="amount-input-group">
+                                <span class="currency-symbol">$</span>
+                                <input 
+                                    type="number" 
+                                    id="deposit-amount" 
+                                    placeholder="0.00" 
+                                    min="10" 
+                                    step="0.01" 
+                                    required
+                                >
+                            </div>
+                            <div class="amount-note">Minimum deposit: $10.00</div>
+                        </div>
+
+                        <!-- Quick Amount Buttons -->
+                        <div class="quick-amounts">
+                            <button type="button" class="quick-amount-btn" data-amount="100">$100</button>
+                            <button type="button" class="quick-amount-btn" data-amount="500">$500</button>
+                            <button type="button" class="quick-amount-btn" data-amount="1000">$1,000</button>
+                            <button type="button" class="quick-amount-btn" data-amount="5000">$5,000</button>
+                        </div>
+
+                        <!-- Payment Details (shown based on selected method) -->
+                        <div class="payment-details" id="card-details">
+                            <div class="form-group">
+                                <label for="card-number">Card Number</label>
+                                <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="card-expiry">Expiry Date</label>
+                                    <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5">
+                                </div>
+                                <div class="form-group">
+                                    <label for="card-cvv">CVV</label>
+                                    <input type="text" id="card-cvv" placeholder="123" maxlength="4">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-details" id="bank-details" style="display: none;">
+                            <div class="bank-info">
+                                <h4>Bank Transfer Details</h4>
+                                <div class="bank-detail">
+                                    <span class="label">Account Name:</span>
+                                    <span class="value">MaxProfit Trading Ltd</span>
+                                </div>
+                                <div class="bank-detail">
+                                    <span class="label">Account Number:</span>
+                                    <span class="value">1234567890</span>
+                                </div>
+                                <div class="bank-detail">
+                                    <span class="label">Routing Number:</span>
+                                    <span class="value">021000021</span>
+                                </div>
+                                <div class="bank-detail">
+                                    <span class="label">Reference:</span>
+                                    <span class="value" id="bank-reference">MP-USER001</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="payment-details" id="crypto-details" style="display: none;">
+                            <div class="form-group">
+                                <label for="crypto-currency">Cryptocurrency</label>
+                                <select id="crypto-currency">
+                                    <option value="BTC">Bitcoin (BTC)</option>
+                                    <option value="ETH">Ethereum (ETH)</option>
+                                    <option value="USDT">Tether (USDT)</option>
+                                    <option value="USDC">USD Coin (USDC)</option>
+                                </select>
+                            </div>
+                            <div class="crypto-address">
+                                <label>Deposit Address</label>
+                                <div class="address-display">
+                                    <span class="address" id="crypto-address">1A1zP1eP5QGefi2DMPTfTL5SLmv7DivfNa</span>
+                                    <button type="button" class="copy-btn" onclick="copyToClipboard('crypto-address')">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                </div>
+                                <div class="qr-code">
+                                    <div class="qr-placeholder">
+                                        <i class="fas fa-qrcode"></i>
+                                        <span>QR Code</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fee Summary -->
+                        <div class="fee-summary">
+                            <div class="fee-item">
+                                <span>Deposit Amount</span>
+                                <span id="fee-amount">$0.00</span>
+                            </div>
+                            <div class="fee-item">
+                                <span>Processing Fee</span>
+                                <span id="fee-processing">$0.00</span>
+                            </div>
+                            <div class="fee-item total">
+                                <span>Total to Pay</span>
+                                <span id="fee-total">$0.00</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-large" id="deposit-submit">
+                            <i class="fas fa-plus"></i>
+                            Confirm Deposit
+                        </button>
+
+                        <div class="deposit-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Demo only. Integrations (Stripe/Paystack/Flutterwave) are stubbed; no real charges.</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/crypto.js"></script>
+    <script src="js/session.js"></script>
+    <script src="js/state.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initDepositPage();
+        });
+
+        async function initDepositPage() {
+            // Check authentication
+            if (!SessionManager.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const session = SessionManager.getSession();
+            const user = state.getUserById(session.userId);
+            
+            if (user) {
+                updateBalanceDisplay(user);
+            }
+
+            setupDepositForm();
+        }
+
+        function updateBalanceDisplay(user) {
+            const currentBalanceEl = document.getElementById('current-balance');
+            const usdBalanceEl = document.getElementById('usd-balance');
+            const btcBalanceEl = document.getElementById('btc-balance');
+            const ethBalanceEl = document.getElementById('eth-balance');
+            
+            if (currentBalanceEl) {
+                const totalUSD = user.balances.USD + 
+                    (user.balances.BTC * 42850) + 
+                    (user.balances.ETH * 2540);
+                currentBalanceEl.textContent = formatCurrency(totalUSD);
+            }
+            
+            if (usdBalanceEl) usdBalanceEl.textContent = formatCurrency(user.balances.USD);
+            if (btcBalanceEl) btcBalanceEl.textContent = user.balances.BTC.toFixed(8);
+            if (ethBalanceEl) ethBalanceEl.textContent = user.balances.ETH.toFixed(6);
+        }
+
+        function setupDepositForm() {
+            const form = document.getElementById('deposit-form');
+            const amountInput = document.getElementById('deposit-amount');
+            const methodCards = document.querySelectorAll('.method-card');
+            const quickAmountBtns = document.querySelectorAll('.quick-amount-btn');
+            
+            let selectedMethod = 'card';
+
+            // Method selection
+            methodCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    selectedMethod = card.getAttribute('data-method');
+                    
+                    // Update active state
+                    methodCards.forEach(c => c.classList.remove('active'));
+                    card.classList.add('active');
+                    
+                    // Show/hide payment details
+                    document.querySelectorAll('.payment-details').forEach(detail => {
+                        detail.style.display = 'none';
+                    });
+                    
+                    const detailsEl = document.getElementById(`${selectedMethod}-details`);
+                    if (detailsEl) {
+                        detailsEl.style.display = 'block';
+                    }
+                    
+                    updateFeeSummary();
+                });
+            });
+
+            // Quick amount buttons
+            quickAmountBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const amount = btn.getAttribute('data-amount');
+                    amountInput.value = amount;
+                    updateFeeSummary();
+                    
+                    // Visual feedback
+                    btn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        btn.style.transform = '';
+                    }, 150);
+                });
+            });
+
+            // Amount input
+            amountInput.addEventListener('input', updateFeeSummary);
+
+            // Form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await processDeposit(selectedMethod);
+            });
+
+            function updateFeeSummary() {
+                const amount = parseFloat(amountInput.value) || 0;
+                let fee = 0;
+                
+                if (selectedMethod === 'card') {
+                    fee = amount * 0.029; // 2.9% for card
+                } else if (selectedMethod === 'crypto') {
+                    fee = 5.00; // Fixed network fee
+                }
+                
+                const total = amount + fee;
+                
+                document.getElementById('fee-amount').textContent = formatCurrency(amount);
+                document.getElementById('fee-processing').textContent = formatCurrency(fee);
+                document.getElementById('fee-total').textContent = formatCurrency(total);
+            }
+
+            async function processDeposit(method) {
+                const amount = parseFloat(amountInput.value);
+                
+                if (!amount || amount < 10) {
+                    showToast('Minimum deposit amount is $10.00', 'error');
+                    return;
+                }
+
+                const submitBtn = document.getElementById('deposit-submit');
+                
+                try {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    showLoading(true);
+
+                    // Simulate processing delay
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    const session = SessionManager.getSession();
+                    const user = state.getUserById(session.userId);
+                    
+                    // Create transaction
+                    const transaction = {
+                        _id: state.generateId(),
+                        userId: session.userId,
+                        type: 'deposit',
+                        amount: amount,
+                        currency: 'USD',
+                        status: 'completed',
+                        note: `Deposit via ${method}`,
+                        createdAt: Date.now(),
+                        meta: { method, reference: `DEP${Date.now().toString().slice(-6)}` }
+                    };
+                    
+                    state.addTransaction(transaction);
+                    
+                    // Update user balance
+                    const newBalance = user.balances.USD + amount;
+                    state.updateUser(session.userId, {
+                        balances: { ...user.balances, USD: newBalance }
+                    });
+                    
+                    // Add notification
+                    state.addNotification({
+                        _id: state.generateId(),
+                        toUserId: session.userId,
+                        title: 'Deposit Successful',
+                        body: `Your deposit of ${formatCurrency(amount)} has been processed successfully.`,
+                        type: 'payment',
+                        read: false,
+                        createdAt: Date.now()
+                    });
+
+                    showToast(`Deposit of ${formatCurrency(amount)} completed successfully!`, 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Deposit error:', error);
+                    showToast('Deposit failed. Please try again.', 'error');
+                } finally {
+                    showLoading(false);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-plus"></i> Confirm Deposit';
+                }
+            }
+        }
+
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                navigator.clipboard.writeText(element.textContent).then(() => {
+                    showToast('Address copied to clipboard', 'success');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

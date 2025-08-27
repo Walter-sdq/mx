@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MaxProfit Trading</title>
+    <meta name="description" content="Login to your MaxProfit trading account">
+    
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span>MaxProfit</span>
+                </div>
+                <h1>Welcome Back</h1>
+                <p>Sign in to your trading account</p>
+            </div>
+
+            <form class="auth-form" id="login-form" novalidate>
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-group">
+                        <i class="fas fa-envelope"></i>
+                        <input 
+                            type="email" 
+                            id="email" 
+                            name="email" 
+                            placeholder="Enter your email"
+                            required
+                            autocomplete="email"
+                        >
+                    </div>
+                    <div class="error-message" id="email-error"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-group">
+                        <i class="fas fa-lock"></i>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password" 
+                            placeholder="Enter your password"
+                            required
+                            autocomplete="current-password"
+                        >
+                        <button type="button" class="password-toggle" id="password-toggle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="error-message" id="password-error"></div>
+                </div>
+
+                <div class="form-options">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="remember" name="remember">
+                        <span class="checkmark"></span>
+                        Remember me
+                    </label>
+                    <a href="#" class="forgot-password">Forgot Password?</a>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-large" id="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    Sign In
+                </button>
+
+                <div class="form-footer">
+                    <p>Don't have an account? <a href="signup.html">Sign up here</a></p>
+                </div>
+            </form>
+        </div>
+
+        <div class="auth-visual">
+            <div class="visual-content">
+                <h2>Start Trading Today</h2>
+                <p>Access advanced trading tools, real-time analytics, and AI-powered insights</p>
+                <div class="visual-features">
+                    <div class="visual-feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Bank-Grade Security</span>
+                    </div>
+                    <div class="visual-feature">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Advanced Analytics</span>
+                    </div>
+                    <div class="visual-feature">
+                        <i class="fas fa-mobile-alt"></i>
+                        <span>Mobile Trading</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/crypto.js"></script>
+    <script src="js/session.js"></script>
+    <script src="js/state.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initLoginPage();
+        });
+
+        async function initLoginPage() {
+            // Check if user is already logged in
+            if (SessionManager.isAuthenticated()) {
+                window.location.href = 'dashboard.html';
+                return;
+            }
+
+            const form = document.getElementById('login-form');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const passwordToggle = document.getElementById('password-toggle');
+            const submitBtn = document.getElementById('login-btn');
+
+            // Password visibility toggle
+            passwordToggle.addEventListener('click', () => {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                passwordToggle.innerHTML = type === 'password' 
+                    ? '<i class="fas fa-eye"></i>' 
+                    : '<i class="fas fa-eye-slash"></i>';
+            });
+
+            // Form validation and submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (!validateForm()) return;
+
+                try {
+                    showLoading(true);
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Signing In...';
+
+                    const email = emailInput.value.trim().toLowerCase();
+                    const password = passwordInput.value;
+                    const rememberMe = document.getElementById('remember').checked;
+                    
+                    // Find user
+                    const user = state.getUserByEmail(email);
+                    if (!user) {
+                        showToast('Invalid email or password', 'error');
+                        return;
+                    }
+                    
+                    // Verify password
+                    const isValid = await CryptoUtils.verifyPassword(password, user.passwordHash);
+                    if (!isValid) {
+                        showToast('Invalid email or password', 'error');
+                        return;
+                    }
+                    
+                    // Update last login
+                    state.updateUser(user._id, { lastLoginAt: Date.now() });
+                    
+                    // Create session
+                    SessionManager.createSession(user, rememberMe);
+
+                    showToast('Login successful! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1000);
+
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showToast('An error occurred during login. Please try again.', 'error');
+                } finally {
+                    showLoading(false);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+                }
+            });
+
+            // Real-time validation
+            emailInput.addEventListener('input', () => validateField('email'));
+            passwordInput.addEventListener('input', () => validateField('password'));
+
+            function validateField(fieldName) {
+                const field = document.getElementById(fieldName);
+                const errorElement = document.getElementById(`${fieldName}-error`);
+                let isValid = true;
+                let message = '';
+
+                if (fieldName === 'email') {
+                    if (!field.value.trim()) {
+                        message = 'Email is required';
+                        isValid = false;
+                    } else if (!isValidEmail(field.value)) {
+                        message = 'Please enter a valid email address';
+                        isValid = false;
+                    }
+                } else if (fieldName === 'password') {
+                    if (!field.value) {
+                        message = 'Password is required';
+                        isValid = false;
+                    }
+                }
+
+                errorElement.textContent = message;
+                field.classList.toggle('error', !isValid);
+                return isValid;
+            }
+
+            function validateForm() {
+                return validateField('email') && validateField('password');
+            }
+        }
+        
+        // Add forgot password modal functionality
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('forgot-password')) {
+                e.preventDefault();
+                showToast('Password reset will be available upon full backend integration. For now, contact support.', 'info');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Withdraw Funds - MaxProfit Trading</title>
+    <meta name="description" content="Withdraw funds from your MaxProfit trading account">
+    
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Simplified header for withdraw page -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <a href="dashboard.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="page-title">Withdraw Funds</h1>
+            </div>
+            
+            <div class="topbar-right">
+                <button class="theme-toggle" id="theme-toggle">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="withdraw-container">
+                <!-- Available Balance -->
+                <div class="balance-overview">
+                    <div class="balance-card">
+                        <h3>Available for Withdrawal</h3>
+                        <div class="balance-amount" id="available-balance">$15,430.25</div>
+                        <div class="balance-note">
+                            <i class="fas fa-info-circle"></i>
+                            <span>Funds from recent trades may take 24-48 hours to become available</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Methods -->
+                <div class="withdraw-methods">
+                    <h3>Withdrawal Method</h3>
+                    <div class="methods-list">
+                        <div class="method-item active" data-method="bank">
+                            <div class="method-icon">
+                                <i class="fas fa-university"></i>
+                            </div>
+                            <div class="method-info">
+                                <h4>Bank Account</h4>
+                                <p>****1234 • 1-3 business days</p>
+                            </div>
+                            <div class="method-status verified">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Verified</span>
+                            </div>
+                        </div>
+                        
+                        <div class="method-item" data-method="paypal">
+                            <div class="method-icon">
+                                <i class="fab fa-paypal"></i>
+                            </div>
+                            <div class="method-info">
+                                <h4>PayPal</h4>
+                                <p>sarah.chen@email.com • Instant</p>
+                            </div>
+                            <div class="method-status verified">
+                                <i class="fas fa-check-circle"></i>
+                                <span>Verified</span>
+                            </div>
+                        </div>
+                        
+                        <div class="method-item" data-method="crypto">
+                            <div class="method-icon">
+                                <i class="fab fa-bitcoin"></i>
+                            </div>
+                            <div class="method-info">
+                                <h4>Crypto Wallet</h4>
+                                <p>Add new wallet address</p>
+                            </div>
+                            <div class="method-status">
+                                <i class="fas fa-plus"></i>
+                                <span>Add</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Withdrawal Form -->
+                <div class="withdraw-form-container">
+                    <form class="withdraw-form" id="withdraw-form">
+                        <div class="form-group">
+                            <label for="withdraw-amount">Withdrawal Amount</label>
+                            <div class="amount-input-group">
+                                <span class="currency-symbol">$</span>
+                                <input 
+                                    type="number" 
+                                    id="withdraw-amount" 
+                                    placeholder="0.00" 
+                                    min="10" 
+                                    step="0.01" 
+                                    required
+                                >
+                            </div>
+                            <div class="amount-note">Minimum withdrawal: $10.00</div>
+                        </div>
+
+                        <!-- Quick Amount Buttons -->
+                        <div class="quick-amounts">
+                            <button type="button" class="quick-amount-btn" data-amount="100">$100</button>
+                            <button type="button" class="quick-amount-btn" data-amount="500">$500</button>
+                            <button type="button" class="quick-amount-btn" data-amount="1000">$1,000</button>
+                            <button type="button" class="quick-amount-btn max-btn" data-amount="max">Max</button>
+                        </div>
+
+                        <!-- Withdrawal Details -->
+                        <div class="withdrawal-details" id="bank-withdrawal" style="display: block;">
+                            <div class="detail-group">
+                                <label>Bank Account</label>
+                                <div class="account-display">
+                                    <div class="account-info">
+                                        <span class="account-name">Chase Bank</span>
+                                        <span class="account-number">****1234</span>
+                                    </div>
+                                    <button type="button" class="change-btn">Change</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="withdrawal-details" id="paypal-withdrawal" style="display: none;">
+                            <div class="detail-group">
+                                <label>PayPal Account</label>
+                                <div class="account-display">
+                                    <div class="account-info">
+                                        <span class="account-name">PayPal</span>
+                                        <span class="account-number">sarah.chen@email.com</span>
+                                    </div>
+                                    <button type="button" class="change-btn">Change</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="withdrawal-details" id="crypto-withdrawal" style="display: none;">
+                            <div class="form-group">
+                                <label for="crypto-type">Cryptocurrency</label>
+                                <select id="crypto-type">
+                                    <option value="BTC">Bitcoin (BTC)</option>
+                                    <option value="ETH">Ethereum (ETH)</option>
+                                    <option value="USDT">Tether (USDT)</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="crypto-wallet">Wallet Address</label>
+                                <input type="text" id="crypto-wallet" placeholder="Enter wallet address" required>
+                            </div>
+                        </div>
+
+                        <!-- Fee Summary -->
+                        <div class="fee-summary">
+                            <div class="fee-item">
+                                <span>Withdrawal Amount</span>
+                                <span id="withdraw-fee-amount">$0.00</span>
+                            </div>
+                            <div class="fee-item">
+                                <span>Processing Fee</span>
+                                <span id="withdraw-fee-processing">$2.50</span>
+                            </div>
+                            <div class="fee-item total">
+                                <span>You'll Receive</span>
+                                <span id="withdraw-fee-total">$0.00</span>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-large" id="withdraw-submit">
+                            <i class="fas fa-minus"></i>
+                            Submit Withdrawal
+                        </button>
+
+                        <div class="withdraw-note">
+                            <i class="fas fa-clock"></i>
+                            <span>Withdrawals are processed within 1-3 business days</span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/crypto.js"></script>
+    <script src="js/session.js"></script>
+    <script src="js/state.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initWithdrawPage();
+        });
+
+        async function initWithdrawPage() {
+            // Check authentication
+            if (!SessionManager.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const session = SessionManager.getSession();
+            const user = state.getUserById(session.userId);
+            
+            if (user) {
+                updateBalanceDisplay(user);
+            }
+
+            setupWithdrawForm();
+        }
+
+        function updateBalanceDisplay(user) {
+            const availableBalanceEl = document.getElementById('available-balance');
+            
+            if (availableBalanceEl) {
+                availableBalanceEl.textContent = formatCurrency(user.balances.USD);
+            }
+        }
+
+        function setupWithdrawForm() {
+            const form = document.getElementById('withdraw-form');
+            const amountInput = document.getElementById('withdraw-amount');
+            const methodItems = document.querySelectorAll('.method-item');
+            const quickAmountBtns = document.querySelectorAll('.quick-amount-btn');
+            
+            let selectedMethod = 'bank';
+
+            // Method selection
+            methodItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    if (item.classList.contains('method-item')) {
+                        selectedMethod = item.getAttribute('data-method');
+                        
+                        // Update active state
+                        methodItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        
+                        // Show/hide withdrawal details
+                        document.querySelectorAll('.withdrawal-details').forEach(detail => {
+                            detail.style.display = 'none';
+                        });
+                        
+                        const detailsEl = document.getElementById(`${selectedMethod}-withdrawal`);
+                        if (detailsEl) {
+                            detailsEl.style.display = 'block';
+                        }
+                        
+                        updateFeeSummary();
+                    }
+                });
+            });
+
+            // Quick amount buttons
+            quickAmountBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const amount = btn.getAttribute('data-amount');
+                    
+                    if (amount === 'max') {
+                        const session = SessionManager.getSession();
+                        const user = state.getUserById(session.userId);
+                        const maxAmount = Math.max(0, user.balances.USD - 2.50); // Subtract fee
+                        amountInput.value = maxAmount.toFixed(2);
+                    } else {
+                        amountInput.value = amount;
+                    }
+                    
+                    updateFeeSummary();
+                    
+                    // Visual feedback
+                    btn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        btn.style.transform = '';
+                    }, 150);
+                });
+            });
+
+            // Amount input
+            amountInput.addEventListener('input', updateFeeSummary);
+
+            // Form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await processWithdrawal(selectedMethod);
+            });
+
+            function updateFeeSummary() {
+                const amount = parseFloat(amountInput.value) || 0;
+                const fee = 2.50; // Fixed withdrawal fee
+                const total = Math.max(0, amount - fee);
+                
+                document.getElementById('withdraw-fee-amount').textContent = formatCurrency(amount);
+                document.getElementById('withdraw-fee-processing').textContent = formatCurrency(fee);
+                document.getElementById('withdraw-fee-total').textContent = formatCurrency(total);
+            }
+
+            async function processWithdrawal(method) {
+                const amount = parseFloat(amountInput.value);
+                const session = SessionManager.getSession();
+                const user = state.getUserById(session.userId);
+                
+                if (!amount || amount < 10) {
+                    showToast('Minimum withdrawal amount is $10.00', 'error');
+                    return;
+                }
+
+                if (amount > user.balances.USD) {
+                    showToast('Insufficient balance', 'error');
+                    return;
+                }
+
+                const submitBtn = document.getElementById('withdraw-submit');
+                
+                try {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    showLoading(true);
+
+                    // Simulate processing delay
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+
+                    // Create withdrawal request
+                    const withdrawal = {
+                        _id: state.generateId(),
+                        userId: session.userId,
+                        amount: amount,
+                        currency: 'USD',
+                        method: method,
+                        addressOrAccount: method === 'bank' ? '****1234' : 
+                                        method === 'paypal' ? 'sarah.chen@email.com' : 
+                                        document.getElementById('crypto-wallet')?.value || '',
+                        status: 'pending',
+                        createdAt: Date.now()
+                    };
+                    
+                    state.addWithdrawal(withdrawal);
+                    
+                    // Create transaction
+                    const transaction = {
+                        _id: state.generateId(),
+                        userId: session.userId,
+                        type: 'withdraw',
+                        amount: amount,
+                        currency: 'USD',
+                        status: 'pending',
+                        note: `Withdrawal request via ${method}`,
+                        createdAt: Date.now(),
+                        meta: { withdrawalId: withdrawal._id, method }
+                    };
+                    
+                    state.addTransaction(transaction);
+                    
+                    // Update user balance (deduct immediately)
+                    const newBalance = user.balances.USD - amount;
+                    state.updateUser(session.userId, {
+                        balances: { ...user.balances, USD: newBalance }
+                    });
+                    
+                    // Add notification
+                    state.addNotification({
+                        _id: state.generateId(),
+                        toUserId: session.userId,
+                        title: 'Withdrawal Request Submitted',
+                        body: `Your withdrawal request for ${formatCurrency(amount)} has been submitted and is being processed.`,
+                        type: 'withdrawal',
+                        read: false,
+                        createdAt: Date.now()
+                    });
+
+                    showToast(`Withdrawal request of ${formatCurrency(amount)} submitted successfully!`, 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Withdrawal error:', error);
+                    showToast('Withdrawal request failed. Please try again.', 'error');
+                } finally {
+                    showLoading(false);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-minus"></i> Submit Withdrawal';
+                }
+            }
+        }
+    </script>
+</body>
+</html>

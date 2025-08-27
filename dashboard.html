@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TradeMax Pro</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container" id="app">
+        <!-- Top Status Bar -->
+        <div class="status-bar">
+            <div class="status-left">
+                <span class="time" id="currentTime">9:41</span>
+            </div>
+            <div class="status-right">
+                <span class="network-indicator">5G</span>
+                <span class="battery">100%</span>
+                <i class="fas fa-battery-full"></i>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-left">
+                <div class="user-avatar">
+                    <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&fit=crop&crop=face" alt="User">
+                </div>
+                <div class="user-info">
+                    <span class="greeting" id="greeting">Good morning</span>
+                    <span class="username" id="username">John Doe</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <button class="header-btn" id="notificationBtn">
+                    <i class="fas fa-bell"></i>
+                    <span class="notification-badge">3</span>
+                </button>
+                <button class="header-btn" id="profileBtn">
+                    <i class="fas fa-user-circle"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content" id="mainContent">
+            <!-- Home/Wallet Page -->
+            <div class="page active" id="homePage">
+                <!-- Portfolio Summary -->
+                <section class="portfolio-card">
+                    <div class="portfolio-header">
+                        <h2>Portfolio Balance</h2>
+                        <button class="visibility-toggle" id="balanceToggle">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <div class="balance-amount" id="portfolioBalance">$24,567.89</div>
+                    <div class="balance-change positive" id="balanceChange">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>+$1,234.56 (5.3%) today</span>
+                    </div>
+                    
+                    <div class="quick-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Available</span>
+                            <span class="stat-value">$12,450.00</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">P&L Today</span>
+                            <span class="stat-value positive">+$892.34</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Margin Used</span>
+                            <span class="stat-value">$5,200.00</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Quick Actions -->
+                <section class="quick-actions">
+                    <button class="action-btn primary" id="depositBtn">
+                        <i class="fas fa-plus"></i>
+                        <span>Deposit</span>
+                    </button>
+                    <button class="action-btn secondary" id="withdrawBtn">
+                        <i class="fas fa-arrow-up"></i>
+                        <span>Withdraw</span>
+                    </button>
+                    <button class="action-btn secondary" id="transferBtn">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Transfer</span>
+                    </button>
+                    <button class="action-btn secondary" id="historyBtn">
+                        <i class="fas fa-history"></i>
+                        <span>History</span>
+                    </button>
+                </section>
+
+                <!-- Watchlist -->
+                <section class="section-card">
+                    <div class="section-header">
+                        <h3>Watchlist</h3>
+                        <button class="section-action" id="editWatchlist">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                    <div class="watchlist-container" id="watchlistContainer">
+                        <!-- Watchlist items will be populated by JavaScript -->
+                    </div>
+                </section>
+
+                <!-- Recent Activity -->
+                <section class="section-card">
+                    <div class="section-header">
+                        <h3>Recent Activity</h3>
+                        <button class="section-action" id="viewAllActivity">View All</button>
+                    </div>
+                    <div class="activity-list" id="recentActivity">
+                        <!-- Recent activity items will be populated by JavaScript -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Trading Page -->
+            <div class="page" id="tradingPage">
+                <!-- Trading Header -->
+                <div class="trading-header">
+                    <div class="symbol-selector" id="symbolSelector">
+                        <span class="current-symbol">EUR/USD</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="symbol-info">
+                        <div class="price-display">
+                            <span class="bid-price">1.0845</span>
+                            <span class="ask-price">1.0847</span>
+                        </div>
+                        <div class="price-change negative">-0.0023 (-0.21%)</div>
+                    </div>
+                </div>
+
+                <!-- Chart Container -->
+                <div class="chart-container">
+                    <div class="chart-controls">
+                        <div class="timeframe-selector" id="timeframeSelector">
+                            <button class="tf-btn">1m</button>
+                            <button class="tf-btn">5m</button>
+                            <button class="tf-btn active">1h</button>
+                            <button class="tf-btn">4h</button>
+                            <button class="tf-btn">1d</button>
+                        </div>
+                        <button class="chart-fullscreen" id="chartFullscreen">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                    </div>
+                    <div class="chart-area" id="chartArea">
+                        <canvas id="tradingChart" width="400" height="250"></canvas>
+                    </div>
+                    <div class="chart-indicators">
+                        <div class="indicator-item">
+                            <span class="indicator-label">Volume:</span>
+                            <span class="indicator-value">2.1M</span>
+                        </div>
+                        <div class="indicator-item">
+                            <span class="indicator-label">RSI:</span>
+                            <span class="indicator-value">64.2</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Trade Panel -->
+                <div class="trade-panel">
+                    <div class="trade-tabs">
+                        <button class="trade-tab active" data-tab="market">Market</button>
+                        <button class="trade-tab" data-tab="limit">Limit</button>
+                        <button class="trade-tab" data-tab="stop">Stop</button>
+                    </div>
+                    
+                    <div class="trade-form" id="tradeForm">
+                        <div class="order-type-selector">
+                            <button class="order-btn buy active" id="buyBtn">
+                                <span>BUY</span>
+                                <span class="buy-price">1.0847</span>
+                            </button>
+                            <button class="order-btn sell" id="sellBtn">
+                                <span>SELL</span>
+                                <span class="sell-price">1.0845</span>
+                            </button>
+                        </div>
+                        
+                        <div class="trade-inputs">
+                            <div class="input-group">
+                                <label>Volume</label>
+                                <div class="volume-selector">
+                                    <button class="volume-btn" data-volume="0.01">0.01</button>
+                                    <button class="volume-btn active" data-volume="0.1">0.1</button>
+                                    <button class="volume-btn" data-volume="1.0">1.0</button>
+                                    <input type="number" class="volume-input" value="0.10" step="0.01" min="0.01">
+                                </div>
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Stop Loss</label>
+                                <input type="number" class="trade-input" placeholder="Optional" step="0.0001">
+                            </div>
+                            
+                            <div class="input-group">
+                                <label>Take Profit</label>
+                                <input type="number" class="trade-input" placeholder="Optional" step="0.0001">
+                            </div>
+                        </div>
+                        
+                        <button class="execute-trade-btn" id="executeTrade">
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Open Positions -->
+                <section class="positions-section">
+                    <div class="section-header">
+                        <h3>Open Positions</h3>
+                        <span class="position-count" id="positionCount">2</span>
+                    </div>
+                    <div class="positions-list" id="positionsList">
+                        <!-- Positions will be populated by JavaScript -->
+                    </div>
+                </section>
+            </div>
+
+            <!-- Transactions Page -->
+            <div class="page" id="transactionsPage">
+                <div class="page-header">
+                    <h2>Transactions</h2>
+                    <button class="filter-btn" id="transactionFilter">
+                        <i class="fas fa-filter"></i>
+                    </button>
+                </div>
+                
+                <div class="transaction-filters">
+                    <div class="filter-tabs">
+                        <button class="filter-tab active" data-filter="all">All</button>
+                        <button class="filter-tab" data-filter="deposits">Deposits</button>
+                        <button class="filter-tab" data-filter="withdrawals">Withdrawals</button>
+                        <button class="filter-tab" data-filter="trades">Trades</button>
+                    </div>
+                </div>
+                
+                <div class="transactions-list" id="transactionsList">
+                    <!-- Transactions will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Notifications Page -->
+            <div class="page" id="notificationsPage">
+                <div class="page-header">
+                    <h2>Notifications</h2>
+                    <button class="mark-all-read" id="markAllRead">Mark All Read</button>
+                </div>
+                
+                <div class="notifications-list" id="notificationsList">
+                    <!-- Notifications will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Profile Page -->
+            <div class="page" id="profilePage">
+                <div class="profile-header">
+                    <div class="profile-avatar">
+                        <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop&crop=face" alt="Profile">
+                        <button class="avatar-edit">
+                            <i class="fas fa-camera"></i>
+                        </button>
+                    </div>
+                    <div class="profile-info">
+                        <h2>John Doe</h2>
+                        <p class="profile-email">john.doe@email.com</p>
+                        <span class="verification-badge verified">
+                            <i class="fas fa-check-circle"></i>
+                            Verified
+                        </span>
+                    </div>
+                </div>
+
+                <div class="profile-stats">
+                    <div class="stat-card">
+                        <span class="stat-number">847</span>
+                        <span class="stat-label">Total Trades</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">67.3%</span>
+                        <span class="stat-label">Win Rate</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">156</span>
+                        <span class="stat-label">Days Active</span>
+                    </div>
+                </div>
+
+                <div class="profile-menu">
+                    <div class="menu-section">
+                        <h3>Account</h3>
+                        <div class="menu-item" id="personalInfo">
+                            <i class="fas fa-user"></i>
+                            <span>Personal Information</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" id="security">
+                            <i class="fas fa-shield-alt"></i>
+                            <span>Security</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" id="verification">
+                            <i class="fas fa-id-card"></i>
+                            <span>Identity Verification</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="menu-section">
+                        <h3>Preferences</h3>
+                        <div class="menu-item" id="notifications">
+                            <i class="fas fa-bell"></i>
+                            <span>Notifications</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" id="language">
+                            <i class="fas fa-globe"></i>
+                            <span>Language</span>
+                            <span class="menu-value">English</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" id="currency">
+                            <i class="fas fa-dollar-sign"></i>
+                            <span>Currency</span>
+                            <span class="menu-value">USD</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="menu-section">
+                        <h3>Support</h3>
+                        <div class="menu-item" id="help">
+                            <i class="fas fa-question-circle"></i>
+                            <span>Help Center</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" id="contact">
+                            <i class="fas fa-headset"></i>
+                            <span>Contact Support</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                        <div class="menu-item" id="terms">
+                            <i class="fas fa-file-contract"></i>
+                            <span>Terms & Conditions</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+
+                    <div class="menu-section">
+                        <div class="menu-item danger" id="logout">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" data-page="trading">
+                <i class="fas fa-chart-line"></i>
+                <span>Trading</span>
+            </button>
+            <button class="nav-item" data-page="transactions">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </button>
+            <button class="nav-item" data-page="notifications">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+            </button>
+            <button class="nav-item" data-page="profile">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+            </button>
+        </nav>
+
+        <!-- Loading Overlay -->
+        <div class="loading-overlay" id="loadingOverlay">
+            <div class="loading-spinner">
+                <div class="spinner"></div>
+                <p>Loading...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/utils.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/mockData.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/dashboard.js"></script>
+</body>
+</html>

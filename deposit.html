@@ -209,7 +209,7 @@
 
                         <div class="deposit-note">
                             <i class="fas fa-info-circle"></i>
-                            <span>Demo only. Integrations (Stripe/Paystack/Flutterwave) are stubbed; no real charges.</span>
+                            <span>Demo mode: Deposits require admin approval. Real integrations would process automatically.</span>
                         </div>
                     </form>
                 </div>
@@ -370,7 +370,7 @@
                         type: 'deposit',
                         amount: amount,
                         currency: 'USD',
-                        status: 'completed',
+                        status: 'pending',
                         note: `Deposit via ${method}`,
                         createdAt: Date.now(),
                         meta: { method, reference: `DEP${Date.now().toString().slice(-6)}` }
@@ -378,24 +378,20 @@
                     
                     state.addTransaction(transaction);
                     
-                    // Update user balance
-                    const newBalance = user.balances.USD + amount;
-                    state.updateUser(session.userId, {
-                        balances: { ...user.balances, USD: newBalance }
-                    });
+                    // Don't update balance immediately - admin must approve
                     
                     // Add notification
                     state.addNotification({
                         _id: state.generateId(),
                         toUserId: session.userId,
-                        title: 'Deposit Successful',
-                        body: `Your deposit of ${formatCurrency(amount)} has been processed successfully.`,
+                        title: 'Deposit Request Submitted',
+                        body: `Your deposit request of ${formatCurrency(amount)} has been submitted and is being processed.`,
                         type: 'payment',
                         read: false,
                         createdAt: Date.now()
                     });
 
-                    showToast(`Deposit of ${formatCurrency(amount)} completed successfully!`, 'success');
+                    showToast(`Deposit request of ${formatCurrency(amount)} submitted successfully!`, 'success');
                     
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';

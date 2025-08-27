@@ -192,6 +192,7 @@
                         email: inputs.email.value.trim().toLowerCase(),
                         passwordHash: await CryptoUtils.hashPassword(inputs.password.value),
                         role: 'user',
+                        emailVerified: false,
                         createdAt: Date.now(),
                         settings: {
                             darkMode: true,
@@ -215,24 +216,15 @@
                     // Create user
                     state.addUser(userData);
                     
-                    // Create session
-                    SessionManager.createSession(userData, false);
+                    // Send verification email
+                    const { EmailVerificationManager } = await import('./js/emailVerification.js');
+                    const token = EmailVerificationManager.generateVerificationToken();
+                    await EmailVerificationManager.sendVerificationEmail(userData.email, token);
                     
-                    // Add welcome notification
-                    state.addNotification({
-                        _id: state.generateId(),
-                        toUserId: userData._id,
-                        title: 'Welcome to MaxProfit!',
-                        body: 'Your account has been successfully created. Start trading now to unlock your potential!',
-                        type: 'welcome',
-                        read: false,
-                        createdAt: Date.now()
-                    });
-
-                    showToast('Account created successfully! Redirecting...', 'success');
+                    showToast('Account created! Please check your email for verification link.', 'success');
                     setTimeout(() => {
-                        window.location.href = 'dashboard.html';
-                    }, 1000);
+                        window.location.href = `verify.html?email=${encodeURIComponent(userData.email)}`;
+                    }, 2000);
 
                 } catch (error) {
                     console.error('Signup error:', error);

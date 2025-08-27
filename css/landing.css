@@ -239,6 +239,105 @@
   overflow: hidden;
 }
 
+.live-chart-card {
+  background: var(--surface-elevated);
+  border: 1px solid var(--border-secondary);
+  border-radius: var(--border-radius-2xl);
+  padding: var(--spacing-6);
+  box-shadow: var(--shadow-xl);
+  width: 100%;
+  max-width: 500px;
+  position: relative;
+  overflow: hidden;
+}
+
+.live-chart-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--success-500) 0%, var(--primary-500) 100%);
+}
+
+.chart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: var(--spacing-4);
+}
+
+.chart-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-2);
+}
+
+.chart-title h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0;
+  color: var(--text-primary);
+}
+
+.price-info {
+  text-align: right;
+}
+
+.current-price {
+  display: block;
+  font-size: var(--font-size-2xl);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-feature-settings: 'tnum';
+  margin-bottom: var(--spacing-1);
+}
+
+.price-change {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius-sm);
+}
+
+.live-chart-container {
+  height: 200px;
+  margin-bottom: var(--spacing-4);
+  background: var(--bg-tertiary);
+  border-radius: var(--border-radius-lg);
+  position: relative;
+}
+
+.chart-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-4);
+  padding-top: var(--spacing-4);
+  border-top: 1px solid var(--border-secondary);
+}
+
+.chart-stats .stat {
+  text-align: center;
+}
+
+.chart-stats .label {
+  display: block;
+  font-size: var(--font-size-xs);
+  color: var(--text-tertiary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: var(--spacing-1);
+}
+
+.chart-stats .value {
+  display: block;
+  font-size: var(--font-size-base);
+  font-weight: 700;
+  color: var(--text-primary);
+  font-feature-settings: 'tnum';
+}
+
 .trading-card::before {
   content: '';
   position: absolute;
@@ -943,11 +1042,43 @@
     padding: var(--spacing-4);
   }
   
+  .live-chart-card {
+    padding: var(--spacing-4);
+    max-width: 100%;
+  }
+  
+  .chart-header {
+    flex-direction: column;
+    gap: var(--spacing-3);
+    text-align: center;
+  }
+  
+  .price-info {
+    text-align: center;
+  }
+  
+  .current-price {
+    font-size: var(--font-size-xl);
+  }
+  
+  .live-chart-container {
+    height: 150px;
+  }
+  
+  .chart-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-2);
+  }
+  
   .price {
     font-size: var(--font-size-xl);
   }
   
   .cta-content h2 {
     font-size: var(--font-size-2xl);
+  }
+  
+  .chart-stats .value {
+    font-size: var(--font-size-sm);
   }
 }

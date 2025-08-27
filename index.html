@@ -80,18 +80,33 @@
                 </div>
             </div>
             <div class="hero-visual">
-                <div class="trading-card">
-                    <div class="card-header">
-                        <h3>Live Trading</h3>
-                        <span class="status-indicator"></span>
+                <div class="live-chart-card">
+                    <div class="chart-header">
+                        <div class="chart-title">
+                            <h3>Bitcoin Live Chart</h3>
+                            <span class="status-indicator"></span>
+                        </div>
+                        <div class="price-info">
+                            <span class="current-price" id="hero-btc-price">$42,850.00</span>
+                            <span class="price-change positive" id="hero-btc-change">+2.45%</span>
+                        </div>
                     </div>
-                    <div class="price-display">
-                        <span class="symbol">BTC/USD</span>
-                        <span class="price" id="hero-btc-price">$42,850.00</span>
-                        <span class="change positive" id="hero-btc-change">+2.45%</span>
+                    <div class="live-chart-container">
+                        <canvas id="hero-live-chart" width="400" height="200"></canvas>
                     </div>
-                    <div class="mini-chart">
-                        <canvas id="hero-chart" width="300" height="120"></canvas>
+                    <div class="chart-stats">
+                        <div class="stat">
+                            <span class="label">24h High</span>
+                            <span class="value" id="btc-high">$43,250</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">24h Low</span>
+                            <span class="value" id="btc-low">$41,890</span>
+                        </div>
+                        <div class="stat">
+                            <span class="label">Volume</span>
+                            <span class="value" id="btc-volume">$2.1B</span>
+                        </div>
                     </div>
                 </div>
             </div>

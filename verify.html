@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Email Verification - MaxProfit Trading</title>
+    <meta name="description" content="Verify your email address">
+    
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="auth-body">
+    <div class="auth-container">
+        <div class="auth-card">
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <i class="fas fa-chart-line"></i>
+                    <span>MaxProfit</span>
+                </div>
+                <h1>Verify Your Email</h1>
+                <p>We've sent a verification link to your email address</p>
+            </div>
+
+            <div class="verification-content">
+                <div class="verification-icon">
+                    <i class="fas fa-envelope-open"></i>
+                </div>
+                
+                <div class="verification-info">
+                    <p>Please check your email inbox and click the verification link to activate your account.</p>
+                    <p class="email-address" id="user-email">your-email@example.com</p>
+                </div>
+
+                <div class="verification-actions">
+                    <button class="btn btn-primary btn-large" id="resend-btn">
+                        <i class="fas fa-paper-plane"></i>
+                        Resend Verification Email
+                    </button>
+                    
+                    <div class="verification-links">
+                        <a href="login.html">Back to Login</a>
+                        <span>•</span>
+                        <a href="signup.html">Use Different Email</a>
+                    </div>
+                </div>
+
+                <!-- Manual verification for demo -->
+                <div class="demo-verification">
+                    <div class="demo-note">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Demo Mode: Click below to simulate email verification</span>
+                    </div>
+                    <button class="btn btn-outline" id="demo-verify-btn">
+                        <i class="fas fa-check"></i>
+                        Simulate Email Verification
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-visual">
+            <div class="visual-content">
+                <h2>Almost There!</h2>
+                <p>Email verification helps keep your account secure and ensures you receive important updates</p>
+                <div class="visual-features">
+                    <div class="visual-feature">
+                        <i class="fas fa-shield-alt"></i>
+                        <span>Enhanced Security</span>
+                    </div>
+                    <div class="visual-feature">
+                        <i class="fas fa-bell"></i>
+                        <span>Important Notifications</span>
+                    </div>
+                    <div class="visual-feature">
+                        <i class="fas fa-lock"></i>
+                        <span>Account Protection</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/state.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initVerificationPage();
+        });
+
+        async function initVerificationPage() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const email = urlParams.get('email');
+            const token = urlParams.get('token');
+            
+            if (email) {
+                document.getElementById('user-email').textContent = email;
+            }
+            
+            // If token is provided, verify automatically
+            if (token) {
+                await verifyEmailToken(token);
+                return;
+            }
+            
+            setupVerificationHandlers(email);
+        }
+
+        function setupVerificationHandlers(email) {
+            const resendBtn = document.getElementById('resend-btn');
+            const demoVerifyBtn = document.getElementById('demo-verify-btn');
+            
+            resendBtn.addEventListener('click', async () => {
+                if (!email) {
+                    showToast('Email address not found', 'error');
+                    return;
+                }
+                
+                try {
+                    resendBtn.disabled = true;
+                    resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                    
+                    const { EmailVerificationManager } = await import('./js/emailVerification.js');
+                    await EmailVerificationManager.resendVerification(email);
+                    
+                    showToast('Verification email sent successfully', 'success');
+                } catch (error) {
+                    showToast('Failed to send verification email', 'error');
+                } finally {
+                    resendBtn.disabled = false;
+                    resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Resend Verification Email';
+                }
+            });
+            
+            // Demo verification button
+            demoVerifyBtn.addEventListener('click', async () => {
+                if (!email) {
+                    showToast('Email address not found', 'error');
+                    return;
+                }
+                
+                try {
+                    const { EmailVerificationManager } = await import('./js/emailVerification.js');
+                    const token = EmailVerificationManager.generateVerificationToken();
+                    await EmailVerificationManager.sendVerificationEmail(email, token);
+                    
+                    // Immediately verify for demo
+                    const result = EmailVerificationManager.verifyEmail(token);
+                    
+                    if (result.success) {
+                        showToast('Email verified successfully! Redirecting to login...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 2000);
+                    } else {
+                        showToast(result.message, 'error');
+                    }
+                } catch (error) {
+                    showToast('Verification failed', 'error');
+                }
+            });
+        }
+
+        async function verifyEmailToken(token) {
+            try {
+                const { EmailVerificationManager } = await import('./js/emailVerification.js');
+                const result = EmailVerificationManager.verifyEmail(token);
+                
+                if (result.success) {
+                    showToast('Email verified successfully! You can now login.', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
+                } else {
+                    showToast(result.message, 'error');
+                }
+            } catch (error) {
+                showToast('Verification failed', 'error');
+            }
+        }
+    </script>
+
+    <style>
+        .verification-content {
+            text-align: center;
+            padding: var(--spacing-8) 0;
+        }
+        
+        .verification-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--spacing-6);
+            background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
+            border-radius: var(--border-radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: var(--font-size-2xl);
+            color: white;
+        }
+        
+        .verification-info {
+            margin-bottom: var(--spacing-8);
+        }
+        
+        .verification-info p {
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-4);
+        }
+        
+        .email-address {
+            font-weight: 600;
+            color: var(--primary-600);
+            background: var(--bg-tertiary);
+            padding: var(--spacing-2) var(--spacing-4);
+            border-radius: var(--border-radius-md);
+            display: inline-block;
+        }
+        
+        .verification-actions {
+            margin-bottom: var(--spacing-8);
+        }
+        
+        .verification-links {
+            margin-top: var(--spacing-4);
+            font-size: var(--font-size-sm);
+            color: var(--text-tertiary);
+        }
+        
+        .verification-links a {
+            color: var(--primary-600);
+            text-decoration: none;
+        }
+        
+        .verification-links a:hover {
+            color: var(--primary-700);
+        }
+        
+        .demo-verification {
+            background: var(--warning-100);
+            border: 1px solid var(--warning-300);
+            border-radius: var(--border-radius-lg);
+            padding: var(--spacing-4);
+            margin-top: var(--spacing-6);
+        }
+        
+        [data-theme="dark"] .demo-verification {
+            background: rgba(255, 193, 7, 0.1);
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+        
+        .demo-note {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: var(--spacing-2);
+            margin-bottom: var(--spacing-3);
+            font-size: var(--font-size-sm);
+            color: var(--warning-800);
+        }
+        
+        [data-theme="dark"] .demo-note {
+            color: var(--warning-400);
+        }
+    </style>
+</body>
+</html>

@@ -1,8 +1,8 @@
-// Mock Data for Demo
+// Mock Data for Demo - Reset to Zero Balances
 import { CryptoUtils } from './crypto.js';
 
 export async function initializeMockData(state) {
-  // Create admin user
+  // Create admin user with full privileges
   const adminPasswordHash = await CryptoUtils.hashPassword('Admin@1234');
   const adminUser = {
     _id: 'admin_001',
@@ -10,6 +10,7 @@ export async function initializeMockData(state) {
     passwordHash: adminPasswordHash,
     fullName: 'Admin User',
     role: 'admin',
+    emailVerified: true,
     createdAt: Date.now() - (60 * 24 * 60 * 60 * 1000), // 60 days ago
     lastLoginAt: Date.now() - (1 * 60 * 60 * 1000), // 1 hour ago
     settings: {
@@ -24,261 +25,16 @@ export async function initializeMockData(state) {
     }
   };
   
-  // Create Sarah Chen user
-  const sarahPasswordHash = await CryptoUtils.hashPassword('User@1234');
-  const sarahUser = {
-    _id: 'user_001',
-    email: 'sarah@maxprofit.dev',
-    passwordHash: sarahPasswordHash,
-    fullName: 'Sarah Chen',
-    role: 'user',
-    createdAt: Date.now() - (30 * 24 * 60 * 60 * 1000), // 30 days ago
-    lastLoginAt: Date.now() - (2 * 60 * 60 * 1000), // 2 hours ago
-    settings: {
-      darkMode: true,
-      notifications: true,
-      biometric: true
-    },
-    balances: {
-      USD: 15430.25,
-      BTC: 0.21340580,
-      ETH: 3.45672100
-    }
-  };
+  // Set users with only admin initially
+  state.setUsers([adminUser]);
   
-  // Create Marcus Rodriguez user
-  const marcusPasswordHash = await CryptoUtils.hashPassword('User@1234');
-  const marcusUser = {
-    _id: 'user_002',
-    email: 'marcus@maxprofit.dev',
-    passwordHash: marcusPasswordHash,
-    fullName: 'Marcus Rodriguez',
-    role: 'user',
-    createdAt: Date.now() - (45 * 24 * 60 * 60 * 1000), // 45 days ago
-    lastLoginAt: Date.now() - (1 * 24 * 60 * 60 * 1000), // 1 day ago
-    settings: {
-      darkMode: false,
-      notifications: true,
-      biometric: false
-    },
-    balances: {
-      USD: 8750.50,
-      BTC: 0.15672340,
-      ETH: 2.87543210
-    }
-  };
-  
-  // Set users
-  state.setUsers([adminUser, sarahUser, marcusUser]);
-  
-  // Create sample transactions for Sarah
-  const transactions = [
-    {
-      _id: 'tx_001',
-      userId: 'user_001',
-      type: 'deposit',
-      amount: 5000.00,
-      currency: 'USD',
-      status: 'completed',
-      note: 'Initial deposit via bank transfer',
-      createdAt: Date.now() - (25 * 24 * 60 * 60 * 1000),
-      meta: { method: 'bank', reference: 'DEP001' }
-    },
-    {
-      _id: 'tx_002',
-      userId: 'user_001',
-      type: 'trade',
-      amount: 0.1,
-      currency: 'BTC',
-      status: 'completed',
-      note: 'BUY 0.1 BTC at $41,500.00',
-      createdAt: Date.now() - (20 * 24 * 60 * 60 * 1000),
-      meta: { side: 'buy', price: 41500.00, tradeId: 'trade_001' }
-    },
-    {
-      _id: 'tx_003',
-      userId: 'user_001',
-      type: 'interest',
-      amount: 127.45,
-      currency: 'USD',
-      status: 'completed',
-      note: 'Monthly interest payment',
-      createdAt: Date.now() - (5 * 24 * 60 * 60 * 1000)
-    },
-    {
-      _id: 'tx_004',
-      userId: 'user_001',
-      type: 'bonus',
-      amount: 50.00,
-      currency: 'USD',
-      status: 'completed',
-      note: 'Welcome bonus',
-      createdAt: Date.now() - (3 * 24 * 60 * 60 * 1000)
-    },
-    {
-      _id: 'tx_005',
-      userId: 'user_001',
-      type: 'withdraw',
-      amount: 1000.00,
-      currency: 'USD',
-      status: 'pending',
-      note: 'Withdrawal to bank account',
-      createdAt: Date.now() - (1 * 24 * 60 * 60 * 1000),
-      meta: { method: 'bank', account: '****1234' }
-    }
-  ];
-  
-  // Add transactions for Marcus
-  const marcusTransactions = [
-    {
-      _id: 'tx_006',
-      userId: 'user_002',
-      type: 'deposit',
-      amount: 3000.00,
-      currency: 'USD',
-      status: 'completed',
-      note: 'Credit card deposit',
-      createdAt: Date.now() - (40 * 24 * 60 * 60 * 1000),
-      meta: { method: 'card', reference: 'DEP002' }
-    },
-    {
-      _id: 'tx_007',
-      userId: 'user_002',
-      type: 'trade',
-      amount: 2.0,
-      currency: 'ETH',
-      status: 'completed',
-      note: 'BUY 2.0 ETH at $2,400.00',
-      createdAt: Date.now() - (35 * 24 * 60 * 60 * 1000),
-      meta: { side: 'buy', price: 2400.00, tradeId: 'trade_002' }
-    }
-  ];
-  
-  state.set(STATE_KEYS.TRANSACTIONS, [...transactions, ...marcusTransactions]);
-  
-  // Create sample trades
-  const trades = [
-    {
-      _id: 'trade_001',
-      userId: 'user_001',
-      symbol: 'BTC/USD',
-      side: 'buy',
-      type: 'market',
-      qty: 0.05,
-      entryPrice: 42100.00,
-      status: 'open',
-      openedAt: Date.now() - (2 * 24 * 60 * 60 * 1000),
-      stopLoss: 40000.00,
-      takeProfit: 45000.00
-    },
-    {
-      _id: 'trade_002',
-      userId: 'user_001',
-      symbol: 'ETH/USD',
-      side: 'buy',
-      type: 'limit',
-      qty: 1.5,
-      entryPrice: 2520.00,
-      status: 'open',
-      openedAt: Date.now() - (1 * 24 * 60 * 60 * 1000),
-      takeProfit: 2800.00
-    },
-    {
-      _id: 'trade_003',
-      userId: 'user_002',
-      symbol: 'BTC/USD',
-      side: 'sell',
-      type: 'market',
-      qty: 0.02,
-      entryPrice: 42500.00,
-      status: 'closed',
-      closePrice: 43200.00,
-      pnl: 14.00,
-      openedAt: Date.now() - (3 * 24 * 60 * 60 * 1000),
-      closedAt: Date.now() - (2 * 24 * 60 * 60 * 1000)
-    }
-  ];
-  
-  state.set(STATE_KEYS.TRADES, trades);
-  
-  // Create sample withdrawals
-  const withdrawals = [
-    {
-      _id: 'withdrawal_001',
-      userId: 'user_001',
-      amount: 1000.00,
-      currency: 'USD',
-      method: 'bank',
-      addressOrAccount: '****1234',
-      status: 'pending',
-      createdAt: Date.now() - (1 * 24 * 60 * 60 * 1000)
-    },
-    {
-      _id: 'withdrawal_002',
-      userId: 'user_002',
-      amount: 500.00,
-      currency: 'USD',
-      method: 'paypal',
-      addressOrAccount: 'marcus@email.com',
-      status: 'approved',
-      adminNote: 'Verified and approved',
-      approvedBy: 'admin_001',
-      createdAt: Date.now() - (3 * 24 * 60 * 60 * 1000),
-      updatedAt: Date.now() - (2 * 24 * 60 * 60 * 1000)
-    }
-  ];
-  
-  state.set(STATE_KEYS.WITHDRAWALS, withdrawals);
-  
-  // Create sample notifications
-  const notifications = [
-    {
-      _id: 'notif_001',
-      toUserId: 'user_001',
-      title: 'Welcome to MaxProfit!',
-      body: 'Your account has been successfully created. Start trading now to unlock your potential!',
-      type: 'welcome',
-      read: false,
-      createdAt: Date.now() - (30 * 24 * 60 * 60 * 1000)
-    },
-    {
-      _id: 'notif_002',
-      toUserId: 'user_001',
-      title: 'Trade Executed',
-      body: 'Your BTC buy order has been executed at $42,100.00. Position is now open.',
-      type: 'trade',
-      read: false,
-      createdAt: Date.now() - (2 * 24 * 60 * 60 * 1000)
-    },
-    {
-      _id: 'notif_003',
-      toUserId: 'user_001',
-      title: 'Interest Payment Received',
-      body: 'You received $127.45 in monthly interest payments. Keep up the great work!',
-      type: 'payment',
-      read: false,
-      createdAt: Date.now() - (5 * 24 * 60 * 60 * 1000)
-    },
-    {
-      _id: 'notif_004',
-      toUserId: 'user_001',
-      title: 'Withdrawal Request Submitted',
-      body: 'Your withdrawal request for $1,000.00 is being processed. Expected completion: 1-3 business days.',
-      type: 'withdrawal',
-      read: true,
-      createdAt: Date.now() - (1 * 24 * 60 * 60 * 1000)
-    },
-    {
-      _id: 'notif_005',
-      title: 'System Maintenance Complete',
-      body: 'Scheduled maintenance has been completed. All services are now fully operational.',
-      type: 'system',
-      read: false,
-      createdAt: Date.now() - (12 * 60 * 60 * 1000) // 12 hours ago
-    }
-  ];
-  
-  state.set(STATE_KEYS.NOTIFICATIONS, notifications);
+  // Initialize empty collections
+  state.set('maxprofit_transactions', []);
+  state.set('maxprofit_trades', []);
+  state.set('maxprofit_withdrawals', []);
+  state.set('maxprofit_notifications', []);
+  state.set('maxprofit_verifications', []);
+  state.set('maxprofit_live_activities', []);
   
   // Initialize price data
   const initialPrices = {
@@ -304,7 +60,7 @@ export async function initializeMockData(state) {
   
   state.setPrices(initialPrices);
   
-  console.log('Mock data initialized successfully');
+  console.log('Mock data initialized with zero balances for new users');
 }
 
 // Generate realistic trading data

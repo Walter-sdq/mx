@@ -222,6 +222,11 @@
   margin-bottom: var(--spacing-6);
 }
 
+.activity-actions {
+  display: flex;
+  gap: var(--spacing-2);
+}
+
 .activity-header h3 {
   font-size: var(--font-size-lg);
   font-weight: 600;
@@ -446,6 +451,39 @@
 [data-theme="dark"] .role-badge.user {
   background-color: rgba(33, 150, 243, 0.2);
   color: var(--primary-400);
+}
+
+/* Verification Badge */
+.verification-badge {
+  padding: var(--spacing-1) var(--spacing-2);
+  border-radius: var(--border-radius-sm);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-1);
+}
+
+.verification-badge.verified {
+  background-color: var(--success-100);
+  color: var(--success-700);
+}
+
+[data-theme="dark"] .verification-badge.verified {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: var(--success-400);
+}
+
+.verification-badge.unverified {
+  background-color: var(--error-100);
+  color: var(--error-700);
+}
+
+[data-theme="dark"] .verification-badge.unverified {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: var(--error-400);
 }
 
 /* Balance Display */
@@ -808,5 +846,15 @@
   .header-filters {
     flex-direction: column;
     gap: var(--spacing-2);
+  }
+  
+  .activity-actions {
+    flex-direction: column;
+    gap: var(--spacing-2);
+  }
+  
+  .activity-actions .btn {
+    font-size: var(--font-size-xs);
+    padding: var(--spacing-1) var(--spacing-2);
   }
 }

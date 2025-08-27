@@ -149,10 +149,15 @@
     <script src="js/crypto.js"></script>
     <script src="js/session.js"></script>
     <script src="js/state.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             initSignupPage();
         });
+
+        const supabaseUrl = 'https://cwwcyqhzmelevlcrrecc.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3d2N5cWh6bWVsZXZsY3JyZWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDg3OTIsImV4cCI6MjA3MDc4NDc5Mn0.iE6sZQHqb_wjGk19DBcKtw-xePnpzVqd-Lfw2DafKho';
+        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
 
         async function initSignupPage() {
             // Check if user is already logged in
@@ -178,61 +183,29 @@
             // Form validation and submission
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
+                const email = document.getElementById('email').value.trim();
+                const password = document.getElementById('password').value;
                 if (!validateForm()) return;
-
+                showLoading(true);
                 try {
-                    showLoading(true);
-                    submitBtn.disabled = true;
-                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
-
-                    const userData = {
-                        _id: state.generateId(),
-                        fullName: inputs.fullName.value.trim(),
-                        email: inputs.email.value.trim().toLowerCase(),
-                        passwordHash: await CryptoUtils.hashPassword(inputs.password.value),
-                        role: 'user',
-                        emailVerified: false,
-                        createdAt: Date.now(),
-                        settings: {
-                            darkMode: true,
-                            notifications: true,
-                            biometric: false
-                        },
-                        balances: {
-                            USD: 0.00,
-                            BTC: 0.00000000,
-                            ETH: 0.00000000
-                        }
-                    };
-                    
-                    // Check if email already exists
-                    const existingUser = state.getUserByEmail(userData.email);
-                    if (existingUser) {
-                        showToast('Email address is already registered', 'error');
-                        return;
+                    const { data, error } = await supabase.auth.signUp({ email, password });
+                    if (error) {
+                        showToast(error.message, 'error');
+                    } else if (data && data.user && data.user.id) {
+                        // Wait for email verification before storing profile
+                        showToast('Signup successful! Check your email for verification.', 'success');
+                        // Optionally, you can poll for verification or instruct user to log in after verifying
+                        setTimeout(() => {
+                            window.location.href = 'login.html';
+                        }, 1500);
+                    } else {
+                        showToast('Signup failed: No user returned.', 'error');
                     }
-                    
-                    // Create user
-                    state.addUser(userData);
-                    
-                    // Send verification email
-                    const { EmailVerificationManager } = await import('./js/emailVerification.js');
-                    const token = EmailVerificationManager.generateVerificationToken();
-                    await EmailVerificationManager.sendVerificationEmail(userData.email, token);
-                    
-                    showToast('Account created! Please check your email for verification link.', 'success');
-                    setTimeout(() => {
-                        window.location.href = `verify.html?email=${encodeURIComponent(userData.email)}`;
-                    }, 2000);
-
                 } catch (error) {
                     console.error('Signup error:', error);
                     showToast('An error occurred during signup. Please try again.', 'error');
                 } finally {
                     showLoading(false);
-                    submitBtn.disabled = false;
-                    submitBtn.innerHTML = '<i class="fas fa-rocket"></i> Create Account';
                 }
             });
 

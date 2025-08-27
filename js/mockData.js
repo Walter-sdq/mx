@@ -1,32 +1,8 @@
 // Mock Data for Demo - Reset to Zero Balances
-import { CryptoUtils } from './crypto.js';
 
 export async function initializeMockData(state) {
-  // Create admin user with full privileges
-  const adminPasswordHash = await CryptoUtils.hashPassword('Admin@1234');
-  const adminUser = {
-    _id: 'admin_001',
-    email: 'admin@maxprofit.dev',
-    passwordHash: adminPasswordHash,
-    fullName: 'Admin User',
-    role: 'admin',
-    emailVerified: true,
-    createdAt: Date.now() - (60 * 24 * 60 * 60 * 1000), // 60 days ago
-    lastLoginAt: Date.now() - (1 * 60 * 60 * 1000), // 1 hour ago
-    settings: {
-      darkMode: true,
-      notifications: true,
-      biometric: false
-    },
-    balances: {
-      USD: 100000.00,
-      BTC: 2.5,
-      ETH: 10.0
-    }
-  };
-  
-  // Set users with only admin initially
-  state.setUsers([adminUser]);
+  // No hardcoded admin user. Only real users from Supabase Auth should be used.
+  state.setUsers([]);
   
   // Initialize empty collections
   state.set('maxprofit_transactions', []);

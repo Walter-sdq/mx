@@ -1,11 +1,11 @@
 // Configuration for data layer switching
-export const DATA_LAYER = 'nedb'; // 'lokijs' | 'nedb'
+window.DATA_LAYER = 'nedb'; // 'lokijs' | 'nedb'
 
 // API Configuration
-export const API_BASE_URL = '/api';
+window.API_BASE_URL = '/api';
 
 // Application Configuration
-export const APP_CONFIG = {
+window.APP_CONFIG = {
   // Trading limits
   MIN_DEPOSIT: 10.00,
   MIN_WITHDRAW: 10.00,
@@ -89,7 +89,7 @@ export const APP_CONFIG = {
 };
 
 // Validation rules
-export const VALIDATION = {
+window.VALIDATION = {
   email: {
     pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     message: 'Please enter a valid email address'
@@ -107,13 +107,13 @@ export const VALIDATION = {
 };
 
 // Toast notification settings
-export const TOAST_CONFIG = {
+window.TOAST_CONFIG = {
   duration: 5000,
   position: 'bottom-right'
 };
 
 // Local storage keys
-export const STORAGE_KEYS = {
+window.STORAGE_KEYS = {
   SESSION: 'maxprofit_session',
   THEME: 'maxprofit_theme',
   SETTINGS: 'maxprofit_settings',

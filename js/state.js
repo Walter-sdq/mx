@@ -1,14 +1,9 @@
 // Application State Management
-import { getStorageItem, setStorageItem } from './utils.js';
-
-// Feature flags
-export const FEATURES = {
+window.FEATURES = {
   USE_EXTERNAL_CHART_LIB: true,   // Chart.js vs vanilla
   MODE: "LOCAL" // "LOCAL" | "LOKI" | "NEDB_PLACEHOLDER"
 };
-
-// State keys
-const STATE_KEYS = {
+window.STATE_KEYS = {
   USERS: 'maxprofit_users',
   TRANSACTIONS: 'maxprofit_transactions',
   TRADES: 'maxprofit_trades',
@@ -217,19 +212,19 @@ class StateManager {
 }
 
 // Global state instance
-export const state = new StateManager();
+window.state = new StateManager();
 
 // Initialize with mock data if empty
-export function initializeState() {
-  if (state.getUsers().length === 0) {
+window.initializeState = function() {
+  if (window.state.getUsers().length === 0) {
     // Import and initialize mock data
     import('./mockData.js').then(({ initializeMockData }) => {
-      initializeMockData(state);
+      initializeMockData(window.state);
     });
   }
-}
+};
 
 // Auto-initialize on load
 document.addEventListener('DOMContentLoaded', () => {
-  initializeState();
+  window.initializeState();
 });

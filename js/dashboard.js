@@ -1,8 +1,4 @@
 // Dashboard JavaScript - Mobile Trading App
-import { SessionManager } from './session.js';
-import { state } from './state.js';
-import { liveSupportManager } from './liveSupport.js';
-import { formatCurrency, getRelativeTime, showToast } from './utils.js';
 
 class TradingDashboard {
     constructor() {
@@ -13,7 +9,6 @@ class TradingDashboard {
         this.positions = [];
         this.transactions = [];
         this.notifications = [];
-        
         this.init();
     }
 
@@ -24,41 +19,70 @@ class TradingDashboard {
         this.loadUserData();
         this.updateUI();
         this.startRealTimeUpdates();
-        
-        // Update time every minute
         setInterval(() => this.updateTime(), 60000);
     }
     
-    loadUserData() {
-        const session = SessionManager.getSession();
+    async loadUserData() {
+        const session = window.SessionManager.getSession();
         if (!session) {
             window.location.href = 'login.html';
             return;
         }
-        
-        this.currentUser = state.getUserById(session.userId);
-        if (!this.currentUser) {
+        // Fetch user profile from Supabase
+        const { data, error } = await window.supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.userId)
+            .single();
+        if (error || !data) {
             window.location.href = 'login.html';
             return;
         }
-        
-        // Update UI with user data
+        this.currentUser = data;
         this.updateUserInterface();
         this.loadUserTransactions();
         this.loadUserNotifications();
+        this.loadUserBalances();
+        this.loadPnL();
+        this.loadMarginUsed();
     }
-    
+
     updateUserInterface() {
         if (!this.currentUser) return;
-        
-        // Update username
         const usernameEl = document.getElementById('username');
-        if (usernameEl) usernameEl.textContent = this.currentUser.fullName;
-        
-        // Update portfolio balance
+        if (usernameEl) usernameEl.textContent = this.currentUser.full_name;
         this.updatePortfolioFromUser();
     }
-    
+
+    async loadUserBalances() {
+        // Example: fetch balances from Supabase (customize as needed)
+        const { data, error } = await window.supabase
+            .from('balances')
+            .select('*')
+            .eq('user_id', this.currentUser.id);
+        if (!error && data && data.length > 0) {
+            // Update UI with balances
+            const balanceEl = document.getElementById('available-balance');
+            if (balanceEl) balanceEl.textContent = `$${data[0].usd.toFixed(2)}`;
+        }
+    }
+
+    async loadPnL() {
+        // Example: fetch today's P&L from Supabase (customize as needed)
+        const { data, error } = await window.supabase
+            .rpc('get_pnl_today', { user_id: this.currentUser.id });
+        const pnlEl = document.getElementById('pnl-today');
+        if (pnlEl && data) pnlEl.textContent = `$${data.toFixed(2)}`;
+    }
+
+    async loadMarginUsed() {
+        // Example: fetch margin used from Supabase (customize as needed)
+        const { data, error } = await window.supabase
+            .rpc('get_margin_used', { user_id: this.currentUser.id });
+        const marginEl = document.getElementById('margin-used');
+        if (marginEl && data) marginEl.textContent = `$${data.toFixed(2)}`;
+    }
+
     updatePortfolioFromUser() {
         if (!this.currentUser) return;
         

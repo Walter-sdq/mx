@@ -1,15 +1,12 @@
 // Utility functions
-
-// Date and time formatting
-export function formatDate(timestamp) {
+window.formatDate = function(timestamp) {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   });
-}
-
-export function formatDateTime(timestamp) {
+};
+window.formatDateTime = function(timestamp) {
   return new Date(timestamp).toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -17,16 +14,14 @@ export function formatDateTime(timestamp) {
     hour: '2-digit',
     minute: '2-digit'
   });
-}
-
-export function formatTime(timestamp) {
+};
+window.formatTime = function(timestamp) {
   return new Date(timestamp).toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit'
   });
-}
-
-export function getRelativeTime(timestamp) {
+};
+window.getRelativeTime = function(timestamp) {
   const now = Date.now();
   const diff = now - timestamp;
   
@@ -44,10 +39,10 @@ export function getRelativeTime(timestamp) {
   if (diff < month) return `${Math.floor(diff / week)}w ago`;
   if (diff < year) return `${Math.floor(diff / month)}mo ago`;
   return `${Math.floor(diff / year)}y ago`;
-}
+};
 
 // Number formatting
-export function formatCurrency(amount, currency = 'USD', decimals = 2) {
+window.formatCurrency = function(amount, currency = 'USD', decimals = 2) {
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
@@ -56,39 +51,35 @@ export function formatCurrency(amount, currency = 'USD', decimals = 2) {
   });
   
   return formatter.format(amount);
-}
-
-export function formatNumber(value, decimals = 2) {
+};
+window.formatNumber = function(value, decimals = 2) {
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
   }).format(value);
-}
-
-export function formatPercent(value, decimals = 2) {
+};
+window.formatPercent = function(value, decimals = 2) {
   return new Intl.NumberFormat('en-US', {
     style: 'percent',
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
   }).format(value / 100);
-}
-
-export function formatCompactNumber(value) {
+};
+window.formatCompactNumber = function(value) {
   const formatter = new Intl.NumberFormat('en-US', {
     notation: 'compact',
     compactDisplay: 'short'
   });
   
   return formatter.format(value);
-}
+};
 
 // Validation functions
-export function isValidEmail(email) {
+window.isValidEmail = function(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
-}
-
-export function checkPasswordStrength(password) {
+};
+window.checkPasswordStrength = function(password) {
   if (!password) return { score: 0, text: '', class: '' };
   
   let score = 0;
@@ -129,27 +120,26 @@ export function checkPasswordStrength(password) {
     class: strength[score].class,
     feedback: feedback.length > 0 ? `Missing: ${feedback.join(', ')}` : ''
   };
-}
+};
 
 // DOM manipulation
-export function createElement(tag, className, textContent) {
+window.createElement = function(tag, className, textContent) {
   const element = document.createElement(tag);
   if (className) element.className = className;
   if (textContent) element.textContent = textContent;
   return element;
-}
-
-export function addEventDelegate(container, selector, event, handler) {
+};
+window.addEventDelegate = function(container, selector, event, handler) {
   container.addEventListener(event, (e) => {
     const target = e.target.closest(selector);
     if (target) {
       handler(e, target);
     }
   });
-}
+};
 
 // Local storage helpers
-export function getStorageItem(key, defaultValue = null) {
+window.getStorageItem = function(key, defaultValue = null) {
   try {
     const item = localStorage.getItem(key);
     return item ? JSON.parse(item) : defaultValue;
@@ -157,9 +147,8 @@ export function getStorageItem(key, defaultValue = null) {
     console.warn(`Failed to parse localStorage item '${key}':`, error);
     return defaultValue;
   }
-}
-
-export function setStorageItem(key, value) {
+};
+window.setStorageItem = function(key, value) {
   try {
     localStorage.setItem(key, JSON.stringify(value));
     return true;
@@ -167,9 +156,8 @@ export function setStorageItem(key, value) {
     console.warn(`Failed to store item '${key}':`, error);
     return false;
   }
-}
-
-export function removeStorageItem(key) {
+};
+window.removeStorageItem = function(key) {
   try {
     localStorage.removeItem(key);
     return true;
@@ -177,10 +165,10 @@ export function removeStorageItem(key) {
     console.warn(`Failed to remove item '${key}':`, error);
     return false;
   }
-}
+};
 
 // Theme management
-export function setTheme(theme) {
+window.setTheme = function(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   setStorageItem('maxprofit_theme', theme);
   
@@ -189,18 +177,16 @@ export function setTheme(theme) {
   themeToggles.forEach(icon => {
     icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
   });
-}
-
-export function getTheme() {
+};
+window.getTheme = function() {
   return getStorageItem('maxprofit_theme', 'dark');
-}
-
-export function toggleTheme() {
+};
+window.toggleTheme = function() {
   const currentTheme = getTheme();
   const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
   setTheme(newTheme);
   return newTheme;
-}
+};
 
 // Toast notifications
 let toastContainer = null;
@@ -218,7 +204,7 @@ function getToastContainer() {
   return toastContainer;
 }
 
-export function showToast(message, type = 'info', duration = 5000) {
+window.showToast = function(message, type = 'info', duration = 5000) {
   const container = getToastContainer();
   
   const toast = document.createElement('div');
@@ -263,7 +249,7 @@ function removeToast(toast) {
 }
 
 // Loading overlay
-export function showLoading(show = true) {
+window.showLoading = function(show = true) {
   let overlay = document.getElementById('loading-overlay');
   if (!overlay && show) {
     overlay = document.createElement('div');
@@ -279,7 +265,7 @@ export function showLoading(show = true) {
 }
 
 // Modal management
-export function openModal(modalId) {
+window.openModal = function(modalId) {
   const modal = document.getElementById(modalId);
   const overlay = document.getElementById('modal-overlay');
   
@@ -290,7 +276,7 @@ export function openModal(modalId) {
   }
 }
 
-export function closeModal(modalId) {
+window.closeModal = function(modalId) {
   const modal = document.getElementById(modalId);
   const overlay = document.getElementById('modal-overlay');
   
@@ -302,7 +288,7 @@ export function closeModal(modalId) {
 }
 
 // Page navigation
-export function showPage(pageId) {
+window.showPage = function(pageId) {
   // Hide all pages
   const pages = document.querySelectorAll('.page');
   pages.forEach(page => page.classList.remove('active'));
@@ -339,15 +325,14 @@ export function showPage(pageId) {
 }
 
 // Array utilities
-export function chunk(array, size) {
+window.chunk = function(array, size) {
   const chunks = [];
   for (let i = 0; i < array.length; i += size) {
     chunks.push(array.slice(i, i + size));
   }
   return chunks;
 }
-
-export function sortBy(array, key, direction = 'asc') {
+window.sortBy = function(array, key, direction = 'asc') {
   return array.sort((a, b) => {
     let aVal = key.split('.').reduce((obj, k) => obj?.[k], a);
     let bVal = key.split('.').reduce((obj, k) => obj?.[k], b);
@@ -360,8 +345,7 @@ export function sortBy(array, key, direction = 'asc') {
     return 0;
   });
 }
-
-export function filterBy(array, filters) {
+window.filterBy = function(array, filters) {
   return array.filter(item => {
     return Object.entries(filters).every(([key, value]) => {
       if (!value) return true;
@@ -378,12 +362,11 @@ export function filterBy(array, filters) {
 }
 
 // URL utilities
-export function getQueryParam(param) {
+window.getQueryParam = function(param) {
   const urlParams = new URLSearchParams(window.location.search);
   return urlParams.get(param);
 }
-
-export function setQueryParam(param, value) {
+window.setQueryParam = function(param, value) {
   const url = new URL(window.location);
   if (value) {
     url.searchParams.set(param, value);
@@ -394,7 +377,7 @@ export function setQueryParam(param, value) {
 }
 
 // Debounce function
-export function debounce(func, wait) {
+window.debounce = function(func, wait) {
   let timeout;
   return function executedFunction(...args) {
     const later = () => {
@@ -407,7 +390,7 @@ export function debounce(func, wait) {
 }
 
 // Throttle function
-export function throttle(func, limit) {
+window.throttle = function(func, limit) {
   let inThrottle;
   return function() {
     const args = arguments;
@@ -421,12 +404,12 @@ export function throttle(func, limit) {
 }
 
 // Generate unique ID
-export function generateId() {
+window.generateId = function() {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 }
 
 // Deep clone object
-export function deepClone(obj) {
+window.deepClone = function(obj) {
   if (obj === null || typeof obj !== 'object') return obj;
   if (obj instanceof Date) return new Date(obj);
   if (obj instanceof Array) return obj.map(item => deepClone(item));
@@ -442,7 +425,7 @@ export function deepClone(obj) {
 }
 
 // CSV export
-export function exportToCSV(data, filename) {
+window.exportToCSV = function(data, filename) {
   if (!data.length) return;
   
   const headers = Object.keys(data[0]);

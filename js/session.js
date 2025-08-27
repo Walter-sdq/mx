@@ -1,7 +1,5 @@
 // Session Management and Route Guards
-import { getStorageItem, setStorageItem, removeStorageItem, showToast } from './utils.js';
-
-export class SessionManager {
+window.SessionManager = class {
   static SESSION_KEY = 'maxprofit_session';
   static DEFAULT_EXPIRY = 24 * 60 * 60 * 1000; // 24 hours
   static REMEMBER_EXPIRY = 30 * 24 * 60 * 60 * 1000; // 30 days
@@ -18,12 +16,12 @@ export class SessionManager {
       token: this.generateToken()
     };
     
-    setStorageItem(this.SESSION_KEY, session);
+    localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
     return session;
   }
   
   static getSession() {
-    const session = getStorageItem(this.SESSION_KEY);
+    const session = JSON.parse(localStorage.getItem(this.SESSION_KEY));
     if (!session) return null;
     
     // Check if session is expired
@@ -36,7 +34,7 @@ export class SessionManager {
   }
   
   static clearSession() {
-    removeStorageItem(this.SESSION_KEY);
+    localStorage.removeItem(this.SESSION_KEY);
   }
   
   static isAuthenticated() {
@@ -66,36 +64,36 @@ export class SessionManager {
     const session = this.getSession();
     if (session) {
       session.expiresAt = Date.now() + this.DEFAULT_EXPIRY;
-      setStorageItem(this.SESSION_KEY, session);
+      localStorage.setItem(this.SESSION_KEY, JSON.stringify(session));
     }
   }
 }
 
 // Route Guards
-export function requireAuth() {
-  if (!SessionManager.isAuthenticated()) {
+window.requireAuth = function() {
+  if (!window.SessionManager.isAuthenticated()) {
     window.location.href = 'login.html';
     return false;
   }
   return true;
-}
+};
 
-export function requireAdmin() {
-  if (!SessionManager.hasRole('admin')) {
+window.requireAdmin = function() {
+  if (!window.SessionManager.hasRole('admin')) {
     showToast('Access denied. Admin privileges required.', 'error');
     window.location.href = 'dashboard.html';
     return false;
   }
   return true;
-}
+};
 
-export function redirectIfAuthenticated() {
+window.redirectIfAuthenticated = function() {
   if (SessionManager.isAuthenticated()) {
     window.location.href = 'dashboard.html';
     return true;
   }
   return false;
-}
+};
 
 // Initialize session management
 document.addEventListener('DOMContentLoaded', () => {

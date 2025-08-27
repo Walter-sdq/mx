@@ -1,6 +1,5 @@
 // PBKDF2 Password Hashing Utilities (Web Crypto API)
-
-export class CryptoUtils {
+window.CryptoUtils = class {
   static async generateSalt() {
     const array = new Uint8Array(16);
     crypto.getRandomValues(array);
@@ -59,7 +58,7 @@ export class CryptoUtils {
 }
 
 // Fallback for older browsers
-export function generateSimpleHash(password) {
+window.generateSimpleHash = function(password) {
   let hash = 0;
   for (let i = 0; i < password.length; i++) {
     const char = password.charCodeAt(i);
@@ -67,4 +66,4 @@ export function generateSimpleHash(password) {
     hash = hash & hash;
   }
   return hash.toString();
-}
+};

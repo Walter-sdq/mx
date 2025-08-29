@@ -216,6 +216,10 @@
                                 <i class="fas fa-plus"></i>
                                 Create User
                             </button>
+                            <button class="btn btn-outline" onclick="admin.exportUserData()">
+                                <i class="fas fa-download"></i>
+                                Export Users
+                            </button>
                             <input type="text" id="users-search" placeholder="Search users...">
                         </div>
                     </div>
@@ -227,10 +231,10 @@
                                     <tr>
                                         <th class="sortable" data-sort="email">User</th>
                                         <th class="sortable" data-sort="role">Role</th>
+                                        <th class="sortable" data-sort="emailVerified">Verified</th>
                                         <th class="sortable" data-sort="balances.USD">USD Balance</th>
                                         <th class="sortable" data-sort="balances.BTC">BTC Balance</th>
                                         <th class="sortable" data-sort="balances.ETH">ETH Balance</th>
-                                        <th class="sortable" data-sort="emailVerified">Verified</th>
                                         <th class="sortable" data-sort="createdAt">Joined</th>
                                         <th class="sortable" data-sort="lastLoginAt">Last Login</th>
                                         <th>Actions</th>
@@ -258,6 +262,10 @@
                             <button class="filter-btn" data-filter="denied">Denied</button>
                             <button class="filter-btn" data-filter="paid">Paid</button>
                         </div>
+                        <button class="btn btn-outline" onclick="admin.exportTransactionData()">
+                            <i class="fas fa-download"></i>
+                            Export Data
+                        </button>
                         <input type="text" id="withdrawals-search" placeholder="Search withdrawals...">
                     </div>
 
@@ -412,7 +420,8 @@
                     </div>
                     <div class="form-group">
                         <label>Initial Password</label>
-                        <input type="password" id="new-user-password" required>
+                        <input type="password" id="new-user-password" placeholder="Will be set by user" disabled>
+                        <small>User will set password during email verification</small>
                     </div>
                     <button type="submit" class="btn btn-primary">Create User</button>
                 </form>
@@ -516,11 +525,9 @@
 
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/crypto.js"></script>
     <script src="js/session.js"></script>
     <script src="js/state.js"></script>
-    <script src="js/prices.js"></script>
-    <script src="js/charts.js"></script>
+    <script src="js/mockData.js"></script>
     <script src="js/admin.js"></script>
 </body>
 </html>

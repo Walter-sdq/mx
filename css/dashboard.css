@@ -40,31 +40,12 @@ body {
 }
 
 .app-container {
+    width: 100%;
     max-width: 428px;
     margin: 0 auto;
     background: var(--surface-color);
     min-height: 100vh;
     position: relative;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-}
-
-/* Status Bar */
-.status-bar {
-    height: var(--status-bar-height);
-    background: var(--text-primary);
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0 16px;
-    font-size: 12px;
-    font-weight: 600;
-}
-
-.status-right {
-    display: flex;
-    align-items: center;
-    gap: 8px;
 }
 
 /* Header */
@@ -160,7 +141,7 @@ body {
 
 /* Main Content */
 .main-content {
-    min-height: calc(100vh - var(--header-height) - var(--bottom-nav-height) - var(--status-bar-height));
+    min-height: calc(100vh - var(--header-height) - var(--bottom-nav-height));
     padding-bottom: 16px;
 }
 
@@ -240,6 +221,10 @@ body {
     color: #ff5722;
 }
 
+.balance-change.neutral {
+    color: var(--text-secondary);
+}
+
 .quick-stats {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -270,6 +255,10 @@ body {
 
 .stat-value.negative {
     color: #ff5722;
+}
+
+.stat-value.neutral {
+    color: var(--text-secondary);
 }
 
 /* Quick Actions */
@@ -427,6 +416,13 @@ body {
     gap: 8px;
     cursor: pointer;
     margin-bottom: 8px;
+    padding: 8px;
+    border-radius: var(--border-radius);
+    transition: var(--transition);
+}
+
+.symbol-selector:hover {
+    background: var(--border-color);
 }
 
 .current-symbol {
@@ -457,6 +453,145 @@ body {
 
 .ask-price {
     color: var(--success-color);
+}
+
+/* Symbol Modal */
+.symbol-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 16px;
+}
+
+.symbol-modal.active {
+    display: flex;
+}
+
+.symbol-modal-content {
+    background: var(--surface-color);
+    border-radius: var(--border-radius-lg);
+    width: 100%;
+    max-width: 400px;
+    max-height: 80vh;
+    overflow: hidden;
+    box-shadow: var(--shadow-heavy);
+}
+
+.symbol-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.symbol-modal-header h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 18px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    background: var(--border-color);
+    color: var(--text-primary);
+}
+
+.symbol-categories {
+    display: flex;
+    background: var(--background-color);
+    margin: 0;
+}
+
+.category-tab {
+    flex: 1;
+    padding: 12px;
+    background: none;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: var(--transition);
+    border-bottom: 2px solid transparent;
+}
+
+.category-tab.active {
+    color: var(--primary-color);
+    border-bottom-color: var(--primary-color);
+}
+
+.symbol-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.symbol-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+    transition: var(--transition);
+    margin-bottom: 4px;
+}
+
+.symbol-item:hover {
+    background: var(--border-color);
+}
+
+.symbol-info {
+    display: flex;
+    flex-direction: column;
+}
+
+.symbol-name {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 2px;
+}
+
+.symbol-description {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.symbol-price {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.symbol-price .price {
+    font-weight: 600;
+    font-size: 16px;
+    margin-bottom: 2px;
+}
+
+.symbol-price .change {
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-weight: 500;
 }
 
 .price-change {
@@ -1476,6 +1611,30 @@ body {
     font-weight: 500;
 }
 
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-secondary);
+}
+
+.empty-state i {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.5;
+}
+
+.empty-state h3 {
+    font-size: 18px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.empty-state p {
+    font-size: 14px;
+    margin: 0;
+}
+
 /* Live Notification */
 .live-notification {
     position: fixed;
@@ -1614,11 +1773,50 @@ body {
 }
 
 /* Responsive Design */
-@media (max-width: 375px) {
+@media (min-width: 768px) {
     .app-container {
-        max-width: 100%;
+        max-width: 768px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
     }
     
+    .main-content {
+        padding: 24px;
+    }
+    
+    .page {
+        padding: 24px;
+    }
+    
+    .quick-actions {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+    }
+    
+    .symbol-modal-content {
+        max-width: 500px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .app-container {
+        max-width: 1024px;
+    }
+    
+    .main-content {
+        padding: 32px;
+    }
+    
+    .trading-header {
+        margin: -32px -32px 24px -32px;
+        padding: 24px 32px;
+    }
+    
+    .chart-area {
+        height: 400px;
+    }
+}
+
+@media (max-width: 375px) {
     .portfolio-card {
         padding: 20px;
     }
@@ -1631,44 +1829,30 @@ body {
         grid-template-columns: repeat(2, 1fr);
     }
     
-    .action-btn {
-        padding: 12px 8px;
-    }
-    
-    .action-btn span {
-        font-size: 12px;
-    }
-    
-    .support-stats {
-        grid-template-columns: 1fr;
-    }
-    
-    .contact-options {
-        grid-template-columns: 1fr;
-    }
-    
     .live-notification {
         left: 16px;
         right: 16px;
-        top: 80px;
+        top: 100px;
     }
 }
 
-@media (min-width: 768px) {
-    .app-container {
-        max-width: 100dvw;
+@media (max-width: 320px) {
+    .symbol-modal-content {
+        margin: 8px;
+        max-height: 90vh;
     }
     
-    .main-content {
-        padding: 24px;
+    .portfolio-card {
+        padding: 16px;
     }
     
-    .page {
-        padding: 24px;
+    .balance-amount {
+        font-size: 28px;
     }
     
-    .bottom-nav {
-        max-width: 768px;
+    .quick-stats {
+        grid-template-columns: 1fr;
+        gap: 12px;
     }
 }
 

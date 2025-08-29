@@ -1,7 +1,7 @@
 // Application State Management
 window.FEATURES = {
   USE_EXTERNAL_CHART_LIB: true,   // Chart.js vs vanilla
-  MODE: "LOCAL" // "LOCAL" | "LOKI" | "NEDB_PLACEHOLDER"
+  MODE: "REAL_DATA" // Real data mode
 };
 window.STATE_KEYS = {
   USERS: 'maxprofit_users',
@@ -9,6 +9,7 @@ window.STATE_KEYS = {
   TRADES: 'maxprofit_trades',
   WITHDRAWALS: 'maxprofit_withdrawals',
   NOTIFICATIONS: 'maxprofit_notifications',
+  LIVE_ACTIVITIES: 'maxprofit_live_activities',
   PRICES: 'maxprofit_prices',
   SETTINGS: 'maxprofit_settings'
 };
@@ -102,6 +103,32 @@ class StateManager {
     return users.find(user => user.email.toLowerCase() === email.toLowerCase());
   }
   
+  // Create new user with zero balances
+  createUser(userData) {
+    const newUser = {
+      _id: this.generateId(),
+      email: userData.email.toLowerCase(),
+      fullName: userData.fullName,
+      role: userData.role || 'user',
+      emailVerified: false,
+      createdAt: Date.now(),
+      lastLoginAt: null,
+      settings: {
+        darkMode: true,
+        notifications: true,
+        biometric: false
+      },
+      balances: {
+        USD: 0.00,
+        BTC: 0.00000000,
+        ETH: 0.00000000
+      }
+    };
+    
+    this.addUser(newUser);
+    return newUser;
+  },
+  
   getTransactions(userId = null) {
     const transactions = this.get(STATE_KEYS.TRANSACTIONS, []);
     return userId ? transactions.filter(t => t.userId === userId) : transactions;
@@ -178,6 +205,19 @@ class StateManager {
     );
   }
   
+  // Live activities for payment feed
+  getLiveActivities() {
+    return this.get(STATE_KEYS.LIVE_ACTIVITIES, []);
+  },
+  
+  addLiveActivity(activity) {
+    return this.update(STATE_KEYS.LIVE_ACTIVITIES, activities => {
+      const newActivities = [...activities, { ...activity, _id: activity._id || this.generateId() }];
+      // Keep only last 50 activities
+      return newActivities.slice(-50);
+    });
+  },
+  
   getPrices() {
     return this.get(STATE_KEYS.PRICES, {});
   }
@@ -200,6 +240,37 @@ class StateManager {
   
   generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
+  }
+  
+  // Initialize admin user if none exists
+  initializeAdmin() {
+    const users = this.getUsers();
+    const adminExists = users.some(user => user.role === 'admin');
+    
+    if (!adminExists) {
+      const adminUser = {
+        _id: this.generateId(),
+        email: 'admin@maxprofit.dev',
+        fullName: 'System Administrator',
+        role: 'admin',
+        emailVerified: true,
+        createdAt: Date.now(),
+        lastLoginAt: Date.now(),
+        settings: {
+          darkMode: true,
+          notifications: true,
+          biometric: false
+        },
+        balances: {
+          USD: 1000000.00,
+          BTC: 10.00000000,
+          ETH: 50.00000000
+        }
+      };
+      
+      this.addUser(adminUser);
+      console.log('Admin user initialized');
+    }
   }
   
   // Clear all data (for testing)

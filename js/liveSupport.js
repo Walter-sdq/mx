@@ -1,25 +1,12 @@
-// Live Support System with Simulated Global Activity
-import { state } from './state.js';
+// Live Payment Feed System
+import { generateGlobalUser, generateRandomAmount } from './mockData.js';
 import { formatCurrency, getRelativeTime, generateId } from './utils.js';
 
-export class LiveSupportManager {
+export class LivePaymentManager {
   constructor() {
     this.activities = [];
     this.isRunning = false;
     this.updateInterval = null;
-    
-    this.globalUsers = [
-      { name: 'Alex Johnson', country: 'United States', avatar: 'https://images.pexels.com/photos/3777946/pexels-photo-3777946.jpeg?w=40&h=40&fit=crop&crop=face' },
-      { name: 'Maria Garcia', country: 'Spain', avatar: 'https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?w=40&h=40&fit=crop&crop=face' },
-      { name: 'Chen Wei', country: 'China', avatar: 'https://images.pexels.com/photos/3184317/pexels-photo-3184317.jpeg?w=40&h=40&fit=crop&crop=face' },
-      { name: 'James Smith', country: 'United Kingdom', avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=40&h=40&fit=crop&crop=face' },
-      { name: 'Sophie Martin', country: 'France', avatar: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?w=40&h=40&fit=crop&crop=face' },
-      { name: 'Raj Patel', country: 'India', avatar: 'https://images.pexels.com/photos/3777931/pexels-photo-3777931.jpeg?w=40&h=40&fit=crop&crop=face' },
-      { name: 'Emma Wilson', country: 'Australia', avatar: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?w=40&h=40&fit=crop&crop=face' },
-      { name: 'Hans Mueller', country: 'Germany', avatar: 'https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?w=40&h=40&fit=crop&crop=face' },
-      { name: 'Yuki Tanaka', country: 'Japan', avatar: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?w=40&h=40&fit=crop&crop=face' },
-      { name: 'Carlos Silva', country: 'Brazil', avatar: 'https://images.pexels.com/photos/3777952/pexels-photo-3777952.jpeg?w=40&h=40&fit=crop&crop=face' }
-    ];
     
     this.init();
   }
@@ -30,25 +17,22 @@ export class LiveSupportManager {
   }
   
   loadActivities() {
-    this.activities = state.get('maxprofit_live_activities', []);
+    this.activities = state.getLiveActivities();
     
     // Seed initial activities if empty
     if (this.activities.length === 0) {
       this.seedInitialActivities();
     }
-    
-    // Keep only last 50 activities
-    this.activities = this.activities.slice(-50);
   }
   
   seedInitialActivities() {
     const now = Date.now();
     const activities = [];
     
-    for (let i = 0; i < 20; i++) {
-      const user = this.globalUsers[Math.floor(Math.random() * this.globalUsers.length)];
-      const type = Math.random() > 0.5 ? 'deposit' : 'withdrawal';
-      const amount = this.generateRandomAmount(type);
+    for (let i = 0; i < 15; i++) {
+      const user = generateGlobalUser();
+      const type = Math.random() > 0.6 ? 'deposit' : 'withdrawal';
+      const amount = generateRandomAmount(type);
       
       activities.push({
         _id: generateId(),
@@ -56,23 +40,13 @@ export class LiveSupportManager {
         type: type,
         amount: amount,
         currency: 'USD',
-        timestamp: now - (i * 60000 * Math.random() * 30), // Last 30 minutes
+        timestamp: now - (i * 60000 * Math.random() * 20), // Last 20 minutes
         status: 'completed'
       });
     }
     
     this.activities = activities.sort((a, b) => b.timestamp - a.timestamp);
-    state.set('maxprofit_live_activities', this.activities);
-  }
-  
-  generateRandomAmount(type) {
-    if (type === 'deposit') {
-      const amounts = [100, 250, 500, 1000, 2500, 5000, 10000];
-      return amounts[Math.floor(Math.random() * amounts.length)];
-    } else {
-      const amounts = [50, 100, 200, 500, 1000, 2000];
-      return amounts[Math.floor(Math.random() * amounts.length)];
-    }
+    state.set(STATE_KEYS.LIVE_ACTIVITIES, this.activities);
   }
   
   startSimulation() {
@@ -81,7 +55,7 @@ export class LiveSupportManager {
     this.isRunning = true;
     this.updateInterval = setInterval(() => {
       this.generateNewActivity();
-    }, 15000 + Math.random() * 30000); // Every 15-45 seconds
+    }, 8000 + Math.random() * 15000); // Every 8-23 seconds
   }
   
   stopSimulation() {
@@ -95,9 +69,9 @@ export class LiveSupportManager {
   }
   
   generateNewActivity() {
-    const user = this.globalUsers[Math.floor(Math.random() * this.globalUsers.length)];
-    const type = Math.random() > 0.6 ? 'deposit' : 'withdrawal';
-    const amount = this.generateRandomAmount(type);
+    const user = generateGlobalUser();
+    const type = Math.random() > 0.65 ? 'deposit' : 'withdrawal';
+    const amount = generateRandomAmount(type);
     
     const activity = {
       _id: generateId(),
@@ -109,14 +83,8 @@ export class LiveSupportManager {
       status: 'completed'
     };
     
-    this.activities.unshift(activity);
-    
-    // Keep only last 50 activities
-    if (this.activities.length > 50) {
-      this.activities = this.activities.slice(0, 50);
-    }
-    
-    state.set('maxprofit_live_activities', this.activities);
+    state.addLiveActivity(activity);
+    this.activities = state.getLiveActivities();
     
     // Trigger UI update
     this.renderActivities();
@@ -129,7 +97,9 @@ export class LiveSupportManager {
     const container = document.getElementById('live-activities-list');
     if (!container) return;
     
-    container.innerHTML = this.activities.map(activity => `
+    const activities = state.getLiveActivities();
+    
+    container.innerHTML = activities.map(activity => `
       <div class="live-activity-item">
         <div class="activity-avatar">
           <img src="${activity.user.avatar}" alt="${activity.user.name}">
@@ -155,8 +125,8 @@ export class LiveSupportManager {
   }
   
   showActivityNotification(activity) {
-    // Only show if user is on live support page
-    const livePage = document.getElementById('live-support-page');
+    // Only show if user is on live payment page
+    const livePage = document.getElementById('supportPage');
     if (!livePage || !livePage.classList.contains('active')) return;
     
     const notification = document.createElement('div');
@@ -170,29 +140,26 @@ export class LiveSupportManager {
     
     document.body.appendChild(notification);
     
-    // Auto remove after 3 seconds
+    // Auto remove after 4 seconds
     setTimeout(() => {
       notification.remove();
-    }, 3000);
-  }
-  
-  getActivities() {
-    return this.activities;
+    }, 4000);
   }
   
   getTotalStats() {
-    const deposits = this.activities.filter(a => a.type === 'deposit');
-    const withdrawals = this.activities.filter(a => a.type === 'withdrawal');
+    const activities = state.getLiveActivities();
+    const deposits = activities.filter(a => a.type === 'deposit');
+    const withdrawals = activities.filter(a => a.type === 'withdrawal');
     
     return {
       totalDeposits: deposits.reduce((sum, a) => sum + a.amount, 0),
       totalWithdrawals: withdrawals.reduce((sum, a) => sum + a.amount, 0),
       depositCount: deposits.length,
       withdrawalCount: withdrawals.length,
-      activeUsers: new Set(this.activities.map(a => a.user.name)).size
+      activeUsers: new Set(activities.map(a => a.user.name)).size
     };
   }
 }
 
 // Global instance
-export const liveSupportManager = new LiveSupportManager();
+export const livePaymentManager = new LivePaymentManager();

@@ -160,14 +160,39 @@
                     const password = passwordInput.value;
                     const rememberMe = document.getElementById('remember').checked;
                     
-                    // Supabase login
+                    // Check if user exists in local state and is verified
+                    const localUser = state.getUserByEmail(email);
+                    if (!localUser) {
+                        showToast('User not found. Please sign up first.', 'error');
+                        return;
+                    }
+                    
+                    if (!localUser.emailVerified) {
+                        showToast('Please verify your email before logging in.', 'error');
+                        setTimeout(() => {
+                            window.location.href = `verify.html?email=${encodeURIComponent(email)}`;
+                        }, 2000);
+                        return;
+                    }
+                    
+                    // Supabase authentication
                     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
                     if (error) {
                         showToast(error.message, 'error');
                     } else {
+                        // Update last login time
+                        state.updateUser(localUser._id, { lastLoginAt: Date.now() });
+                        
+                        // Create session
+                        SessionManager.createSession(localUser, rememberMe);
+                        
                         showToast('Login successful! Redirecting...', 'success');
                         setTimeout(() => {
-                            window.location.href = 'dashboard.html';
+                            if (localUser.role === 'admin') {
+                                window.location.href = 'admin.html';
+                            } else {
+                                window.location.href = 'dashboard.html';
+                            }
                         }, 1000);
                     }
                 } catch (error) {

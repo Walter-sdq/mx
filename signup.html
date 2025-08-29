@@ -192,11 +192,32 @@
                     if (error) {
                         showToast(error.message, 'error');
                     } else if (data && data.user && data.user.id) {
-                        // Wait for email verification before storing profile
+                        // Create user profile in local state
+                        const userData = {
+                            email: email,
+                            fullName: inputs.fullName.value.trim(),
+                            role: 'user'
+                        };
+                        
+                        // Store user data for verification
+                        const newUser = state.createUser(userData);
+                        
+                        // Store verification data
+                        const verificationData = {
+                            email: email,
+                            userId: newUser._id,
+                            supabaseId: data.user.id,
+                            verified: false,
+                            createdAt: Date.now()
+                        };
+                        
+                        const verifications = state.get('maxprofit_verifications', []);
+                        verifications.push(verificationData);
+                        state.set('maxprofit_verifications', verifications);
+                        
                         showToast('Signup successful! Check your email for verification.', 'success');
-                        // Optionally, you can poll for verification or instruct user to log in after verifying
                         setTimeout(() => {
-                            window.location.href = 'login.html';
+                            window.location.href = `verify.html?email=${encodeURIComponent(email)}`;
                         }, 1500);
                     } else {
                         showToast('Signup failed: No user returned.', 'error');

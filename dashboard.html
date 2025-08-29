@@ -13,18 +13,6 @@
 </head>
 <body>
     <div class="app-container" id="app">
-        <!-- Top Status Bar -->
-        <div class="status-bar">
-            <div class="status-left">
-                <span class="time" id="currentTime">9:41</span>
-            </div>
-            <div class="status-right">
-                <span class="network-indicator">5G</span>
-                <span class="battery">100%</span>
-                <i class="fas fa-battery-full"></i>
-            </div>
-        </div>
-
         <!-- Header -->
         <header class="app-header">
             <div class="header-left">
@@ -33,7 +21,7 @@
                 </div>
                 <div class="user-info">
                     <span class="greeting" id="greeting">Good morning</span>
-                    <span class="username" id="username">John Doe</span>
+                    <span class="username" id="username">Loading...</span>
                 </div>
             </div>
             <div class="header-right">
@@ -59,24 +47,24 @@
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
-                    <div class="balance-amount" id="portfolioBalance">$24,567.89</div>
-                    <div class="balance-change positive" id="balanceChange">
-                        <i class="fas fa-arrow-up"></i>
-                        <span>+$1,234.56 (5.3%) today</span>
+                    <div class="balance-amount" id="portfolioBalance">$0.00</div>
+                    <div class="balance-change neutral" id="balanceChange">
+                        <i class="fas fa-minus"></i>
+                        <span>$0.00 (0.0%) today</span>
                     </div>
                     
                     <div class="quick-stats">
                         <div class="stat-item">
                             <span class="stat-label">Available</span>
-                            <span class="stat-value">$12,450.00</span>
+                            <span class="stat-value" id="available-balance">$0.00</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">P&L Today</span>
-                            <span class="stat-value positive">+$892.34</span>
+                            <span class="stat-value neutral" id="pnl-today">$0.00</span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Margin Used</span>
-                            <span class="stat-value">$5,200.00</span>
+                            <span class="stat-value" id="margin-used">$0.00</span>
                         </div>
                     </div>
                 </section>
@@ -131,15 +119,35 @@
                 <!-- Trading Header -->
                 <div class="trading-header">
                     <div class="symbol-selector" id="symbolSelector">
-                        <span class="current-symbol">EUR/USD</span>
+                        <span class="current-symbol" id="current-symbol">BTC/USD</span>
                         <i class="fas fa-chevron-down"></i>
                     </div>
                     <div class="symbol-info">
                         <div class="price-display">
-                            <span class="bid-price">1.0845</span>
-                            <span class="ask-price">1.0847</span>
+                            <span class="bid-price" id="bid-price">43250.00</span>
+                            <span class="ask-price" id="ask-price">43252.00</span>
                         </div>
-                        <div class="price-change negative">-0.0023 (-0.21%)</div>
+                        <div class="price-change positive" id="symbol-change">+125.50 (+0.29%)</div>
+                    </div>
+                </div>
+                
+                <!-- Symbol Selector Modal -->
+                <div class="symbol-modal" id="symbolModal">
+                    <div class="symbol-modal-content">
+                        <div class="symbol-modal-header">
+                            <h3>Select Trading Pair</h3>
+                            <button class="modal-close" onclick="closeSymbolModal()">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                        <div class="symbol-categories">
+                            <button class="category-tab active" data-category="crypto">Crypto</button>
+                            <button class="category-tab" data-category="forex">Forex</button>
+                            <button class="category-tab" data-category="stocks">Stocks</button>
+                        </div>
+                        <div class="symbol-list" id="symbolList">
+                            <!-- Symbols will be populated here -->
+                        </div>
                     </div>
                 </div>
 
@@ -224,10 +232,10 @@
                 <section class="positions-section">
                     <div class="section-header">
                         <h3>Open Positions</h3>
-                        <span class="position-count" id="positionCount">2</span>
+                        <span class="position-count" id="positionCount">0</span>
                     </div>
                     <div class="positions-list" id="positionsList">
-                        <!-- Positions will be populated by JavaScript -->
+                        <div class="empty-state">No open positions</div>
                     </div>
                 </section>
             </div>
@@ -270,67 +278,44 @@
             <!-- Live Support Page -->
             <div class="page" id="supportPage">
                 <div class="page-header">
-                    <h2>Live Support</h2>
-                    <div class="support-status">
+                    <h2>Live Payments</h2>
+                    <div class="payment-status">
                         <span class="status-indicator online"></span>
-                        <span>Support Online</span>
+                        <span>Live Feed</span>
                     </div>
                 </div>
                 
-                <div class="support-stats">
+                <div class="payment-stats">
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-users"></i>
+                            <i class="fas fa-arrow-down"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-number" id="active-users">1,247</span>
-                            <span class="stat-label">Active Users</span>
+                            <span class="stat-number" id="total-deposits">$0</span>
+                            <span class="stat-label">Total Deposits</span>
                         </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-icon">
-                            <i class="fas fa-dollar-sign"></i>
+                            <i class="fas fa-arrow-up"></i>
                         </div>
                         <div class="stat-info">
-                            <span class="stat-number" id="total-volume">$2.1M</span>
-                            <span class="stat-label">24h Volume</span>
+                            <span class="stat-number" id="total-withdrawals">$0</span>
+                            <span class="stat-label">Total Withdrawals</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="live-activities-section">
+                <div class="live-payments-section">
                     <div class="section-header">
-                        <h3>Global Activity Feed</h3>
+                        <h3>Global Payment Feed</h3>
                         <div class="activity-indicator">
                             <span class="pulse-dot"></span>
                             <span>Live</span>
                         </div>
                     </div>
                     <div class="live-activities-list" id="live-activities-list">
-                        <!-- Live activities will be populated here -->
-                    </div>
-                </div>
-
-                <div class="support-contact">
-                    <div class="contact-card">
-                        <div class="contact-header">
-                            <h3>Need Help?</h3>
-                            <p>Our support team is here to assist you</p>
-                        </div>
-                        <div class="contact-options">
-                            <button class="contact-btn">
-                                <i class="fas fa-comments"></i>
-                                <span>Live Chat</span>
-                            </button>
-                            <button class="contact-btn">
-                                <i class="fas fa-envelope"></i>
-                                <span>Email Support</span>
-                            </button>
-                            <button class="contact-btn">
-                                <i class="fas fa-phone"></i>
-                                <span>Call Us</span>
-                            </button>
-                        </div>
+                        <!-- Live payment activities will be populated here -->
                     </div>
                 </div>
             </div>
@@ -345,8 +330,8 @@
                         </button>
                     </div>
                     <div class="profile-info">
-                        <h2>John Doe</h2>
-                        <p class="profile-email">john.doe@email.com</p>
+                        <h2 id="profile-name">Loading...</h2>
+                        <p class="profile-email" id="profile-email">Loading...</p>
                         <span class="verification-badge verified">
                             <i class="fas fa-check-circle"></i>
                             Verified
@@ -356,15 +341,15 @@
 
                 <div class="profile-stats">
                     <div class="stat-card">
-                        <span class="stat-number">847</span>
+                        <span class="stat-number" id="total-trades">0</span>
                         <span class="stat-label">Total Trades</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-number">67.3%</span>
+                        <span class="stat-number" id="win-rate">0%</span>
                         <span class="stat-label">Win Rate</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-number">156</span>
+                        <span class="stat-number" id="days-active">0</span>
                         <span class="stat-label">Days Active</span>
                     </div>
                 </div>
@@ -458,8 +443,8 @@
                 <span>Notifications</span>
             </button>
             <button class="nav-item" data-page="support">
-                <i class="fas fa-headset"></i>
-                <span>Live Support</span>
+                <i class="fas fa-globe"></i>
+                <span>Live Payments</span>
             </button>
             <button class="nav-item" data-page="profile">
                 <i class="fas fa-user"></i>
@@ -481,6 +466,7 @@
     <script src="js/config.js"></script>
     <script src="js/state.js"></script>
     <script src="js/mockData.js"></script>
+    <script src="js/liveSupport.js"></script>
     <script src="js/charts.js"></script>
     <script src="js/dashboard.js"></script>
 </body>

@@ -144,21 +144,20 @@
                 }
                 
                 try {
-                    const { EmailVerificationManager } = await import('./js/emailVerification.js');
-                    const token = EmailVerificationManager.generateVerificationToken();
-                    await EmailVerificationManager.sendVerificationEmail(email, token);
-                    
-                    // Immediately verify for demo
-                    const result = EmailVerificationManager.verifyEmail(token);
-                    
-                    if (result.success) {
-                        showToast('Email verified successfully! Redirecting to login...', 'success');
-                        setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 2000);
-                    } else {
-                        showToast(result.message, 'error');
+                    // Mark user as verified in local state
+                    const user = state.getUserByEmail(email);
+                    if (!user) {
+                        showToast('User not found', 'error');
+                        return;
                     }
+                    
+                    // Update verification status
+                    state.updateUser(user._id, { emailVerified: true });
+                    
+                    showToast('Email verified successfully! You can now login.', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 2000);
                 } catch (error) {
                     showToast('Verification failed', 'error');
                 }
@@ -167,16 +166,21 @@
 
         async function verifyEmailToken(token) {
             try {
-                const { EmailVerificationManager } = await import('./js/emailVerification.js');
-                const result = EmailVerificationManager.verifyEmail(token);
+                // Auto-verify for demo purposes
+                const urlParams = new URLSearchParams(window.location.search);
+                const email = urlParams.get('email');
                 
-                if (result.success) {
+                if (email) {
+                    const user = state.getUserByEmail(email);
+                    if (user) {
+                        state.updateUser(user._id, { emailVerified: true });
+                    }
                     showToast('Email verified successfully! You can now login.', 'success');
                     setTimeout(() => {
                         window.location.href = 'login.html';
                     }, 2000);
                 } else {
-                    showToast(result.message, 'error');
+                    showToast('Verification failed', 'error');
                 }
             } catch (error) {
                 showToast('Verification failed', 'error');

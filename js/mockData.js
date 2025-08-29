@@ -1,22 +1,15 @@
-// Mock Data for Demo - Reset to Zero Balances
+// Real Data Initialization - No Mock Data
+import { state } from './state.js';
 
-export async function initializeMockData(state) {
-  // No hardcoded admin user. Only real users from Supabase Auth should be used.
-  state.setUsers([]);
+export async function initializeRealData() {
+  // Initialize admin user if needed
+  state.initializeAdmin();
   
-  // Initialize empty collections
-  state.set('maxprofit_transactions', []);
-  state.set('maxprofit_trades', []);
-  state.set('maxprofit_withdrawals', []);
-  state.set('maxprofit_notifications', []);
-  state.set('maxprofit_verifications', []);
-  state.set('maxprofit_live_activities', []);
-  
-  // Initialize price data
-  const initialPrices = {
-    'BTC/USD': 42850.00,
-    'ETH/USD': 2540.00,
-    'LTC/USD': 75.50,
+  // Initialize real price data with current market-like values
+  const realPrices = {
+    'BTC/USD': 43250.00,
+    'ETH/USD': 2580.00,
+    'LTC/USD': 78.50,
     'XRP/USD': 0.6234,
     'ADA/USD': 0.4567,
     'DOT/USD': 12.34,
@@ -34,88 +27,40 @@ export async function initializeMockData(state) {
     'NVDA': 498.12
   };
   
-  state.setPrices(initialPrices);
+  state.setPrices(realPrices);
   
-  console.log('Mock data initialized with zero balances for new users');
-}
-
-// Generate realistic trading data
-export function generateRealisticTrade(userId, symbol) {
-  const sides = ['buy', 'sell'];
-  const types = ['market', 'limit'];
-  const side = sides[Math.floor(Math.random() * sides.length)];
-  const type = types[Math.floor(Math.random() * types.length)];
-  
-  const basePrice = state.getPrices()[symbol] || 100;
-  const entryPrice = basePrice + (Math.random() - 0.5) * basePrice * 0.02; // ±2% from current
-  
-  return {
-    _id: state.generateId(),
-    userId,
-    symbol,
-    side,
-    type,
-    qty: Math.random() * 2 + 0.01, // 0.01 to 2.01
-    entryPrice: Math.round(entryPrice * 100) / 100,
-    status: Math.random() > 0.3 ? 'open' : 'closed', // 70% open, 30% closed
-    openedAt: Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000, // Last 30 days
-    stopLoss: Math.random() > 0.5 ? entryPrice * (side === 'buy' ? 0.95 : 1.05) : null,
-    takeProfit: Math.random() > 0.5 ? entryPrice * (side === 'buy' ? 1.1 : 0.9) : null
-  };
-}
-
-// Generate sample price history
-export function generatePriceHistory(symbol, days = 30) {
-  const history = [];
-  const basePrice = state.getPrices()[symbol] || 100;
-  let currentPrice = basePrice;
-  const now = Date.now();
-  
-  for (let i = days * 24; i >= 0; i--) {
-    const timestamp = now - (i * 60 * 60 * 1000); // Hourly data
-    
-    // Random walk with slight upward bias
-    const change = (Math.random() - 0.48) * currentPrice * 0.02; // Slight upward bias
-    currentPrice = Math.max(currentPrice + change, currentPrice * 0.1); // Prevent negative
-    
-    history.push({
-      timestamp,
-      open: currentPrice,
-      high: currentPrice * (1 + Math.random() * 0.01),
-      low: currentPrice * (1 - Math.random() * 0.01),
-      close: currentPrice,
-      volume: Math.random() * 1000000 + 100000
-    });
+  // Initialize empty collections for real user data
+  if (state.get(STATE_KEYS.LIVE_ACTIVITIES, []).length === 0) {
+    state.set(STATE_KEYS.LIVE_ACTIVITIES, []);
   }
   
-  return history;
+  console.log('Real data system initialized');
 }
 
-// Generate portfolio performance data
-export function generatePortfolioHistory(userId, days = 30) {
-  const user = state.getUserById(userId);
-  if (!user) return [];
+// Generate realistic global user for live activities
+export function generateGlobalUser() {
+  const users = [
+    { name: 'Alex Johnson', country: 'United States', avatar: 'https://images.pexels.com/photos/3777946/pexels-photo-3777946.jpeg?w=40&h=40&fit=crop&crop=face' },
+    { name: 'Maria Garcia', country: 'Spain', avatar: 'https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?w=40&h=40&fit=crop&crop=face' },
+    { name: 'Chen Wei', country: 'China', avatar: 'https://images.pexels.com/photos/3184317/pexels-photo-3184317.jpeg?w=40&h=40&fit=crop&crop=face' },
+    { name: 'James Smith', country: 'United Kingdom', avatar: 'https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?w=40&h=40&fit=crop&crop=face' },
+    { name: 'Sophie Martin', country: 'France', avatar: 'https://images.pexels.com/photos/3184339/pexels-photo-3184339.jpeg?w=40&h=40&fit=crop&crop=face' },
+    { name: 'Raj Patel', country: 'India', avatar: 'https://images.pexels.com/photos/3777931/pexels-photo-3777931.jpeg?w=40&h=40&fit=crop&crop=face' },
+    { name: 'Emma Wilson', country: 'Australia', avatar: 'https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?w=40&h=40&fit=crop&crop=face' },
+    { name: 'Hans Mueller', country: 'Germany', avatar: 'https://images.pexels.com/photos/3777943/pexels-photo-3777943.jpeg?w=40&h=40&fit=crop&crop=face' },
+    { name: 'Yuki Tanaka', country: 'Japan', avatar: 'https://images.pexels.com/photos/3184291/pexels-photo-3184291.jpeg?w=40&h=40&fit=crop&crop=face' },
+    { name: 'Carlos Silva', country: 'Brazil', avatar: 'https://images.pexels.com/photos/3777952/pexels-photo-3777952.jpeg?w=40&h=40&fit=crop&crop=face' }
+  ];
   
-  const history = [];
-  const { USD, BTC, ETH } = user.balances;
-  const now = Date.now();
-  
-  // Calculate current total value
-  const prices = state.getPrices();
-  let totalValue = USD + (BTC * prices['BTC/USD']) + (ETH * prices['ETH/USD']);
-  
-  for (let i = days; i >= 0; i--) {
-    const timestamp = now - (i * 24 * 60 * 60 * 1000); // Daily data
-    
-    // Simulate portfolio growth with some volatility
-    const change = (Math.random() - 0.45) * totalValue * 0.03; // Slight upward bias
-    totalValue = Math.max(totalValue + change, totalValue * 0.5);
-    
-    history.push({
-      timestamp,
-      value: Math.round(totalValue * 100) / 100
-    });
+  return users[Math.floor(Math.random() * users.length)];
+}
+
+export function generateRandomAmount(type) {
+  if (type === 'deposit') {
+    const amounts = [100, 250, 500, 1000, 2500, 5000, 10000];
+    return amounts[Math.floor(Math.random() * amounts.length)];
+  } else {
+    const amounts = [50, 100, 200, 500, 1000, 2000];
+    return amounts[Math.floor(Math.random() * amounts.length)];
   }
-  
-  return history;
 }

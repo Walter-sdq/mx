@@ -1,21 +1,4 @@
 // Admin dashboard functionality
-import { SessionManager, requireAuth, requireAdmin } from './session.js';
-import { state } from './state.js';
-import { priceEngine } from './prices.js';
-import { createBarChart, generateSampleData } from './charts.js';
-import { 
-  showToast, 
-  showPage, 
-  openModal, 
-  closeModal, 
-  formatDateTime, 
-  formatCurrency, 
-  getRelativeTime,
-  exportToCSV,
-  debounce,
-  sortBy,
-  filterBy
-} from './utils.js';
 
 class AdminDashboard {
   constructor() {
@@ -34,8 +17,19 @@ class AdminDashboard {
   
   async init() {
     // Check authentication and admin role
-    if (!requireAuth()) return;
-    if (!requireAdmin()) return;
+    if (!SessionManager.isAuthenticated()) {
+      window.location.href = 'login.html';
+      return;
+    }
+    
+    const session = SessionManager.getSession();
+    const user = state.getUserById(session.userId);
+    
+    if (!user || user.role !== 'admin') {
+      showToast('Access denied. Admin privileges required.', 'error');
+      window.location.href = 'dashboard.html';
+      return;
+    }
     
     // Load user data
     this.loadUserData();
@@ -254,7 +248,7 @@ class AdminDashboard {
   loadAdminData() {
     try {
       // Load all users
-      this.users = state.getUsers();
+      this.users = state.getUsers().filter(u => u.role !== 'admin'); // Don't show admin users
       this.renderUsers();
       this.updateKPIs();
       
@@ -612,38 +606,39 @@ class AdminDashboard {
       fullName: nameInput.value.trim(),
       email: emailInput.value.trim().toLowerCase(),
       role: roleSelect.value,
-      password: passwordInput.value
+      emailVerified: true // Admin-created users are auto-verified
     };
     
     // Validation
-    if (!userData.fullName || !userData.email || !userData.password) {
+    if (!userData.fullName || !userData.email) {
       showToast('Please fill in all required fields', 'error');
       return;
     }
     
-    if (userData.password.length < 8) {
-      showToast('Password must be at least 8 characters', 'error');
+    // Check if email already exists
+    const existingUser = state.getUserByEmail(userData.email);
+    if (existingUser) {
+      showToast('Email already exists', 'error');
       return;
     }
     
     try {
-      const result = await DB.createUser(userData);
+      const newUser = state.createUser(userData);
       
-      if (result.success) {
-        showToast('User created successfully', 'success');
-        closeModal('create-user-modal');
-        
-        // Reset form
-        nameInput.value = '';
-        emailInput.value = '';
-        roleSelect.selectedIndex = 0;
-        passwordInput.value = '';
-        
-        // Refresh data
-        await this.loadAdminData();
-      } else {
-        showToast(result.message || 'Failed to create user', 'error');
-      }
+      // Mark as verified since admin created
+      state.updateUser(newUser._id, { emailVerified: true });
+      
+      showToast('User created successfully', 'success');
+      closeModal('create-user-modal');
+      
+      // Reset form
+      nameInput.value = '';
+      emailInput.value = '';
+      roleSelect.selectedIndex = 0;
+      passwordInput.value = '';
+      
+      // Refresh data
+      this.loadAdminData();
     } catch (error) {
       console.error('Create user error:', error);
       showToast('Failed to create user', 'error');
@@ -692,17 +687,13 @@ class AdminDashboard {
     };
     
     try {
-      const result = await DB.updateUser(this.currentEditUser._id, updates);
+      state.updateUser(this.currentEditUser._id, updates);
       
-      if (result.success) {
-        showToast('User updated successfully', 'success');
-        closeModal('edit-user-modal');
-        
-        // Refresh data
-        await this.loadAdminData();
-      } else {
-        showToast(result.message || 'Failed to update user', 'error');
-      }
+      showToast('User updated successfully', 'success');
+      closeModal('edit-user-modal');
+      
+      // Refresh data
+      this.loadAdminData();
     } catch (error) {
       console.error('Update user error:', error);
       showToast('Failed to update user', 'error');
@@ -728,36 +719,34 @@ class AdminDashboard {
     if (!reason) return;
     
     try {
-      // Update user balance
-      const balanceUpdate = {};
-      balanceUpdate[`balances.${currency}`] = newBalance;
+      // Update user balance directly
+      const updatedBalances = { ...this.currentEditUser.balances };
+      updatedBalances[currency] = newBalance;
       
-      const result = await DB.updateUser(this.currentEditUser._id, balanceUpdate);
+      state.updateUser(this.currentEditUser._id, { balances: updatedBalances });
       
-      if (result.success) {
-        // Create transaction record
-        const transactionData = {
-          userId: this.currentEditUser._id,
-          type: difference > 0 ? 'bonus' : 'fee',
-          amount: Math.abs(difference),
-          currency: currency,
-          status: 'completed',
-          note: `Admin adjustment: ${reason}`,
-          meta: { adminId: this.currentUser._id, reason }
-        };
-        
-        await DB.createTransaction(transactionData);
-        
-        showToast(`${currency} balance adjusted successfully`, 'success');
-        
-        // Update local data
-        this.currentEditUser.balances[currency] = newBalance;
-        
-        // Refresh data
-        await this.loadAdminData();
-      } else {
-        showToast(result.message || 'Failed to adjust balance', 'error');
-      }
+      // Create transaction record
+      const transactionData = {
+        _id: state.generateId(),
+        userId: this.currentEditUser._id,
+        type: difference > 0 ? 'bonus' : 'fee',
+        amount: Math.abs(difference),
+        currency: currency,
+        status: 'completed',
+        note: `Admin adjustment: ${reason}`,
+        createdAt: Date.now(),
+        meta: { adminId: this.currentUser._id, reason }
+      };
+      
+      state.addTransaction(transactionData);
+      
+      showToast(`${currency} balance adjusted successfully`, 'success');
+      
+      // Update local data
+      this.currentEditUser.balances[currency] = newBalance;
+      
+      // Refresh data
+      this.loadAdminData();
     } catch (error) {
       console.error('Adjust balance error:', error);
       showToast('Failed to adjust balance', 'error');
@@ -773,16 +762,12 @@ class AdminDashboard {
     }
     
     try {
-      const result = await DB.deleteUser(userId);
+      state.deleteUser(userId);
       
-      if (result.success) {
-        showToast('User deleted successfully', 'success');
-        
-        // Refresh data
-        await this.loadAdminData();
-      } else {
-        showToast(result.message || 'Failed to delete user', 'error');
-      }
+      showToast('User deleted successfully', 'success');
+      
+      // Refresh data
+      this.loadAdminData();
     } catch (error) {
       console.error('Delete user error:', error);
       showToast('Failed to delete user', 'error');
@@ -863,44 +848,43 @@ class AdminDashboard {
       const updates = {
         status: newStatus,
         adminNote: adminNote,
-        approvedBy: this.currentUser._id
+        approvedBy: this.currentUser._id,
+        updatedAt: Date.now()
       };
       
-      const result = await DB.updateWithdrawal(this.currentWithdrawal._id, updates);
+      state.updateWithdrawal(this.currentWithdrawal._id, updates);
       
-      if (result.success) {
-        showToast(message, 'success');
-        closeModal('withdrawal-modal');
-        
-        // If denied, refund the user's balance
-        if (action === 'deny') {
-          const user = this.users.find(u => u._id === this.currentWithdrawal.userId);
-          if (user) {
-            const newBalance = (user.balances?.USD || 0) + this.currentWithdrawal.amount;
-            await DB.updateUser(user._id, {
-              'balances.USD': newBalance
-            });
-            
-            // Create refund transaction
-            const transactionData = {
-              userId: user._id,
-              type: 'deposit',
-              amount: this.currentWithdrawal.amount,
-              currency: 'USD',
-              status: 'completed',
-              note: `Withdrawal refund: ${adminNote || 'Withdrawal denied'}`,
-              meta: { withdrawalId: this.currentWithdrawal._id, adminId: this.currentUser._id }
-            };
-            
-            await DB.createTransaction(transactionData);
-          }
+      showToast(message, 'success');
+      closeModal('withdrawal-modal');
+      
+      // If denied, refund the user's balance
+      if (action === 'deny') {
+        const user = state.getUserById(this.currentWithdrawal.userId);
+        if (user) {
+          const updatedBalances = { ...user.balances };
+          updatedBalances.USD = (updatedBalances.USD || 0) + this.currentWithdrawal.amount;
+          
+          state.updateUser(user._id, { balances: updatedBalances });
+          
+          // Create refund transaction
+          const transactionData = {
+            _id: state.generateId(),
+            userId: user._id,
+            type: 'deposit',
+            amount: this.currentWithdrawal.amount,
+            currency: 'USD',
+            status: 'completed',
+            note: `Withdrawal refund: ${adminNote || 'Withdrawal denied'}`,
+            createdAt: Date.now(),
+            meta: { withdrawalId: this.currentWithdrawal._id, adminId: this.currentUser._id }
+          };
+          
+          state.addTransaction(transactionData);
         }
-        
-        // Refresh data
-        await this.loadAdminData();
-      } else {
-        showToast(result.message || 'Failed to process withdrawal', 'error');
       }
+      
+      // Refresh data
+      this.loadAdminData();
     } catch (error) {
       console.error('Process withdrawal error:', error);
       showToast('Failed to process withdrawal', 'error');
@@ -1031,21 +1015,27 @@ class AdminDashboard {
       }
       
       // Create notifications for each target user
-      const promises = targetUsers.map(user => {
-        return DB.createNotification({
+      targetUsers.forEach(user => {
+        state.addNotification({
+          _id: state.generateId(),
           toUserId: user._id,
           title: title,
-          body: message
+          body: message,
+          type: 'system',
+          read: false,
+          createdAt: Date.now()
         });
       });
       
       // Also create a broadcast record (no toUserId)
-      promises.push(DB.createNotification({
+      state.addNotification({
+        _id: state.generateId(),
         title: title,
-        body: message
-      }));
-      
-      await Promise.all(promises);
+        body: message,
+        type: 'system',
+        read: false,
+        createdAt: Date.now()
+      });
       
       showToast(`Notification sent to ${targetUsers.length} user${targetUsers.length !== 1 ? 's' : ''}`, 'success');
       
@@ -1055,7 +1045,7 @@ class AdminDashboard {
       recipientsSelect.selectedIndex = 0;
       
       // Refresh data
-      await this.loadAdminData();
+      this.loadAdminData();
       
     } catch (error) {
       console.error('Send broadcast error:', error);
@@ -1257,6 +1247,47 @@ class AdminDashboard {
     const pageId = activePage.id;
     return pageId.replace('-page', '');
   }
+  
+  // Export functions for admin
+  exportUserData() {
+    const users = state.getUsers();
+    const exportData = users.map(user => ({
+      'Full Name': user.fullName,
+      'Email': user.email,
+      'Role': user.role,
+      'Email Verified': user.emailVerified ? 'Yes' : 'No',
+      'USD Balance': user.balances?.USD || 0,
+      'BTC Balance': user.balances?.BTC || 0,
+      'ETH Balance': user.balances?.ETH || 0,
+      'Created At': formatDateTime(user.createdAt),
+      'Last Login': user.lastLoginAt ? formatDateTime(user.lastLoginAt) : 'Never'
+    }));
+    
+    exportToCSV(exportData, `maxprofit-users-${new Date().toISOString().split('T')[0]}.csv`);
+    showToast('User data exported successfully', 'success');
+  },
+  
+  exportTransactionData() {
+    const transactions = state.getTransactions();
+    const users = state.getUsers();
+    
+    const exportData = transactions.map(transaction => {
+      const user = users.find(u => u._id === transaction.userId);
+      return {
+        'Date': formatDateTime(transaction.createdAt),
+        'User': user ? user.fullName : 'Unknown',
+        'Email': user ? user.email : 'Unknown',
+        'Type': transaction.type,
+        'Amount': transaction.amount,
+        'Currency': transaction.currency,
+        'Status': transaction.status,
+        'Note': transaction.note || ''
+      };
+    });
+    
+    exportToCSV(exportData, `maxprofit-transactions-${new Date().toISOString().split('T')[0]}.csv`);
+    showToast('Transaction data exported successfully', 'success');
+  },
   
   getActivityIcon(type) {
     const icons = {

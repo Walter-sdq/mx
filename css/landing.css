@@ -304,7 +304,7 @@
 .live-chart-container {
   height: 200px;
   margin-bottom: var(--spacing-4);
-  background: var(--bg-tertiary);
+  background: transparent;
   border-radius: var(--border-radius-lg);
   position: relative;
 }
@@ -960,6 +960,15 @@
     order: -1;
   }
   
+  .live-chart-card {
+    max-width: 100%;
+    margin: 0 auto;
+  }
+  
+  .live-chart-container {
+    height: 180px;
+  }
+  
   .hero-stats {
     grid-template-columns: repeat(3, 1fr);
     gap: var(--spacing-4);
@@ -1044,7 +1053,6 @@
   
   .live-chart-card {
     padding: var(--spacing-4);
-    max-width: 100%;
   }
   
   .chart-header {

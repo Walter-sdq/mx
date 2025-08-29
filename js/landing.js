@@ -1,4 +1,5 @@
 // Landing page functionality
+import { initializeRealData } from './mockData.js';
 import { priceEngine, formatPrice, formatPriceChange } from './prices.js';
 import { createMiniChart, generateSampleData } from './charts.js';
 import { APP_CONFIG } from './config.js';
@@ -11,6 +12,9 @@ class LandingPage {
   }
   
   init() {
+    // Initialize real data system
+    await initializeRealData();
+    
     this.setupNavigation();
     this.setupHeroChart();
     this.setupMarketTicker();
@@ -87,12 +91,10 @@ class LandingPage {
   setupHeroChart() {
     const canvas = document.getElementById('hero-chart');
     const liveCanvas = document.getElementById('hero-live-chart');
-    if (!canvas) return;
     
-    // Initialize live chart with real-time data
     if (liveCanvas) {
       this.initLiveChart(liveCanvas);
-    } else {
+    } else if (canvas) {
       // Fallback to mini chart
       const data = generateSampleData(50, 42850, 0.02);
       this.heroChart = createMiniChart(canvas, data, {
@@ -102,6 +104,7 @@ class LandingPage {
     }
     
     // Subscribe to BTC price updates
+    priceEngine.start();
     priceEngine.subscribe('BTC/USD', (priceData) => {
       this.updateHeroPrice(priceData);
       this.updateBTCStats(priceData);
@@ -111,8 +114,11 @@ class LandingPage {
   initLiveChart(canvas) {
     const ctx = canvas.getContext('2d');
     
-    // Generate initial data
-    const data = generateSampleData(30, 42850, 0.02);
+    // Get real price history
+    const history = priceEngine.getPriceHistory('BTC/USD', '1H');
+    const data = history.length > 0 
+      ? history.map(h => ({ x: h.timestamp, y: h.price }))
+      : generateSampleData(30, 43250, 0.02);
     
     this.heroChart = new Chart(ctx, {
       type: 'line',
@@ -216,8 +222,8 @@ class LandingPage {
       const dataset = this.heroChart.data.datasets[0];
       dataset.data.push(newDataPoint);
       
-      // Keep only last 50 points
-      if (dataset.data.length > 50) {
+      // Keep only last 60 points for better visualization
+      if (dataset.data.length > 60) {
         dataset.data.shift();
       }
       
@@ -226,23 +232,25 @@ class LandingPage {
   }
   
   updateBTCStats(priceData) {
-    // Update 24h stats (simulated)
+    // Update 24h stats with real market simulation
     const highEl = document.getElementById('btc-high');
     const lowEl = document.getElementById('btc-low');
     const volumeEl = document.getElementById('btc-volume');
     
+    const stats = priceEngine.getMarketStats('BTC/USD');
+    
     if (highEl) {
-      const high = priceData.price * (1 + Math.random() * 0.02);
+      const high = stats ? stats.high : priceData.price * 1.015;
       highEl.textContent = `$${high.toFixed(0)}`;
     }
     
     if (lowEl) {
-      const low = priceData.price * (1 - Math.random() * 0.02);
+      const low = stats ? stats.low : priceData.price * 0.985;
       lowEl.textContent = `$${low.toFixed(0)}`;
     }
     
     if (volumeEl) {
-      const volume = (Math.random() * 3 + 1).toFixed(1);
+      const volume = stats ? (stats.volume / 1000).toFixed(1) : (Math.random() * 3 + 1).toFixed(1);
       volumeEl.textContent = `$${volume}B`;
     }
   }
@@ -251,17 +259,19 @@ class LandingPage {
     const tickerContent = document.getElementById('ticker-content');
     if (!tickerContent) return;
     
-    // Initialize ticker with all symbols
+    // Initialize ticker with real symbols and prices
     const allSymbols = [
       ...APP_CONFIG.SYMBOLS.crypto.slice(0, 6),
       ...APP_CONFIG.SYMBOLS.forex.slice(0, 4),
       ...APP_CONFIG.SYMBOLS.stocks.slice(0, 4)
     ];
     
+    const currentPrices = state.getPrices();
+    
     this.tickerData = allSymbols.map(symbolInfo => ({
       symbol: symbolInfo.symbol,
       name: symbolInfo.name,
-      price: priceEngine.getCurrentPrice(symbolInfo.symbol),
+      price: currentPrices[symbolInfo.symbol] || 0,
       change: 0,
       changePercent: 0
     }));

@@ -18,6 +18,18 @@ class StateManager {
   constructor() {
     this.subscribers = new Map();
     this.cache = new Map();
+    this.prevState = new Map(); // Store previous state
+  }
+
+  // Save previous state before mutation
+  savePrevState(key) {
+    if (this.cache.has(key)) {
+      this.prevState.set(key, JSON.parse(JSON.stringify(this.cache.get(key))));
+    }
+  }
+
+  getPrevState(key) {
+    return this.prevState.get(key);
   }
   
   // Generic state operations
@@ -32,12 +44,14 @@ class StateManager {
   }
   
   set(key, value) {
+    this.savePrevState(key); // Save previous state
     this.cache.set(key, value);
     setStorageItem(key, value);
     this.notify(key, value);
   }
   
   update(key, updater) {
+    this.savePrevState(key); // Save previous state
     const current = this.get(key, []);
     const updated = updater(current);
     this.set(key, updated);
@@ -127,7 +141,7 @@ class StateManager {
     
     this.addUser(newUser);
     return newUser;
-  },
+  }
   
   getTransactions(userId = null) {
     const transactions = this.get(STATE_KEYS.TRANSACTIONS, []);
@@ -208,15 +222,14 @@ class StateManager {
   // Live activities for payment feed
   getLiveActivities() {
     return this.get(STATE_KEYS.LIVE_ACTIVITIES, []);
-  },
-  
+  }
   addLiveActivity(activity) {
     return this.update(STATE_KEYS.LIVE_ACTIVITIES, activities => {
       const newActivities = [...activities, { ...activity, _id: activity._id || this.generateId() }];
       // Keep only last 50 activities
       return newActivities.slice(-50);
     });
-  },
+  }
   
   getPrices() {
     return this.get(STATE_KEYS.PRICES, {});
@@ -287,6 +300,10 @@ window.state = new StateManager();
 
 // Initialize with mock data if empty
 window.initializeState = function() {
+  if (window.FEATURES.MODE === "REAL_DATA") {
+    // Do not load mock data
+    return;
+  }
   if (window.state.getUsers().length === 0) {
     // Import and initialize mock data
     import('./mockData.js').then(({ initializeMockData }) => {

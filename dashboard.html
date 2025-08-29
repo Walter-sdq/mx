@@ -47,24 +47,21 @@
                             <i class="fas fa-eye"></i>
                         </button>
                     </div>
-                    <div class="balance-amount" id="portfolioBalance">$0.00</div>
-                    <div class="balance-change neutral" id="balanceChange">
-                        <i class="fas fa-minus"></i>
-                        <span>$0.00 (0.0%) today</span>
-                    </div>
+                    <div class="balance-amount" id="portfolioBalance"></div>
+                    <div class="balance-change positive" id="balanceChange"></div>
                     
                     <div class="quick-stats">
                         <div class="stat-item">
                             <span class="stat-label">Available</span>
-                            <span class="stat-value" id="available-balance">$0.00</span>
+                            <span class="stat-value" id="available-balance"></span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">P&L Today</span>
-                            <span class="stat-value neutral" id="pnl-today">$0.00</span>
+                            <span class="stat-value positive" id="pnl-today"></span>
                         </div>
                         <div class="stat-item">
                             <span class="stat-label">Margin Used</span>
-                            <span class="stat-value" id="margin-used">$0.00</span>
+                            <span class="stat-value" id="margin-used"></span>
                         </div>
                     </div>
                 </section>
@@ -330,26 +327,25 @@
                         </button>
                     </div>
                     <div class="profile-info">
-                        <h2 id="profile-name">Loading...</h2>
-                        <p class="profile-email" id="profile-email">Loading...</p>
-                        <span class="verification-badge verified">
+                        <h2 id="profileName"></h2>
+                        <p class="profile-email" id="profileEmail"></p>
+                        <span class="verification-badge" id="profileVerified">
                             <i class="fas fa-check-circle"></i>
-                            Verified
                         </span>
                     </div>
                 </div>
 
                 <div class="profile-stats">
                     <div class="stat-card">
-                        <span class="stat-number" id="total-trades">0</span>
+                        <span class="stat-number" id="profileTotalTrades"></span>
                         <span class="stat-label">Total Trades</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-number" id="win-rate">0%</span>
+                        <span class="stat-number" id="profileWinRate"></span>
                         <span class="stat-label">Win Rate</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-number" id="days-active">0</span>
+                        <span class="stat-number" id="profileDaysActive"></span>
                         <span class="stat-label">Days Active</span>
                     </div>
                 </div>
@@ -465,9 +461,9 @@
     <script src="js/utils.js"></script>
     <script src="js/config.js"></script>
     <script src="js/state.js"></script>
-    <script src="js/mockData.js"></script>
-    <script src="js/liveSupport.js"></script>
-    <script src="js/charts.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script src="js/session.js"></script>
+    <script type="module" src="js/mockData.js"></script>
+    <script type="module" src="js/charts.js"></script>
+    <script type="module" src="js/dashboard.js"></script>
 </body>
 </html>

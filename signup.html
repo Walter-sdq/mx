@@ -198,26 +198,10 @@
                             fullName: inputs.fullName.value.trim(),
                             role: 'user'
                         };
-                        
-                        // Store user data for verification
-                        const newUser = state.createUser(userData);
-                        
-                        // Store verification data
-                        const verificationData = {
-                            email: email,
-                            userId: newUser._id,
-                            supabaseId: data.user.id,
-                            verified: false,
-                            createdAt: Date.now()
-                        };
-                        
-                        const verifications = state.get('maxprofit_verifications', []);
-                        verifications.push(verificationData);
-                        state.set('maxprofit_verifications', verifications);
-                        
-                        showToast('Signup successful! Check your email for verification.', 'success');
+                        state.createUser(userData);
+                        showToast('Signup successful! You can now log in.', 'success');
                         setTimeout(() => {
-                            window.location.href = `verify.html?email=${encodeURIComponent(email)}`;
+                            window.location.href = 'login.html';
                         }, 1500);
                     } else {
                         showToast('Signup failed: No user returned.', 'error');

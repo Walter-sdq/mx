@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trading - MaxProfit</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/trading.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="trading-container">
+        <header class="trading-header">
+            <h1>Live Trading Chart</h1>
+        </header>
+        <main>
+            <section class="chart-section">
+                <canvas id="tradingChart" height="400"></canvas>
+            </section>
+        </main>
+    </div>
+    <script src="js/charts.js"></script>
+    <script src="js/prices.js"></script>
+    <script>
+        // Example: Render live BTC/USD chart
+        const priceEngine = new window.PriceEngine();
+        function renderTradingChart() {
+            const ctx = document.getElementById('tradingChart').getContext('2d');
+            const btcHistory = priceEngine.priceHistory['BTC/USD'] || [];
+            const data = {
+                labels: btcHistory.map(p => new Date(p.timestamp)),
+                datasets: [{
+                    label: 'BTC/USD',
+                    data: btcHistory.map(p => p.price),
+                    borderColor: '#f7931a',
+                    backgroundColor: 'rgba(247,147,26,0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            };
+            new Chart(ctx, {
+                type: 'line',
+                data,
+                options: window.defaultChartConfig || {}
+            });
+        }
+        renderTradingChart();
+        // Optionally, update chart every minute
+        setInterval(renderTradingChart, 60000);
+    </script>
+</body>
+</html>

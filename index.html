@@ -59,55 +59,10 @@
                         <i class="fas fa-rocket"></i>
                         Start Trading Now
                     </a>
-                    <a href="login.html" class="btn btn-outline btn-large">
-                        <i class="fas fa-sign-in-alt"></i>
-                        Login
-                    </a>
                 </div>
-                <div class="hero-stats">
-                    <div class="stat-item">
-                        <span class="stat-number">$2.5B+</span>
-                        <span class="stat-label">Daily Volume</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">150K+</span>
-                        <span class="stat-label">Active Traders</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-number">99.9%</span>
-                        <span class="stat-label">Uptime</span>
-                    </div>
-                </div>
-            </div>
-            <div class="hero-visual">
-                <div class="live-chart-card">
-                    <div class="chart-header">
-                        <div class="chart-title">
-                            <h3>Bitcoin Live Chart</h3>
-                            <span class="status-indicator"></span>
-                        </div>
-                        <div class="price-info">
-                            <span class="current-price" id="hero-btc-price">$42,850.00</span>
-                            <span class="price-change positive" id="hero-btc-change">+2.45%</span>
-                        </div>
-                    </div>
-                    <div class="live-chart-container">
-                        <canvas id="hero-live-chart" width="400" height="200"></canvas>
-                    </div>
-                    <div class="chart-stats">
-                        <div class="stat">
-                            <span class="label">24h High</span>
-                            <span class="value" id="btc-high">$43,250</span>
-                        </div>
-                        <div class="stat">
-                            <span class="label">24h Low</span>
-                            <span class="value" id="btc-low">$41,890</span>
-                        </div>
-                        <div class="stat">
-                            <span class="label">Volume</span>
-                            <span class="value" id="btc-volume">$2.1B</span>
-                        </div>
-                    </div>
+                <div class="live-btc-chart">
+                    <h3>Live Bitcoin Price</h3>
+                    <canvas id="btcLiveChart" height="120"></canvas>
                 </div>
             </div>
         </div>
@@ -420,5 +375,31 @@
     <script src="js/prices.js"></script>
     <script src="js/charts.js"></script>
     <script src="js/landing.js"></script>
+    <script>
+        // Render live BTC/USD chart on homepage
+        const priceEngine = new window.PriceEngine();
+        function renderHomeBTCChart() {
+            const ctx = document.getElementById('btcLiveChart').getContext('2d');
+            const btcHistory = priceEngine.priceHistory['BTC/USD'] || [];
+            const data = {
+                labels: btcHistory.map(p => new Date(p.timestamp)),
+                datasets: [{
+                    label: 'BTC/USD',
+                    data: btcHistory.map(p => p.price),
+                    borderColor: '#f7931a',
+                    backgroundColor: 'rgba(247,147,26,0.1)',
+                    fill: true,
+                    tension: 0.3
+                }]
+            };
+            new Chart(ctx, {
+                type: 'line',
+                data,
+                options: window.defaultChartConfig || {}
+            });
+        }
+        renderHomeBTCChart();
+        setInterval(renderHomeBTCChart, 60000);
+    </script>
 </body>
 </html>

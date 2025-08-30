@@ -199,6 +199,12 @@
                             role: 'user'
                         };
                         state.createUser(userData);
+                        // Insert user profile into Supabase users table
+                        await supabase.from('users').insert({
+                            id: data.user.id,
+                            email: email,
+                            full_name: inputs.fullName.value.trim()
+                        });
                         showToast('Signup successful! You can now log in.', 'success');
                         setTimeout(() => {
                             window.location.href = 'login.html';

@@ -1,7 +1,7 @@
 // Chart.js helpers and configurations
 
 // Default chart configuration
-export const defaultChartConfig = {
+window.defaultChartConfig = {
   responsive: true,
   maintainAspectRatio: false,
   interaction: {

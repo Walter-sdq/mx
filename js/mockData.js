@@ -37,6 +37,9 @@ export async function initializeRealData() {
   console.log('Real data system initialized');
 }
 
+// Attach to window for landing.js compatibility
+window.initializeRealData = initializeRealData;
+
 // Generate realistic global user for live activities
 export function generateGlobalUser() {
   const users = [

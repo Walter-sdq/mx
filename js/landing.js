@@ -1,8 +1,9 @@
 // Landing page functionality
-import { initializeRealData } from './mockData.js';
-import { priceEngine, formatPrice, formatPriceChange } from './prices.js';
-import { createMiniChart, generateSampleData } from './charts.js';
-import { APP_CONFIG } from './config.js';
+// Remove import for browser compatibility
+// import { initializeRealData } from './mockData.js';
+// import { priceEngine, formatPrice, formatPriceChange } from './prices.js';
+// import { createMiniChart, generateSampleData } from './charts.js';
+// import { APP_CONFIG } from './config.js';
 
 class LandingPage {
   constructor() {
@@ -13,7 +14,7 @@ class LandingPage {
   
   init() {
     // Initialize real data system
-    await initializeRealData();
+    window.initializeRealData();
     
     this.setupNavigation();
     this.setupHeroChart();

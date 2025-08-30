@@ -1,10 +1,11 @@
 // Price engine for realistic market simulation
-import { APP_CONFIG } from './config.js';
-import { getStorageItem, setStorageItem } from './utils.js';
+// Remove import/export for browser compatibility
+// import { APP_CONFIG } from './config.js';
+// import { getStorageItem, setStorageItem } from './utils.js';
 
-class PriceEngine {
+window.PriceEngine = class {
   constructor() {
-    this.prices = { ...APP_CONFIG.INITIAL_PRICES };
+    this.prices = { ...window.APP_CONFIG.INITIAL_PRICES };
     this.priceHistory = {};
     this.subscribers = new Map();
     this.isRunning = false;

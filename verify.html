@@ -108,8 +108,16 @@
                 try {
                     resendBtn.disabled = true;
                     resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-                    // TODO: Integrate with real backend for email verification
-                    showToast('Verification email sent (real backend integration needed)', 'success');
+                    // Supabase resend verification email
+                    const { error } = await window.supabase.auth.resend({
+                        type: 'signup',
+                        email: email
+                    });
+                    if (error) {
+                        showToast('Failed to send verification email', 'error');
+                    } else {
+                        showToast('Verification email sent successfully', 'success');
+                    }
                 } catch (error) {
                     showToast('Failed to send verification email', 'error');
                 } finally {

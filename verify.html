@@ -44,18 +44,6 @@
                         <a href="signup.html">Use Different Email</a>
                     </div>
                 </div>
-
-                <!-- Manual verification for demo -->
-                <div class="demo-verification">
-                    <div class="demo-note">
-                        <i class="fas fa-info-circle"></i>
-                        <span>Demo Mode: Click below to simulate email verification</span>
-                    </div>
-                    <button class="btn btn-outline" id="demo-verify-btn">
-                        <i class="fas fa-check"></i>
-                        Simulate Email Verification
-                    </button>
-                </div>
             </div>
         </div>
 
@@ -112,54 +100,21 @@
 
         function setupVerificationHandlers(email) {
             const resendBtn = document.getElementById('resend-btn');
-            const demoVerifyBtn = document.getElementById('demo-verify-btn');
-            
             resendBtn.addEventListener('click', async () => {
                 if (!email) {
                     showToast('Email address not found', 'error');
                     return;
                 }
-                
                 try {
                     resendBtn.disabled = true;
                     resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-                    
-                    const { EmailVerificationManager } = await import('./js/emailVerification.js');
-                    await EmailVerificationManager.resendVerification(email);
-                    
-                    showToast('Verification email sent successfully', 'success');
+                    // TODO: Integrate with real backend for email verification
+                    showToast('Verification email sent (real backend integration needed)', 'success');
                 } catch (error) {
                     showToast('Failed to send verification email', 'error');
                 } finally {
                     resendBtn.disabled = false;
                     resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Resend Verification Email';
-                }
-            });
-            
-            // Demo verification button
-            demoVerifyBtn.addEventListener('click', async () => {
-                if (!email) {
-                    showToast('Email address not found', 'error');
-                    return;
-                }
-                
-                try {
-                    // Mark user as verified in local state
-                    const user = state.getUserByEmail(email);
-                    if (!user) {
-                        showToast('User not found', 'error');
-                        return;
-                    }
-                    
-                    // Update verification status
-                    state.updateUser(user._id, { emailVerified: true });
-                    
-                    showToast('Email verified successfully! You can now login.', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                } catch (error) {
-                    showToast('Verification failed', 'error');
                 }
             });
         }
@@ -242,33 +197,6 @@
         
         .verification-links a:hover {
             color: var(--primary-700);
-        }
-        
-        .demo-verification {
-            background: var(--warning-100);
-            border: 1px solid var(--warning-300);
-            border-radius: var(--border-radius-lg);
-            padding: var(--spacing-4);
-            margin-top: var(--spacing-6);
-        }
-        
-        [data-theme="dark"] .demo-verification {
-            background: rgba(255, 193, 7, 0.1);
-            border-color: rgba(255, 193, 7, 0.3);
-        }
-        
-        .demo-note {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: var(--spacing-2);
-            margin-bottom: var(--spacing-3);
-            font-size: var(--font-size-sm);
-            color: var(--warning-800);
-        }
-        
-        [data-theme="dark"] .demo-note {
-            color: var(--warning-400);
         }
     </style>
 </body>

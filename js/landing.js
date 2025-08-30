@@ -12,7 +12,7 @@ class LandingPage {
     this.init();
   }
   
-  init() {
+  async init() {
     // Initialize real data system
     window.initializeRealData();
     
@@ -412,10 +412,10 @@ class LandingPage {
   }
 }
 
-// Initialize landing page
-document.addEventListener('DOMContentLoaded', () => {
-  new LandingPage();
-});
+// Entry point
+(async () => {
+  await new LandingPage();
+})();
 
 // Export for external use
 export { LandingPage };

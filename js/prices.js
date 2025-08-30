@@ -1,7 +1,10 @@
 // Price engine for realistic market simulation
 // Remove import/export for browser compatibility
 // import { APP_CONFIG } from './config.js';
-// import { getStorageItem, setStorageItem } from './utils.js';
+// 
+// Use window.getStorageItem and window.setStorageItem for compatibility
+const getStorageItem = window.getStorageItem;
+const setStorageItem = window.setStorageItem;
 
 window.PriceEngine = class {
   constructor() {

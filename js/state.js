@@ -296,7 +296,7 @@ class StateManager {
 }
 
 // Global state instance
-window.state = new StateManager();
+export const state = new StateManager();
 
 // Initialize with mock data if empty
 window.initializeState = function() {

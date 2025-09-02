@@ -1,375 +1,491 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MaxProfit Trading - Professional Trading Platform</title>
-    <meta name="description" content="AI-powered trading platform for crypto, forex, and stocks. Advanced analytics and secure trading.">
-    
-    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/landing.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta
+      name="description"
+      content="AI-powered trading platform for crypto, forex, and stocks. Advanced analytics and secure trading."
+    />
+
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/landing.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-</head>
-<body>
+  </head>
+  <body>
     <nav class="navbar" id="navbar">
-        <div class="nav-container">
-            <div class="nav-logo">
-                <i class="fas fa-chart-line"></i>
-                <span>MaxProfit</span>
-            </div>
-            
-            <ul class="nav-menu" id="nav-menu">
-                <li><a href="#home" class="nav-link">Home</a></li>
-                <li><a href="#about" class="nav-link">About</a></li>
-                <li><a href="#features" class="nav-link">Features</a></li>
-                <li><a href="#testimonials" class="nav-link">Testimonials</a></li>
-            </ul>
-            
-            <div class="nav-actions">
-                <button class="theme-toggle" id="theme-toggle">
-                    <i class="fas fa-sun"></i>
-                </button>
-                <a href="login.html" class="btn btn-outline">Login</a>
-                <a href="signup.html" class="btn btn-primary">Get Started</a>
-            </div>
-            
-            <div class="hamburger" id="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
+      <div class="nav-container">
+        <div class="nav-logo">
+          <i class="fas fa-chart-line"></i>
+          <span>MaxProfit</span>
         </div>
+
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="#home" class="nav-link">Home</a></li>
+          <li><a href="#about" class="nav-link">About</a></li>
+          <li><a href="#features" class="nav-link">Features</a></li>
+          <li><a href="#testimonials" class="nav-link">Testimonials</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <button class="theme-toggle" id="theme-toggle">
+            <i class="fas fa-sun"></i>
+          </button>
+          <a href="login.html" class="btn btn-outline">Login</a>
+          <a href="signup.html" class="btn btn-primary">Get Started</a>
+        </div>
+
+        <div class="hamburger" id="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
     </nav>
 
     <section class="hero" id="home">
-        <div class="hero-container">
-            <div class="hero-content">
-                <h1 class="hero-title">
-                    Maximize Your <span class="gradient-text">Trading Profits</span> 
-                    with AI-Powered Insights
-                </h1>
-                <p class="hero-subtitle">
-                    Trade crypto, forex, and stocks with our next-generation platform. 
-                    Get real-time analytics, secure transactions, and 24/7 support.
-                </p>
-                <div class="hero-actions">
-                    <a href="signup.html" class="btn btn-primary btn-large">
-                        <i class="fas fa-rocket"></i>
-                        Start Trading Now
-                    </a>
-                </div>
-                <div class="live-btc-chart">
-                    <h3>Live Bitcoin Price</h3>
-                    <canvas id="btcLiveChart" height="120"></canvas>
-                </div>
+      <div class="hero-container">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            Maximize Your <span class="gradient-text">Trading Profits</span>
+            with AI-Powered Insights
+          </h1>
+          <p class="hero-subtitle">
+            Trade crypto, forex, and stocks with our next-generation platform.
+            Get real-time analytics, secure transactions, and 24/7 support.
+          </p>
+          <div class="hero-actions">
+            <a href="signup.html" class="btn btn-primary btn-large">
+              <i class="fas fa-rocket"></i>
+              Start Trading Now
+            </a>
+            <a href="login.html" class="btn btn-outline btn-large">
+              <i class="fas fa-sign-in-alt"></i>
+              Login
+            </a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <span class="stat-number">$2.5B+</span>
+              <span class="stat-label">Daily Volume</span>
             </div>
+            <div class="stat-item">
+              <span class="stat-number">150K+</span>
+              <span class="stat-label">Active Traders</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">99.9%</span>
+              <span class="stat-label">Uptime</span>
+            </div>
+          </div>
         </div>
+        <div class="hero-visual">
+          <div class="live-chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <h3>Bitcoin Live Chart</h3>
+                <span class="status-indicator"></span>
+              </div>
+              <div class="price-info">
+                <span class="current-price" id="hero-btc-price"
+                  >$42,850.00</span
+                >
+                <span class="price-change positive" id="hero-btc-change"
+                  >+2.45%</span
+                >
+              </div>
+            </div>
+            <div class="live-chart-container">
+              <div id="hero-live-chart" width="400" height="100%">
+                <div
+                  class="tradingview-widget-container"
+                  width="100%"
+                  height="100%"
+                >
+                  <div id="tradingview_btc"></div>
+                  <script src="https://s3.tradingview.com/tv.js"></script>
+                  <script type="text/javascript">
+                    new TradingView.widget({
+                      width: "100%",
+                      height: 150,
+                      symbol: "BINANCE:BTCUSDT",
+                      interval: "1",
+                      timezone: "Etc/UTC",
+                      theme: "dark",
+                      style: "1",
+                      locale: "en",
+                      toolbar_bg: "#222",
+                      enable_publishing: false,
+                      allow_symbol_change: true,
+                      container_id: "tradingview_btc",
+                    });
+                  </script>
+                </div>
+              </div>
+            </div>
+            <div class="chart-stats">
+              <div class="stat">
+                <span class="label">24h High</span>
+                <span class="value" id="btc-high">$43,250</span>
+              </div>
+              <div class="stat">
+                <span class="label">24h Low</span>
+                <span class="value" id="btc-low">$41,890</span>
+              </div>
+              <div class="stat">
+                <span class="label">Volume</span>
+                <span class="value" id="btc-volume">$2.1B</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="market-ticker">
-        <div class="ticker-container">
-            <div class="ticker-content" id="ticker-content"></div>
-        </div>
+      <div class="ticker-container">
+        <div class="ticker-content" id="ticker-content"></div>
+      </div>
     </section>
 
     <section class="about" id="about">
-        <div class="container">
-            <div class="section-header">
-                <h2>About MaxProfit Trading</h2>
-                <p>Building the future of financial markets with cutting-edge technology</p>
-            </div>
-            
-            <div class="about-grid">
-                <div class="about-content">
-                    <h3>Our Mission</h3>
-                    <p>To democratize financial markets by providing retail traders with institutional-grade tools and AI-powered insights.</p>
-                    
-                    <h3>Our Vision</h3>
-                    <p>To become the world's most trusted trading platform, empowering millions of traders through smart technology.</p>
-                    
-                    <div class="about-features">
-                        <div class="feature-item">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Bank-Grade Security</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-robot"></i>
-                            <span>AI-Powered Analytics</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-globe"></i>
-                            <span>Global Markets Access</span>
-                        </div>
-                        <div class="feature-item">
-                            <i class="fas fa-clock"></i>
-                            <span>24/7 Trading Support</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="about-visual">
-                    <div class="glass-card">
-                        <div class="card-content">
-                            <h4>Platform Statistics</h4>
-                            <div class="stats-grid">
-                                <div class="stat">
-                                    <span class="number">150,000+</span>
-                                    <span class="label">Active Users</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="number">50+</span>
-                                    <span class="label">Cryptocurrencies</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="number">100+</span>
-                                    <span class="label">Forex Pairs</span>
-                                </div>
-                                <div class="stat">
-                                    <span class="number">5,000+</span>
-                                    <span class="label">Stocks</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div class="container">
+        <div class="section-header">
+          <h2>About MaxProfit Trading</h2>
+          <p>
+            Building the future of financial markets with cutting-edge
+            technology
+          </p>
         </div>
+
+        <div class="about-grid">
+          <div class="about-content">
+            <h3>Our Mission</h3>
+            <p>
+              To democratize financial markets by providing retail traders with
+              institutional-grade tools and AI-powered insights.
+            </p>
+
+            <h3>Our Vision</h3>
+            <p>
+              To become the world's most trusted trading platform, empowering
+              millions of traders through smart technology.
+            </p>
+
+            <div class="about-features">
+              <div class="feature-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>Bank-Grade Security</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-robot"></i>
+                <span>AI-Powered Analytics</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-globe"></i>
+                <span>Global Markets Access</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-clock"></i>
+                <span>24/7 Trading Support</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="about-visual">
+            <div class="glass-card">
+              <div class="card-content">
+                <h4>Platform Statistics</h4>
+                <div class="stats-grid">
+                  <div class="stat">
+                    <span class="number">150,000+</span>
+                    <span class="label">Active Users</span>
+                  </div>
+                  <div class="stat">
+                    <span class="number">50+</span>
+                    <span class="label">Cryptocurrencies</span>
+                  </div>
+                  <div class="stat">
+                    <span class="number">100+</span>
+                    <span class="label">Forex Pairs</span>
+                  </div>
+                  <div class="stat">
+                    <span class="number">5,000+</span>
+                    <span class="label">Stocks</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="features" id="features">
-        <div class="container">
-            <div class="section-header">
-                <h2>Platform Features</h2>
-                <p>Everything you need for successful trading in one powerful platform</p>
-            </div>
-            
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-brain"></i>
-                    </div>
-                    <h3>AI-Powered Insights</h3>
-                    <p>Get intelligent market analysis and trading signals powered by advanced machine learning algorithms.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-coins"></i>
-                    </div>
-                    <h3>Multi-Asset Trading</h3>
-                    <p>Trade cryptocurrencies, forex pairs, and stocks all from one unified platform with competitive spreads.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-mobile-alt"></i>
-                    </div>
-                    <h3>Mobile-First Design</h3>
-                    <p>Access your portfolio and trade on-the-go with our responsive platform optimized for all devices.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-lock"></i>
-                    </div>
-                    <h3>Enterprise Security</h3>
-                    <p>Your funds and data are protected by military-grade encryption and multi-factor authentication.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-chart-line"></i>
-                    </div>
-                    <h3>Advanced Analytics</h3>
-                    <p>Professional charting tools, technical indicators, and portfolio analytics for informed decisions.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-headset"></i>
-                    </div>
-                    <h3>24/7 Support</h3>
-                    <p>Get help whenever you need it with our round-the-clock customer support team.</p>
-                </div>
-            </div>
+      <div class="container">
+        <div class="section-header">
+          <h2>Platform Features</h2>
+          <p>
+            Everything you need for successful trading in one powerful platform
+          </p>
         </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-brain"></i>
+            </div>
+            <h3>AI-Powered Insights</h3>
+            <p>
+              Get intelligent market analysis and trading signals powered by
+              advanced machine learning algorithms.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-coins"></i>
+            </div>
+            <h3>Multi-Asset Trading</h3>
+            <p>
+              Trade cryptocurrencies, forex pairs, and stocks all from one
+              unified platform with competitive spreads.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h3>Mobile-First Design</h3>
+            <p>
+              Access your portfolio and trade on-the-go with our responsive
+              platform optimized for all devices.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+            <h3>Enterprise Security</h3>
+            <p>
+              Your funds and data are protected by military-grade encryption and
+              multi-factor authentication.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Advanced Analytics</h3>
+            <p>
+              Professional charting tools, technical indicators, and portfolio
+              analytics for informed decisions.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-headset"></i>
+            </div>
+            <h3>24/7 Support</h3>
+            <p>
+              Get help whenever you need it with our round-the-clock customer
+              support team.
+            </p>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="testimonials" id="testimonials">
-        <div class="container">
-            <div class="section-header">
-                <h2>What Our Traders Say</h2>
-                <p>Join thousands of successful traders who trust MaxProfit</p>
-            </div>
-            
-            <div class="testimonials-grid">
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p>"MaxProfit's AI insights have completely transformed my trading strategy. I've increased my portfolio by 40% in just 6 months."</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <img src="https://images.pexels.com/photos/3777946/pexels-photo-3777946.jpeg?w=100&h=100&fit=crop&crop=face" alt="Sarah Chen">
-                        <div class="author-info">
-                            <span class="name">Sarah Chen</span>
-                            <span class="title">Cryptocurrency Trader</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p>"The platform is incredibly intuitive and the customer support is outstanding. I switched from my previous broker and couldn't be happier."</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <img src="https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?w=100&h=100&fit=crop&crop=face" alt="Marcus Rodriguez">
-                        <div class="author-info">
-                            <span class="name">Marcus Rodriguez</span>
-                            <span class="title">Forex Trader</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="testimonial-card">
-                    <div class="testimonial-content">
-                        <div class="stars">
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                            <i class="fas fa-star"></i>
-                        </div>
-                        <p>"As a day trader, execution speed is everything. MaxProfit delivers lightning-fast trades with zero slippage. Highly recommended!"</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <img src="https://images.pexels.com/photos/3184317/pexels-photo-3184317.jpeg?w=100&h=100&fit=crop&crop=face" alt="Jessica Wu">
-                        <div class="author-info">
-                            <span class="name">Jessica Wu</span>
-                            <span class="title">Day Trader</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+      <div class="container">
+        <div class="section-header">
+          <h2>What Our Traders Say</h2>
+          <p>Join thousands of successful traders who trust MaxProfit</p>
         </div>
+
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="testimonial-content">
+              <div class="stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p>
+                "MaxProfit's AI insights have completely transformed my trading
+                strategy. I've increased my portfolio by 40% in just 6 months."
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <img
+                src="https://images.pexels.com/photos/3777946/pexels-photo-3777946.jpeg?w=100&h=100&fit=crop&crop=face"
+                alt="Sarah Chen"
+              />
+              <div class="author-info">
+                <span class="name">Sarah Chen</span>
+                <span class="title">Cryptocurrency Trader</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testimonial-content">
+              <div class="stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p>
+                "The platform is incredibly intuitive and the customer support
+                is outstanding. I switched from my previous broker and couldn't
+                be happier."
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <img
+                src="https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?w=100&h=100&fit=crop&crop=face"
+                alt="Marcus Rodriguez"
+              />
+              <div class="author-info">
+                <span class="name">Marcus Rodriguez</span>
+                <span class="title">Forex Trader</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testimonial-content">
+              <div class="stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p>
+                "As a day trader, execution speed is everything. MaxProfit
+                delivers lightning-fast trades with zero slippage. Highly
+                recommended!"
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <img
+                src="https://images.pexels.com/photos/3184317/pexels-photo-3184317.jpeg?w=100&h=100&fit=crop&crop=face"
+                alt="Jessica Wu"
+              />
+              <div class="author-info">
+                <span class="name">Jessica Wu</span>
+                <span class="title">Day Trader</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <section class="cta">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Ready to Start Your Trading Journey?</h2>
-                <p>Join over 150,000 traders who trust MaxProfit for their financial success</p>
-                <div class="cta-actions">
-                    <a href="signup.html" class="btn btn-primary btn-large">
-                        <i class="fas fa-rocket"></i>
-                        Create Free Account
-                    </a>
-                    <button class="btn btn-outline btn-large">
-                        <i class="fas fa-phone"></i>
-                        Contact Sales
-                    </button>
-                </div>
-                <p class="cta-note">
-                    <i class="fas fa-shield-alt"></i>
-                    No hidden fees • Bank-grade security • Instant setup
-                </p>
-            </div>
+      <div class="container">
+        <div class="cta-content">
+          <h2>Ready to Start Your Trading Journey?</h2>
+          <p>
+            Join over 150,000 traders who trust MaxProfit for their financial
+            success
+          </p>
+          <div class="cta-actions">
+            <a href="signup.html" class="btn btn-primary btn-large">
+              <i class="fas fa-rocket"></i>
+              Create Free Account
+            </a>
+            <button class="btn btn-outline btn-large">
+              <i class="fas fa-phone"></i>
+              Contact Sales
+            </button>
+          </div>
+          <p class="cta-note">
+            <i class="fas fa-shield-alt"></i>
+            No hidden fees • Bank-grade security • Instant setup
+          </p>
         </div>
+      </div>
     </section>
 
     <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <div class="footer-logo">
-                        <i class="fas fa-chart-line"></i>
-                        <span>MaxProfit Trading</span>
-                    </div>
-                    <p>The next-generation trading platform powered by AI, designed for both beginner and professional traders.</p>
-                    <div class="social-links">
-                        <a href="#"><i class="fab fa-twitter"></i></a>
-                        <a href="#"><i class="fab fa-linkedin"></i></a>
-                        <a href="#"><i class="fab fa-facebook"></i></a>
-                        <a href="#"><i class="fab fa-telegram"></i></a>
-                    </div>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Platform</h4>
-                    <ul>
-                        <li><a href="login.html">Login</a></li>
-                        <li><a href="signup.html">Sign Up</a></li>
-                        <li><a href="#features">Features</a></li>
-                        <li><a href="#about">About</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Resources</h4>
-                    <ul>
-                        <li><a href="#">FAQ</a></li>
-                        <li><a href="#">Support</a></li>
-                        <li><a href="#">API Documentation</a></li>
-                        <li><a href="#">Trading Guide</a></li>
-                    </ul>
-                </div>
-                
-                <div class="footer-section">
-                    <h4>Legal</h4>
-                    <ul>
-                        <li><a href="#">Terms of Service</a></li>
-                        <li><a href="#">Privacy Policy</a></li>
-                        <li><a href="#">Risk Disclosure</a></li>
-                        <li><a href="#">Compliance</a></li>
-                    </ul>
-                </div>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <div class="footer-logo">
+              <i class="fas fa-chart-line"></i>
+              <span>MaxProfit Trading</span>
             </div>
-            
-            <div class="footer-bottom">
-                <p>&copy; 2025 MaxProfit Trading. All rights reserved.</p>
-                <p><strong>Risk Warning:</strong> Trading involves substantial risk and may result in loss of capital.</p>
+            <p>
+              The next-generation trading platform powered by AI, designed for
+              both beginner and professional traders.
+            </p>
+            <div class="social-links">
+              <a href="#"><i class="fab fa-twitter"></i></a>
+              <a href="#"><i class="fab fa-linkedin"></i></a>
+              <a href="#"><i class="fab fa-facebook"></i></a>
+              <a href="#"><i class="fab fa-telegram"></i></a>
             </div>
+          </div>
+
+          <div class="footer-section">
+            <h4>Platform</h4>
+            <ul>
+              <li><a href="login.html">Login</a></li>
+              <li><a href="signup.html">Sign Up</a></li>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#about">About</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h4>Resources</h4>
+            <ul>
+              <li><a href="#">FAQ</a></li>
+              <li><a href="#">Support</a></li>
+              <li><a href="#">API Documentation</a></li>
+              <li><a href="#">Trading Guide</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Risk Disclosure</a></li>
+              <li><a href="#">Compliance</a></li>
+            </ul>
+          </div>
         </div>
+
+        <div class="footer-bottom">
+          <p>&copy; 2025 MaxProfit Trading. All rights reserved.</p>
+          <p>
+            <strong>Risk Warning:</strong> Trading involves substantial risk and
+            may result in loss of capital.
+          </p>
+        </div>
+      </div>
     </footer>
 
     <!-- TradingView Widget for real-time chart -->
-    <section class="trading-chart-section">
-      <div class="tradingview-widget-container">
-        <div id="tradingview_btc"></div>
-        <!-- TradingView widget loader script -->
-        <script src="https://s3.tradingview.com/tv.js"></script>
-        <script type="text/javascript">
-          new TradingView.widget({
-            "width": "100%",
-            "height": 400,
-            "symbol": "BINANCE:BTCUSDT",
-            "interval": "1",
-            "timezone": "Etc/UTC",
-            "theme": "dark",
-            "style": "1",
-            "locale": "en",
-            "toolbar_bg": "#222",
-            "enable_publishing": false,
-            "allow_symbol_change": true,
-            "container_id": "tradingview_btc"
-          });
-        </script>
-      </div>
-    </section>
+    <section class="trading-chart-section"></section>
 
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
@@ -378,30 +494,32 @@
     <script src="js/charts.js"></script>
     <script src="js/landing.js"></script>
     <script>
-        // Render live BTC/USD chart on homepage
-        const priceEngine = new window.PriceEngine();
-        function renderHomeBTCChart() {
-            const ctx = document.getElementById('btcLiveChart').getContext('2d');
-            const btcHistory = priceEngine.priceHistory['BTC/USD'] || [];
-            const data = {
-                labels: btcHistory.map(p => new Date(p.timestamp)),
-                datasets: [{
-                    label: 'BTC/USD',
-                    data: btcHistory.map(p => p.price),
-                    borderColor: '#f7931a',
-                    backgroundColor: 'rgba(247,147,26,0.1)',
-                    fill: true,
-                    tension: 0.3
-                }]
-            };
-            new Chart(ctx, {
-                type: 'line',
-                data,
-                options: window.defaultChartConfig || {}
-            });
-        }
-        renderHomeBTCChart();
-        setInterval(renderHomeBTCChart, 60000);
+      // Render live BTC/USD chart on homepage
+      const priceEngine = new window.PriceEngine();
+      function renderHomeBTCChart() {
+        const ctx = document.getElementById("btcLiveChart").getContext("2d");
+        const btcHistory = priceEngine.priceHistory["BTC/USD"] || [];
+        const data = {
+          labels: btcHistory.map((p) => new Date(p.timestamp)),
+          datasets: [
+            {
+              label: "BTC/USD",
+              data: btcHistory.map((p) => p.price),
+              borderColor: "#f7931a",
+              backgroundColor: "rgba(247,147,26,0.1)",
+              fill: true,
+              tension: 0.3,
+            },
+          ],
+        };
+        new Chart(ctx, {
+          type: "line",
+          data,
+          options: window.defaultChartConfig || {},
+        });
+      }
+      renderHomeBTCChart();
+      setInterval(renderHomeBTCChart, 60000);
     </script>
-</body>
+  </body>
 </html>

@@ -75,6 +75,14 @@ class TradingDashboard {
         if (profileNameEl) profileNameEl.textContent = this.currentProfile.full_name;
         if (profileEmailEl) profileEmailEl.textContent = this.currentProfile.email;
         
+        // Update notification count
+        const unreadCount = this.notifications.filter(n => !n.read).length;
+        const notificationCountEl = document.getElementById('notification-count');
+        if (notificationCountEl) {
+            notificationCountEl.textContent = unreadCount;
+            notificationCountEl.style.display = unreadCount > 0 ? 'block' : 'none';
+        }
+        
         this.updatePortfolioFromUser();
         this.updateProfileStats();
     }
@@ -169,6 +177,35 @@ class TradingDashboard {
         
         // Profile menu items
         this.setupProfileMenu();
+        
+        // Notification handlers
+        this.setupNotificationHandlers();
+    }
+    
+    setupNotificationHandlers() {
+        const notificationBtn = document.getElementById('notificationBtn');
+        const markAllReadBtn = document.getElementById('markAllRead');
+        
+        if (notificationBtn) {
+            notificationBtn.addEventListener('click', () => {
+                this.navigateToPage('notifications');
+            });
+        }
+        
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', async () => {
+                try {
+                    await apiClient.markAllNotificationsRead(this.currentUser.id);
+                    this.notifications = this.notifications.map(n => ({ ...n, read: true }));
+                    this.updateUserInterface();
+                    this.loadNotifications();
+                    showToast('All notifications marked as read', 'success');
+                } catch (error) {
+                    console.error('Mark all read error:', error);
+                    showToast('Failed to mark notifications as read', 'error');
+                }
+            });
+        }
     }
     
     setupSymbolSelector() {
@@ -278,9 +315,13 @@ class TradingDashboard {
         const bidPriceEl = document.getElementById('bid-price');
         const askPriceEl = document.getElementById('ask-price');
         const symbolChangeEl = document.getElementById('symbol-change');
+        const buyPriceEl = document.querySelector('.buy-price');
+        const sellPriceEl = document.querySelector('.sell-price');
         
         if (bidPriceEl) bidPriceEl.textContent = (priceData.price - spread).toFixed(2);
         if (askPriceEl) askPriceEl.textContent = (priceData.price + spread).toFixed(2);
+        if (buyPriceEl) buyPriceEl.textContent = (priceData.price + spread).toFixed(2);
+        if (sellPriceEl) sellPriceEl.textContent = (priceData.price - spread).toFixed(2);
         
         if (symbolChangeEl) {
             symbolChangeEl.textContent = `${priceData.changePercent >= 0 ? '+' : ''}${priceData.changePercent.toFixed(2)}%`;
@@ -481,11 +522,6 @@ class TradingDashboard {
             minute: '2-digit',
             hour12: false 
         });
-        
-        const timeElement = document.getElementById('currentTime');
-        if (timeElement) {
-            timeElement.textContent = timeString;
-        }
 
         // Update greeting
         const hour = now.getHours();
@@ -625,6 +661,11 @@ class TradingDashboard {
         const container = document.getElementById('transactionsList');
         if (!container) return;
 
+        if (this.transactions.length === 0) {
+            container.innerHTML = '<div class="empty-state">No transactions found</div>';
+            return;
+        }
+
         container.innerHTML = this.transactions.map(transaction => `
             <div class="transaction-item">
                 <div class="transaction-icon ${transaction.type}">
@@ -694,6 +735,11 @@ class TradingDashboard {
         const container = document.getElementById('transactionsList');
         if (!container) return;
 
+        if (filteredTransactions.length === 0) {
+            container.innerHTML = '<div class="empty-state">No transactions found for this filter</div>';
+            return;
+        }
+
         container.innerHTML = filteredTransactions.map(transaction => `
             <div class="transaction-item">
                 <div class="transaction-icon ${transaction.type}">
@@ -731,6 +777,15 @@ class TradingDashboard {
             return;
         }
 
+        // Check if user has sufficient balance
+        const balances = this.currentProfile.balances || { USD: 0 };
+        const tradeValue = quantity * currentPrice;
+        
+        if (side === 'buy' && tradeValue > balances.USD) {
+            showToast('Insufficient USD balance', 'error');
+            return;
+        }
+
         try {
             showLoading(true);
             
@@ -761,6 +816,15 @@ class TradingDashboard {
             };
 
             await apiClient.createTransaction(transaction);
+
+            // Update user balance
+            const newBalances = { ...balances };
+            if (side === 'buy') {
+                newBalances.USD -= tradeValue;
+            }
+            
+            await apiClient.updateUser(this.currentUser.id, { balances: newBalances });
+            this.currentProfile.balances = newBalances;
 
             showToast(`${side.toUpperCase()} order executed successfully!`, 'success');
             
@@ -799,6 +863,7 @@ class TradingDashboard {
         // Subscribe to price updates
         realTimePrices.subscribe('all', () => {
             this.updateUI();
+            this.updateTradingPrices();
         });
         
         // Update UI periodically

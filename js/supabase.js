@@ -107,7 +107,7 @@ export async function signOut() {
 
 export async function resetPassword(email) {
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${window.location.origin}/reset-password.html`
+    redirectTo: `${window.location.origin}/login.html`
   });
   return { error };
 }

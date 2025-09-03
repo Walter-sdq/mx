@@ -1,1117 +1,680 @@
-/* Landing Page Styles */
-
-/* Navigation */
-.navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: var(--z-sticky);
-  background: rgba(26, 26, 26, 0.95);
-  backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all var(--transition-normal);
-}
-
-[data-theme="light"] .navbar {
-  background: rgba(255, 255, 255, 0.95);
-  border-bottom-color: var(--border-secondary);
-}
-
-.navbar.scrolled {
-  background: var(--surface-elevated);
-  box-shadow: var(--shadow-md);
-}
-
-.nav-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-4);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: 80px;
-}
-
-.nav-logo {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.nav-logo i {
-  font-size: var(--font-size-2xl);
-  color: var(--primary-500);
-}
-
-.nav-menu {
-  display: flex;
-  list-style: none;
-  gap: var(--spacing-8);
-  margin: 0;
-  padding: 0;
-}
-
-.nav-link {
-  color: var(--text-secondary);
-  font-weight: 500;
-  padding: var(--spacing-2) 0;
-  position: relative;
-  transition: color var(--transition-fast);
-}
-
-.nav-link:hover,
-.nav-link.active {
-  color: var(--primary-500);
-}
-
-.nav-link::after {
-  content: '';
-  position: absolute;
-  bottom: -2px;
-  left: 0;
-  width: 0;
-  height: 2px;
-  background-color: var(--primary-500);
-  transition: width var(--transition-fast);
-}
-
-.nav-link:hover::after,
-.nav-link.active::after {
-  width: 100%;
-}
-
-.nav-actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-4);
-}
-
-.theme-toggle {
-  background: none;
-  border: none;
-  color: var(--text-tertiary);
-  font-size: var(--font-size-lg);
-  cursor: pointer;
-  padding: var(--spacing-2);
-  border-radius: var(--border-radius-full);
-  transition: all var(--transition-fast);
-}
-
-.theme-toggle:hover {
-  color: var(--primary-500);
-  background-color: var(--bg-hover);
-}
-
-.hamburger {
-  display: none;
-  flex-direction: column;
-  gap: 4px;
-  cursor: pointer;
-  padding: var(--spacing-2);
-}
-
-.hamburger span {
-  width: 24px;
-  height: 2px;
-  background-color: var(--text-primary);
-  transition: all var(--transition-fast);
-}
-
-.hamburger.active span:nth-child(1) {
-  transform: rotate(45deg) translate(6px, 6px);
-}
-
-.hamburger.active span:nth-child(2) {
-  opacity: 0;
-}
-
-.hamburger.active span:nth-child(3) {
-  transform: rotate(-45deg) translate(6px, -6px);
-}
-
-/* Hero Section */
-.hero {
-  padding: calc(80px + var(--spacing-20)) 0 var(--spacing-20);
-  background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-tertiary) 100%);
-  position: relative;
-  overflow: hidden;
-}
-
-.hero::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(ellipse at top, rgba(33, 150, 243, 0.1) 0%, transparent 50%);
-  pointer-events: none;
-}
-
-.hero-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 var(--spacing-4);
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-12);
-  align-items: center;
-}
-
-.hero-content {
-  position: relative;
-  z-index: 1;
-}
-
-.hero-title {
-  font-size: clamp(2.5rem, 5vw, 4rem);
-  font-weight: 800;
-  line-height: 1.1;
-  margin-bottom: var(--spacing-6);
-  color: var(--text-primary);
-}
-
-.gradient-text {
-  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.hero-subtitle {
-  font-size: var(--font-size-xl);
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-8);
-  line-height: var(--line-height-relaxed);
-}
-
-.hero-actions {
-  display: flex;
-  gap: var(--spacing-4);
-  margin-bottom: var(--spacing-12);
-}
-
-.hero-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-6);
-}
-
-.stat-item {
-  text-align: center;
-}
-
-.stat-number {
-  display: block;
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--primary-600);
-  margin-bottom: var(--spacing-1);
-}
-
-.stat-label {
-  font-size: var(--font-size-sm);
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-.hero-visual {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-
-.trading-card {
-  background: var(--surface-elevated);
-  border: 1px solid var(--border-secondary);
-  border-radius: var(--border-radius-2xl);
-  padding: var(--spacing-6);
-  box-shadow: var(--shadow-xl);
-  width: 100%;
-  max-width: 400px;
-  position: relative;
-  overflow: hidden;
-}
-
-.live-chart-card {
-  background: var(--surface-elevated);
-  border: 1px solid var(--border-secondary);
-  border-radius: var(--border-radius-2xl);
-  padding: var(--spacing-6);
-  box-shadow: var(--shadow-xl);
-  width: 100%;
-  max-width: 500px;
-  position: relative;
-  overflow: hidden;
-}
-
-.live-chart-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, var(--success-500) 0%, var(--primary-500) 100%);
-}
-
-.chart-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: var(--spacing-4);
-}
-
-.chart-title {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-}
-
-.chart-title h3 {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  margin: 0;
-  color: var(--text-primary);
-}
-
-.price-info {
-  text-align: right;
-}
-
-.current-price {
-  display: block;
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--text-primary);
-  font-feature-settings: 'tnum';
-  margin-bottom: var(--spacing-1);
-}
-
-.price-change {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--border-radius-sm);
-}
-
-.live-chart-container {
-  height: 200px;
-  margin-bottom: var(--spacing-4);
-  background: var(--bg-tertiary);
-  border-radius: var(--border-radius-lg);
-  position: relative;
-  overflow: hidden;
-}
-
-.tradingview-widget-container {
-  width: 100%;
-  height: 100%;
-  border-radius: var(--border-radius-lg);
-  overflow: hidden;
-}
-
-.tradingview-widget-container iframe {
-  border-radius: var(--border-radius-lg);
-}
-
-.chart-stats {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-4);
-  padding-top: var(--spacing-4);
-  border-top: 1px solid var(--border-secondary);
-}
-
-.chart-stats .stat {
-  text-align: center;
-}
-
-.chart-stats .label {
-  display: block;
-  font-size: var(--font-size-xs);
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: var(--spacing-1);
-}
-
-.chart-stats .value {
-  display: block;
-  font-size: var(--font-size-base);
-  font-weight: 700;
-  color: var(--text-primary);
-  font-feature-settings: 'tnum';
-}
-
-.trading-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, var(--primary-500) 0%, var(--success-500) 100%);
-}
-
-.card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-4);
-}
-
-.card-header h3 {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  margin: 0;
-}
-
-.status-indicator {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background-color: var(--success-500);
-  animation: pulse 2s infinite;
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(76, 175, 80, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(76, 175, 80, 0);
-  }
-}
-
-.price-display {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: var(--spacing-4);
-  padding: var(--spacing-4);
-  background: var(--bg-tertiary);
-  border-radius: var(--border-radius-lg);
-}
-
-.symbol {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-}
-
-.price {
-  font-size: var(--font-size-2xl);
-  font-weight: 700;
-  color: var(--text-primary);
-  font-feature-settings: 'tnum';
-}
-
-.change {
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-  padding: var(--spacing-1) var(--spacing-2);
-  border-radius: var(--border-radius-sm);
-}
-
-.change.positive {
-  color: var(--success-700);
-  background-color: var(--success-100);
-}
-
-[data-theme="dark"] .change.positive {
-  color: var(--success-400);
-  background-color: rgba(76, 175, 80, 0.1);
-}
-
-.change.negative {
-  color: var(--error-700);
-  background-color: var(--error-100);
-}
-
-[data-theme="dark"] .change.negative {
-  color: var(--error-400);
-  background-color: rgba(244, 67, 54, 0.1);
-}
-
-.mini-chart {
-  height: 120px;
-  position: relative;
-}
-
-/* Market Ticker */
-.market-ticker {
-  background: var(--bg-secondary);
-  border-top: 1px solid var(--border-secondary);
-  border-bottom: 1px solid var(--border-secondary);
-  padding: var(--spacing-4) 0;
-  overflow: hidden;
-}
-
-.ticker-container {
-  position: relative;
-  width: 100%;
-}
-
-.ticker-content {
-  display: flex;
-  animation: scroll-left 60s linear infinite;
-  white-space: nowrap;
-}
-
-@keyframes scroll-left {
-  from {
-    transform: translateX(100%);
-  }
-  to {
-    transform: translateX(-100%);
-  }
-}
-
-.ticker-item {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  margin-right: var(--spacing-8);
-  padding: var(--spacing-2) var(--spacing-4);
-  border-radius: var(--border-radius-lg);
-  background: var(--bg-tertiary);
-  min-width: 180px;
-}
-
-.ticker-symbol {
-  font-weight: 600;
-  color: var(--text-primary);
-  min-width: 60px;
-}
-
-.ticker-price {
-  font-weight: 700;
-  font-feature-settings: 'tnum';
-  min-width: 80px;
-}
-
-.ticker-change {
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  padding: 2px var(--spacing-1);
-  border-radius: var(--border-radius-sm);
-  min-width: 50px;
-  text-align: center;
-}
-
-/* About Section */
-.about {
-  padding: var(--spacing-20) 0;
-  background: var(--bg-secondary);
-}
-
-.section-header {
-  text-align: center;
-  margin-bottom: var(--spacing-16);
-}
-
-.section-header h2 {
-  font-size: var(--font-size-3xl);
-  font-weight: 700;
-  margin-bottom: var(--spacing-4);
-  color: var(--text-primary);
-}
-
-.section-header p {
-  font-size: var(--font-size-lg);
-  color: var(--text-secondary);
-  max-width: 600px;
-  margin: 0 auto;
-}
-
-.about-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: var(--spacing-16);
-  align-items: center;
-}
-
-.about-content h3 {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  margin-bottom: var(--spacing-4);
-  color: var(--primary-600);
-}
-
-.about-content p {
-  font-size: var(--font-size-lg);
-  line-height: var(--line-height-relaxed);
-  margin-bottom: var(--spacing-8);
-  color: var(--text-secondary);
-}
-
-.about-features {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-4);
-}
-
-.feature-item {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-3);
-  padding: var(--spacing-3);
-  border-radius: var(--border-radius-lg);
-  background: var(--bg-tertiary);
-  transition: all var(--transition-fast);
-}
-
-.feature-item:hover {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.feature-item i {
-  font-size: var(--font-size-lg);
-  color: var(--primary-500);
-}
-
-.feature-item span {
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.about-visual {
-  display: flex;
-  justify-content: center;
-}
-
-.card-content h4 {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  margin-bottom: var(--spacing-6);
-  text-align: center;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: var(--spacing-6);
-}
-
-.stat {
-  text-align: center;
-}
-
-.stat .number {
-  display: block;
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--primary-600);
-  margin-bottom: var(--spacing-1);
-}
-
-.stat .label {
-  font-size: var(--font-size-sm);
-  color: var(--text-tertiary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Features Section */
-.features {
-  padding: var(--spacing-20) 0;
-  background: var(--bg-primary);
-}
-
-.features-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-8);
-}
-
-.feature-card {
-  background: var(--surface);
-  border: 1px solid var(--border-secondary);
-  border-radius: var(--border-radius-xl);
-  padding: var(--spacing-8);
-  text-align: center;
-  transition: all var(--transition-fast);
-  position: relative;
-  overflow: hidden;
-}
-
-.feature-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-  opacity: 0;
-  transition: opacity var(--transition-normal);
-}
-
-.feature-card:hover::before {
-  opacity: 0.05;
-}
-
-.feature-card:hover {
-  transform: translateY(-8px);
-  box-shadow: var(--shadow-xl);
-  border-color: var(--primary-300);
-}
-
-.feature-icon {
-  width: 80px;
-  height: 80px;
-  margin: 0 auto var(--spacing-6);
-  background: linear-gradient(135deg, var(--primary-500) 0%, var(--primary-700) 100%);
-  border-radius: var(--border-radius-xl);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: var(--font-size-2xl);
-  color: white;
-  position: relative;
-  z-index: 1;
-}
-
-.feature-card h3 {
-  font-size: var(--font-size-xl);
-  font-weight: 600;
-  margin-bottom: var(--spacing-4);
-  position: relative;
-  z-index: 1;
-}
-
-.feature-card p {
-  color: var(--text-secondary);
-  line-height: var(--line-height-relaxed);
-  margin: 0;
-  position: relative;
-  z-index: 1;
-}
-
-/* Testimonials Section */
-.testimonials {
-  padding: var(--spacing-20) 0;
-  background: var(--bg-secondary);
-}
-
-.testimonials-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: var(--spacing-8);
-}
-
-.testimonial-card {
-  background: var(--surface);
-  border: 1px solid var(--border-secondary);
-  border-radius: var(--border-radius-xl);
-  padding: var(--spacing-8);
-  transition: all var(--transition-fast);
-}
-
-.testimonial-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
-}
-
-.testimonial-content {
-  margin-bottom: var(--spacing-6);
-}
-
-.stars {
-  display: flex;
-  gap: var(--spacing-1);
-  margin-bottom: var(--spacing-4);
-}
-
-.stars i {
-  color: var(--warning-500);
-  font-size: var(--font-size-sm);
-}
-
-.testimonial-content p {
-  color: var(--text-secondary);
-  line-height: var(--line-height-relaxed);
-  font-style: italic;
-  margin: 0;
-}
-
-.testimonial-author {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-4);
-}
-
-.testimonial-author img {
-  width: 50px;
-  height: 50px;
-  border-radius: var(--border-radius-full);
-  object-fit: cover;
-}
-
-.author-info .name {
-  display: block;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-1);
-}
-
-.author-info .title {
-  font-size: var(--font-size-sm);
-  color: var(--text-tertiary);
-}
-
-/* CTA Section */
-.cta {
-  padding: var(--spacing-20) 0;
-  background: linear-gradient(135deg, var(--primary-600) 0%, var(--primary-800) 100%);
-  color: white;
-  text-align: center;
-}
-
-.cta-content h2 {
-  font-size: var(--font-size-3xl);
-  font-weight: 700;
-  margin-bottom: var(--spacing-4);
-}
-
-.cta-content p {
-  font-size: var(--font-size-lg);
-  margin-bottom: var(--spacing-8);
-  opacity: 0.9;
-}
-
-.cta-actions {
-  display: flex;
-  justify-content: center;
-  gap: var(--spacing-4);
-  margin-bottom: var(--spacing-6);
-}
-
-.cta-actions .btn-primary {
-  background-color: white;
-  color: var(--primary-700);
-  border-color: white;
-}
-
-.cta-actions .btn-primary:hover {
-  background-color: var(--neutral-100);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
-}
-
-.cta-actions .btn-outline {
-  border-color: white;
-  color: white;
-}
-
-.cta-actions .btn-outline:hover {
-  background-color: white;
-  color: var(--primary-700);
-}
-
-.cta-note {
-  font-size: var(--font-size-sm);
-  opacity: 0.8;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-2);
-  margin: 0;
-}
-
-/* Footer */
-.footer {
-  background: var(--bg-tertiary);
-  padding: var(--spacing-16) 0 var(--spacing-8);
-  border-top: 1px solid var(--border-secondary);
-}
-
-.footer-content {
-  display: grid;
-  grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: var(--spacing-12);
-  margin-bottom: var(--spacing-8);
-}
-
-.footer-section h4 {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-  margin-bottom: var(--spacing-6);
-  color: var(--text-primary);
-}
-
-.footer-logo {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-2);
-  font-size: var(--font-size-xl);
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: var(--spacing-4);
-}
-
-.footer-logo i {
-  font-size: var(--font-size-2xl);
-  color: var(--primary-500);
-}
-
-.footer-section p {
-  color: var(--text-secondary);
-  line-height: var(--line-height-relaxed);
-  margin-bottom: var(--spacing-6);
-}
-
-.social-links {
-  display: flex;
-  gap: var(--spacing-3);
-}
-
-.social-links a {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: var(--border-radius-full);
-  background: var(--bg-hover);
-  color: var(--text-tertiary);
-  transition: all var(--transition-fast);
-}
-
-.social-links a:hover {
-  background: var(--primary-500);
-  color: white;
-  transform: translateY(-2px);
-}
-
-.footer-section ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.footer-section ul li {
-  margin-bottom: var(--spacing-3);
-}
-
-.footer-section ul a {
-  color: var(--text-secondary);
-  transition: color var(--transition-fast);
-}
-
-.footer-section ul a:hover {
-  color: var(--primary-500);
-}
-
-.footer-bottom {
-  padding-top: var(--spacing-8);
-  border-top: 1px solid var(--border-secondary);
-  text-align: center;
-  color: var(--text-tertiary);
-  font-size: var(--font-size-sm);
-}
-
-.footer-bottom p {
-  margin-bottom: var(--spacing-2);
-}
-
-/* Mobile Navigation */
-@media (max-width: 768px) {
-  .hamburger {
-    display: flex;
-  }
-  
-  .nav-menu {
-    position: fixed;
-    top: 80px;
-    left: 0;
-    width: 100%;
-    height: calc(100vh - 80px);
-    background: var(--surface-elevated);
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: center;
-    gap: var(--spacing-4);
-    padding: var(--spacing-8);
-    transform: translateX(-100%);
-    transition: transform var(--transition-normal);
-  }
-  
-  .nav-menu.active {
-    transform: translateX(0);
-  }
-  
-  .nav-actions .btn {
-    display: none;
-  }
-  
-  .nav-actions .theme-toggle {
-    display: flex;
-  }
-  
-  /* Hero Mobile */
-  .hero-container {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-8);
-    text-align: center;
-  }
-  
-  .hero-visual {
-    order: -1;
-  }
-  
-  .live-chart-card {
-    max-width: 100%;
-    margin: 0 auto;
-  }
-  
-  .live-chart-container {
-    height: 180px;
-  }
-  
-  .hero-stats {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-4);
-  }
-  
-  .stat-number {
-    font-size: var(--font-size-xl);
-  }
-  
-  /* About Mobile */
-  .about-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-8);
-    text-align: center;
-  }
-  
-  .about-features {
-    grid-template-columns: 1fr;
-  }
-  
-  /* Features Mobile */
-  .features-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-6);
-  }
-  
-  /* Testimonials Mobile */
-  .testimonials-grid {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-6);
-  }
-  
-  /* CTA Mobile */
-  .cta-actions {
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  /* Footer Mobile */
-  .footer-content {
-    grid-template-columns: 1fr;
-    gap: var(--spacing-8);
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .nav-container {
-    padding: 0 var(--spacing-3);
-    height: 70px;
-  }
-  
-  .hero {
-    padding: calc(70px + var(--spacing-12)) 0 var(--spacing-12);
-  }
-  
-  .hero-title {
-    font-size: 2rem;
-  }
-  
-  .hero-subtitle {
-    font-size: var(--font-size-base);
-  }
-  
-  .hero-actions {
-    flex-direction: column;
-    gap: var(--spacing-3);
-  }
-  
-  .section-header h2 {
-    font-size: var(--font-size-2xl);
-  }
-  
-  .feature-card,
-  .testimonial-card {
-    padding: var(--spacing-6);
-  }
-  
-  .trading-card {
-    padding: var(--spacing-4);
-  }
-  
-  .live-chart-card {
-    padding: var(--spacing-4);
-  }
-  
-  .chart-header {
-    flex-direction: column;
-    gap: var(--spacing-3);
-    text-align: center;
-  }
-  
-  .price-info {
-    text-align: center;
-  }
-  
-  .current-price {
-    font-size: var(--font-size-xl);
-  }
-  
-  .live-chart-container {
-    height: 200px;
-  }
-  
-  .chart-stats {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-2);
-  }
-  
-  .price {
-    font-size: var(--font-size-xl);
-  }
-  
-  .cta-content h2 {
-    font-size: var(--font-size-2xl);
-  }
-  
-  .chart-stats .value {
-    font-size: var(--font-size-sm);
-  }
-  
-  .hero-container {
-    gap: var(--spacing-6);
-  }
-  
-  .hero-stats {
-    grid-template-columns: repeat(3, 1fr);
-    gap: var(--spacing-3);
-  }
-  
-  .stat-number {
-    font-size: var(--font-size-lg);
-  }
-}
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - MaxProfit Trading</title>
+    <meta name="description" content="Manage your MaxProfit account settings">
+    
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Simplified header for settings page -->
+        <header class="topbar">
+            <div class="topbar-left">
+                <a href="dashboard.html" class="back-btn">
+                    <i class="fas fa-arrow-left"></i>
+                </a>
+                <h1 class="page-title">Settings</h1>
+            </div>
+            
+            <div class="topbar-right">
+                <button class="theme-toggle" id="theme-toggle">
+                    <i class="fas fa-sun"></i>
+                </button>
+            </div>
+        </header>
+
+        <main class="content">
+            <div class="settings-container">
+                <!-- Account Section -->
+                <div class="settings-section">
+                    <h3>Account</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Profile Information</div>
+                            <div class="setting-subtitle">Update your personal details</div>
+                        </div>
+                        <button class="setting-action" onclick="openModal('profile-modal')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Change Password</div>
+                            <div class="setting-subtitle">Update your account password</div>
+                        </div>
+                        <button class="setting-action" onclick="openModal('password-modal')">
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Preferences Section -->
+                <div class="settings-section">
+                    <h3>Preferences</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Dark Mode</div>
+                            <div class="setting-subtitle">Switch between light and dark theme</div>
+                        </div>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="dark-mode-setting">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Push Notifications</div>
+                            <div class="setting-subtitle">Receive alerts for trades and updates</div>
+                        </div>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="notifications-setting" checked>
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Email Notifications</div>
+                            <div class="setting-subtitle">Receive important updates via email</div>
+                        </div>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="email-setting" checked>
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">SMS Alerts</div>
+                            <div class="setting-subtitle">Get trade confirmations via SMS</div>
+                        </div>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="sms-setting">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Section -->
+                <div class="settings-section">
+                    <h3>Security</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Two-Factor Authentication</div>
+                            <div class="setting-subtitle">Add extra security to your account</div>
+                        </div>
+                        <button class="setting-action" onclick="openModal('2fa-modal')">
+                            <span class="status-text">Setup</span>
+                            <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Biometric Login</div>
+                            <div class="setting-subtitle">Use fingerprint or face ID</div>
+                        </div>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="biometric-setting">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Session Timeout</div>
+                            <div class="setting-subtitle">Auto-logout after inactivity</div>
+                        </div>
+                        <select class="setting-select" id="session-timeout">
+                            <option value="15">15 minutes</option>
+                            <option value="30">30 minutes</option>
+                            <option value="60" selected>1 hour</option>
+                            <option value="240">4 hours</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Support Section -->
+                <div class="settings-section">
+                    <h3>Support</h3>
+                    
+                    <div class="setting-item clickable">
+                        <div class="setting-info">
+                            <div class="setting-title">Help Center</div>
+                            <div class="setting-subtitle">FAQs and tutorials</div>
+                        </div>
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                    
+                    <div class="setting-item clickable">
+                        <div class="setting-info">
+                            <div class="setting-title">Contact Support</div>
+                            <div class="setting-subtitle">Get help from our team</div>
+                        </div>
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                    
+                    <div class="setting-item clickable">
+                        <div class="setting-info">
+                            <div class="setting-title">Report a Bug</div>
+                            <div class="setting-subtitle">Help us improve the platform</div>
+                        </div>
+                        <i class="fas fa-external-link-alt"></i>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="settings-section danger">
+                    <h3>Account Actions</h3>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Export Data</div>
+                            <div class="setting-subtitle">Download your account data</div>
+                        </div>
+                        <button class="setting-action" onclick="exportAccountData()">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="setting-item">
+                        <div class="setting-info">
+                            <div class="setting-title">Logout</div>
+                            <div class="setting-subtitle">Sign out of your account</div>
+                        </div>
+                        <button class="setting-action danger" onclick="confirmLogout()">
+                            <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Profile Modal -->
+    <div class="modal" id="profile-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Profile Information</h3>
+                <button class="modal-close" onclick="closeModal('profile-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="profile-form" id="profile-form">
+                    <div class="form-group">
+                        <label for="profile-name">Full Name</label>
+                        <input type="text" id="profile-name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="profile-email">Email Address</label>
+                        <input type="email" id="profile-email" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div class="modal" id="password-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Change Password</h3>
+                <button class="modal-close" onclick="closeModal('password-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="password-form" id="password-form">
+                    <div class="form-group">
+                        <label for="current-password">Current Password</label>
+                        <input type="password" id="current-password" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">New Password</label>
+                        <input type="password" id="new-password" required>
+                        <div class="password-strength" id="password-strength"></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm New Password</label>
+                        <input type="password" id="confirm-password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Change Password</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2FA Modal -->
+    <div class="modal" id="2fa-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Two-Factor Authentication</h3>
+                <button class="modal-close" onclick="closeModal('2fa-modal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="2fa-setup">
+                    <div class="setup-step">
+                        <h4>Setup Instructions</h4>
+                        <p>Two-factor authentication will be available upon full backend integration. This feature adds an extra layer of security to your account.</p>
+                        <div class="setup-placeholder">
+                            <i class="fas fa-mobile-alt"></i>
+                            <span>Coming Soon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modal-overlay"></div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <script src="js/config.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import { authManager } from './js/auth.js';
+        import { apiClient } from './js/api.js';
+        import { showToast, isValidEmail, checkPasswordStrength, toggleTheme, exportToCSV, formatDateTime } from './js/utils.js';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initSettingsPage();
+        });
+
+        async function initSettingsPage() {
+            // Check authentication
+            if (!authManager.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const profile = authManager.getProfile();
+            
+            if (profile) {
+                loadUserSettings(profile);
+            }
+
+            setupSettingsForm();
+        }
+
+        function loadUserSettings(profile) {
+            // Load current settings
+            const settings = profile.settings || {};
+            
+            document.getElementById('dark-mode-setting').checked = settings.dark_mode !== false;
+            document.getElementById('notifications-setting').checked = settings.notifications !== false;
+            document.getElementById('email-setting').checked = settings.email_notifications !== false;
+            document.getElementById('sms-setting').checked = settings.sms_notifications === true;
+            document.getElementById('biometric-setting').checked = settings.biometric === true;
+            
+            // Load profile info
+            const profileName = document.getElementById('profile-name');
+            const profileEmail = document.getElementById('profile-email');
+            
+            if (profileName) profileName.value = profile.full_name;
+            if (profileEmail) profileEmail.value = profile.email;
+        }
+
+        function setupSettingsForm() {
+            // Toggle switches
+            const toggles = document.querySelectorAll('.toggle-switch input');
+            toggles.forEach(toggle => {
+                toggle.addEventListener('change', () => {
+                    saveSettings();
+                });
+            });
+
+            // Session timeout
+            const sessionTimeout = document.getElementById('session-timeout');
+            if (sessionTimeout) {
+                sessionTimeout.addEventListener('change', () => {
+                    saveSettings();
+                });
+            }
+
+            // Profile form
+            const profileForm = document.getElementById('profile-form');
+            if (profileForm) {
+                profileForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await updateProfile();
+                });
+            }
+
+            // Password form
+            const passwordForm = document.getElementById('password-form');
+            if (passwordForm) {
+                passwordForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await changePassword();
+                });
+            }
+
+            // Password strength indicator
+            const newPasswordInput = document.getElementById('new-password');
+            if (newPasswordInput) {
+                newPasswordInput.addEventListener('input', updatePasswordStrength);
+            }
+        }
+
+        async function saveSettings() {
+            const user = authManager.getUser();
+            if (!user) return;
+
+            const settings = {
+                dark_mode: document.getElementById('dark-mode-setting').checked,
+                notifications: document.getElementById('notifications-setting').checked,
+                email_notifications: document.getElementById('email-setting').checked,
+                sms_notifications: document.getElementById('sms-setting').checked,
+                biometric: document.getElementById('biometric-setting').checked,
+                session_timeout: parseInt(document.getElementById('session-timeout').value)
+            };
+
+            try {
+                await apiClient.updateUser(user.id, { settings });
+                
+                // Apply dark mode immediately
+                if (settings.dark_mode !== (document.documentElement.getAttribute('data-theme') === 'dark')) {
+                    toggleTheme();
+                }
+
+                showToast('Settings saved successfully', 'success');
+            } catch (error) {
+                console.error('Settings save error:', error);
+                showToast('Failed to save settings', 'error');
+            }
+        }
+
+        async function updateProfile() {
+            const user = authManager.getUser();
+            if (!user) return;
+
+            const fullName = document.getElementById('profile-name').value.trim();
+            const email = document.getElementById('profile-email').value.trim().toLowerCase();
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            initSettingsPage();
+        });
+
+        async function initSettingsPage() {
+            // Check authentication
+            if (!SessionManager.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const session = SessionManager.getSession();
+            const user = state.getUserById(session.userId);
+            
+            if (user) {
+                loadUserSettings(user);
+            }
+
+            setupSettingsForm();
+        }
+
+        function loadUserSettings(user) {
+            // Load current settings
+            const settings = user.settings || {};
+            
+            document.getElementById('dark-mode-setting').checked = settings.darkMode !== false;
+            document.getElementById('notifications-setting').checked = settings.notifications !== false;
+            document.getElementById('email-setting').checked = settings.emailNotifications !== false;
+            document.getElementById('sms-setting').checked = settings.smsNotifications === true;
+            document.getElementById('biometric-setting').checked = settings.biometric === true;
+            
+            // Load profile info
+            const profileName = document.getElementById('profile-name');
+            const profileEmail = document.getElementById('profile-email');
+            
+            if (profileName) profileName.value = user.fullName;
+            if (profileEmail) profileEmail.value = user.email;
+        }
+
+        function setupSettingsForm() {
+            // Toggle switches
+            const toggles = document.querySelectorAll('.toggle-switch input');
+            toggles.forEach(toggle => {
+                toggle.addEventListener('change', () => {
+                    saveSettings();
+                });
+            });
+
+            // Session timeout
+            const sessionTimeout = document.getElementById('session-timeout');
+            if (sessionTimeout) {
+                sessionTimeout.addEventListener('change', () => {
+                    saveSettings();
+                });
+            }
+
+            // Profile form
+            const profileForm = document.getElementById('profile-form');
+            if (profileForm) {
+                profileForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await updateProfile();
+                });
+            }
+
+            // Password form
+            const passwordForm = document.getElementById('password-form');
+            if (passwordForm) {
+                passwordForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    await changePassword();
+                });
+            }
+
+            // Password strength indicator
+            const newPasswordInput = document.getElementById('new-password');
+            if (newPasswordInput) {
+                newPasswordInput.addEventListener('input', updatePasswordStrength);
+            }
+        }
+
+        function saveSettings() {
+            const session = SessionManager.getSession();
+            if (!session) return;
+
+            const settings = {
+                darkMode: document.getElementById('dark-mode-setting').checked,
+                notifications: document.getElementById('notifications-setting').checked,
+                emailNotifications: document.getElementById('email-setting').checked,
+                smsNotifications: document.getElementById('sms-setting').checked,
+                biometric: document.getElementById('biometric-setting').checked,
+                sessionTimeout: parseInt(document.getElementById('session-timeout').value)
+            };
+
+            state.updateUser(session.userId, { settings });
+            
+            // Apply dark mode immediately
+            if (settings.darkMode !== (document.documentElement.getAttribute('data-theme') === 'dark')) {
+                toggleTheme();
+            }
+
+            showToast('Settings saved successfully', 'success');
+        }
+
+        async function updateProfile() {
+            const session = SessionManager.getSession();
+            if (!session) return;
+
+            const fullName = document.getElementById('profile-name').value.trim();
+            const email = document.getElementById('profile-email').value.trim().toLowerCase();
+
+            if (!fullName || !email) {
+                showToast('Please fill in all fields', 'error');
+                return;
+            }
+
+            if (!isValidEmail(email)) {
+                showToast('Please enter a valid email address', 'error');
+                return;
+            }
+
+            // Check if email is already taken by another user
+            const existingUser = state.getUserByEmail(email);
+            if (existingUser && existingUser._id !== session.userId) {
+                showToast('Email address is already in use', 'error');
+                return;
+            }
+
+            try {
+                state.updateUser(session.userId, {
+                    fullName,
+                    email
+                });
+
+                // Update session
+                const currentSession = SessionManager.getSession();
+                currentSession.fullName = fullName;
+                currentSession.email = email;
+                SessionManager.createSession(currentSession, false);
+
+                showToast('Profile updated successfully', 'success');
+                closeModal('profile-modal');
+
+            } catch (error) {
+                console.error('Profile update error:', error);
+                showToast('Failed to update profile', 'error');
+            }
+        }
+
+        async function changePassword() {
+            const session = SessionManager.getSession();
+            if (!session) return;
+
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            if (!currentPassword || !newPassword || !confirmPassword) {
+                showToast('Please fill in all password fields', 'error');
+                return;
+            }
+
+            if (newPassword !== confirmPassword) {
+                showToast('New passwords do not match', 'error');
+                return;
+            }
+
+            const strength = checkPasswordStrength(newPassword);
+            if (strength.score < 3) {
+                showToast('Password is too weak. Please use a stronger password.', 'error');
+                return;
+            }
+
+            try {
+                const user = state.getUserById(session.userId);
+                
+                // Verify current password
+                const isCurrentValid = await CryptoUtils.verifyPassword(currentPassword, user.passwordHash);
+                if (!isCurrentValid) {
+                    showToast('Current password is incorrect', 'error');
+                    return;
+                }
+
+                // Hash new password
+                const newPasswordHash = await CryptoUtils.hashPassword(newPassword);
+                
+                state.updateUser(session.userId, {
+                    passwordHash: newPasswordHash
+                });
+
+                showToast('Password changed successfully', 'success');
+                closeModal('password-modal');
+
+                // Clear form
+                document.getElementById('password-form').reset();
+
+            } catch (error) {
+                console.error('Password change error:', error);
+                showToast('Failed to change password', 'error');
+            }
+        }
+
+        function updatePasswordStrength() {
+            const password = document.getElementById('new-password').value;
+            const strengthElement = document.getElementById('password-strength');
+            const strength = checkPasswordStrength(password);
+            
+            strengthElement.innerHTML = `
+                <div class="strength-bar ${strength.class}">
+                    <div class="strength-fill"></div>
+                </div>
+                <span class="strength-text">${strength.text}</span>
+                ${strength.feedback ? `<div class="strength-feedback">${strength.feedback}</div>` : ''}
+            `;
+        }
+
+        function exportAccountData() {
+            const session = SessionManager.getSession();
+            if (!session) return;
+
+            const user = state.getUserById(session.userId);
+            const transactions = state.getTransactions(session.userId);
+            const trades = state.getTrades(session.userId);
+            const notifications = state.getNotifications(session.userId);
+
+            const exportData = {
+                user: {
+                    fullName: user.fullName,
+                    email: user.email,
+                    role: user.role,
+                    createdAt: user.createdAt,
+                    balances: user.balances
+                },
+                transactions,
+                trades,
+                notifications,
+                exportedAt: Date.now()
+            };
+
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+                type: 'application/json' 
+            });
+            
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `maxprofit-data-${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+            
+            URL.revokeObjectURL(url);
+            showToast('Account data exported successfully', 'success');
+        }
+
+        function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                SessionManager.clearSession();
+                window.location.href = 'login.html';
+            }
+        }
+    </script>
+</body>
+</html>

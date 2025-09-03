@@ -294,47 +294,48 @@
 
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/crypto.js"></script>
-    <script src="js/session.js"></script>
-    <script src="js/state.js"></script>
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import { authManager } from './js/auth.js';
+        import { apiClient } from './js/api.js';
+        import { showToast, showLoading, isValidEmail, checkPasswordStrength } from './js/utils.js';
+        
         document.addEventListener('DOMContentLoaded', () => {
             initSettingsPage();
         });
 
         async function initSettingsPage() {
             // Check authentication
-            if (!SessionManager.isAuthenticated()) {
+            if (!authManager.isAuthenticated()) {
                 window.location.href = 'login.html';
                 return;
             }
 
-            const session = SessionManager.getSession();
-            const user = state.getUserById(session.userId);
+            const profile = authManager.getProfile();
             
-            if (user) {
-                loadUserSettings(user);
+            if (profile) {
+                loadUserSettings(profile);
             }
 
             setupSettingsForm();
         }
 
-        function loadUserSettings(user) {
+        function loadUserSettings(profile) {
             // Load current settings
-            const settings = user.settings || {};
+            const settings = profile.settings || {};
             
-            document.getElementById('dark-mode-setting').checked = settings.darkMode !== false;
+            document.getElementById('dark-mode-setting').checked = settings.dark_mode !== false;
             document.getElementById('notifications-setting').checked = settings.notifications !== false;
-            document.getElementById('email-setting').checked = settings.emailNotifications !== false;
-            document.getElementById('sms-setting').checked = settings.smsNotifications === true;
+            document.getElementById('email-setting').checked = settings.email_notifications !== false;
+            document.getElementById('sms-setting').checked = settings.sms_notifications === true;
             document.getElementById('biometric-setting').checked = settings.biometric === true;
             
             // Load profile info
             const profileName = document.getElementById('profile-name');
             const profileEmail = document.getElementById('profile-email');
             
-            if (profileName) profileName.value = user.fullName;
-            if (profileEmail) profileEmail.value = user.email;
+            if (profileName) profileName.value = profile.full_name;
+            if (profileEmail) profileEmail.value = profile.email;
         }
 
         function setupSettingsForm() {
@@ -379,32 +380,35 @@
             }
         }
 
-        function saveSettings() {
-            const session = SessionManager.getSession();
-            if (!session) return;
+        async function saveSettings() {
+            if (!authManager.isAuthenticated()) return;
 
             const settings = {
-                darkMode: document.getElementById('dark-mode-setting').checked,
+                dark_mode: document.getElementById('dark-mode-setting').checked,
                 notifications: document.getElementById('notifications-setting').checked,
-                emailNotifications: document.getElementById('email-setting').checked,
-                smsNotifications: document.getElementById('sms-setting').checked,
+                email_notifications: document.getElementById('email-setting').checked,
+                sms_notifications: document.getElementById('sms-setting').checked,
                 biometric: document.getElementById('biometric-setting').checked,
-                sessionTimeout: parseInt(document.getElementById('session-timeout').value)
+                session_timeout: parseInt(document.getElementById('session-timeout').value)
             };
 
-            state.updateUser(session.userId, { settings });
+            try {
+                await apiClient.updateUser(authManager.getUser().id, { settings });
+                
+                // Apply dark mode immediately
+                if (settings.dark_mode !== (document.documentElement.getAttribute('data-theme') === 'dark')) {
+                    toggleTheme();
+                }
             
-            // Apply dark mode immediately
-            if (settings.darkMode !== (document.documentElement.getAttribute('data-theme') === 'dark')) {
-                toggleTheme();
+                showToast('Settings saved successfully', 'success');
+            } catch (error) {
+                console.error('Settings save error:', error);
+                showToast('Failed to save settings', 'error');
             }
-
-            showToast('Settings saved successfully', 'success');
         }
 
         async function updateProfile() {
-            const session = SessionManager.getSession();
-            if (!session) return;
+            if (!authManager.isAuthenticated()) return;
 
             const fullName = document.getElementById('profile-name').value.trim();
             const email = document.getElementById('profile-email').value.trim().toLowerCase();
@@ -419,24 +423,11 @@
                 return;
             }
 
-            // Check if email is already taken by another user
-            const existingUser = state.getUserByEmail(email);
-            if (existingUser && existingUser._id !== session.userId) {
-                showToast('Email address is already in use', 'error');
-                return;
-            }
-
             try {
-                state.updateUser(session.userId, {
-                    fullName,
+                await apiClient.updateUser(authManager.getUser().id, {
+                    full_name: fullName,
                     email
                 });
-
-                // Update session
-                const currentSession = SessionManager.getSession();
-                currentSession.fullName = fullName;
-                currentSession.email = email;
-                SessionManager.createSession(currentSession, false);
 
                 showToast('Profile updated successfully', 'success');
                 closeModal('profile-modal');
@@ -448,8 +439,7 @@
         }
 
         async function changePassword() {
-            const session = SessionManager.getSession();
-            if (!session) return;
+            if (!authManager.isAuthenticated()) return;
 
             const currentPassword = document.getElementById('current-password').value;
             const newPassword = document.getElementById('new-password').value;
@@ -472,21 +462,14 @@
             }
 
             try {
-                const user = state.getUserById(session.userId);
-                
-                // Verify current password
-                const isCurrentValid = await CryptoUtils.verifyPassword(currentPassword, user.passwordHash);
-                if (!isCurrentValid) {
-                    showToast('Current password is incorrect', 'error');
-                    return;
-                }
-
-                // Hash new password
-                const newPasswordHash = await CryptoUtils.hashPassword(newPassword);
-                
-                state.updateUser(session.userId, {
-                    passwordHash: newPasswordHash
+                // Use Supabase auth to update password
+                const { error } = await supabase.auth.updateUser({
+                    password: newPassword
                 });
+                
+                if (error) {
+                    throw new Error(error.message);
+                }
 
                 showToast('Password changed successfully', 'success');
                 closeModal('password-modal');
@@ -514,49 +497,62 @@
             `;
         }
 
-        function exportAccountData() {
-            const session = SessionManager.getSession();
-            if (!session) return;
+        async function exportAccountData() {
+            if (!authManager.isAuthenticated()) return;
 
-            const user = state.getUserById(session.userId);
-            const transactions = state.getTransactions(session.userId);
-            const trades = state.getTrades(session.userId);
-            const notifications = state.getNotifications(session.userId);
+            try {
+                const profile = authManager.getProfile();
+                const { data: transactions } = await apiClient.getTransactions(authManager.getUser().id);
+                const { data: trades } = await apiClient.getTrades(authManager.getUser().id);
+                const { data: notifications } = await apiClient.getNotifications(authManager.getUser().id);
 
-            const exportData = {
-                user: {
-                    fullName: user.fullName,
-                    email: user.email,
-                    role: user.role,
-                    createdAt: user.createdAt,
-                    balances: user.balances
-                },
-                transactions,
-                trades,
-                notifications,
-                exportedAt: Date.now()
-            };
+                const exportData = {
+                    user: {
+                        fullName: profile.full_name,
+                        email: profile.email,
+                        role: profile.role,
+                        createdAt: profile.created_at,
+                        balances: profile.balances
+                    },
+                    transactions: transactions || [],
+                    trades: trades || [],
+                    notifications: notifications || [],
+                    exportedAt: Date.now()
+                };
 
-            const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
-                type: 'application/json' 
-            });
-            
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `maxprofit-data-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
-            
-            URL.revokeObjectURL(url);
-            showToast('Account data exported successfully', 'success');
-        }
-
-        function confirmLogout() {
-            if (confirm('Are you sure you want to logout?')) {
-                SessionManager.clearSession();
-                window.location.href = 'login.html';
+                const blob = new Blob([JSON.stringify(exportData, null, 2)], { 
+                    type: 'application/json' 
+                });
+                
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `maxprofit-data-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
+                
+                URL.revokeObjectURL(url);
+                showToast('Account data exported successfully', 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showToast('Failed to export data', 'error');
             }
         }
+
+        async function confirmLogout() {
+            if (confirm('Are you sure you want to logout?')) {
+                try {
+                    await authManager.logout();
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Logout error:', error);
+                    showToast('Failed to logout', 'error');
+                }
+            }
+        }
+        
+        // Make functions available globally
+        window.exportAccountData = exportAccountData;
+        window.confirmLogout = confirmLogout;
     </script>
 </body>
 </html>

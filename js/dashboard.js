@@ -1,8 +1,6 @@
 // Dashboard JavaScript - Production Ready
-import { authManager } from './auth.js';
-import { apiClient } from './api.js';
-import { realTimePrices } from './realtime.js';
-import { formatCurrency, formatDateTime, getRelativeTime, showToast, showLoading } from './utils.js';
+// Remove ES module imports for browser compatibility
+// Use global objects from window
 
 class TradingDashboard {
     constructor() {
@@ -27,6 +25,12 @@ class TradingDashboard {
 
         this.currentUser = authManager.getUser();
         this.currentProfile = authManager.getProfile();
+
+        // Display name from Supabase profile
+        if (this.currentProfile && this.currentProfile.full_name) {
+            const nameEl = document.getElementById('dashboard-display-name');
+            if (nameEl) nameEl.textContent = this.currentProfile.full_name;
+        }
 
         if (!this.currentUser || !this.currentProfile) {
             window.location.href = 'login.html';
@@ -892,6 +896,9 @@ class TradingDashboard {
         return icons[type] || 'bell';
     }
 }
+
+window.TradingDashboard = TradingDashboard;
+new TradingDashboard();
 
 // Initialize the dashboard when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {

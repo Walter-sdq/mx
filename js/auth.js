@@ -1,5 +1,7 @@
 // Authentication module
-import { supabase, signUp, signIn, signOut, resetPassword, resendConfirmation, getCurrentUser } from './supabase.js';
+// Use global supabase from CDN
+// Import helper functions from supabase.js
+import { signUp, signIn, signOut, resetPassword, resendConfirmation, getCurrentUser } from './supabase.js';
 
 class AuthManager {
   constructor() {
@@ -10,6 +12,14 @@ class AuthManager {
   
   async init() {
     // Listen for auth state changes
+    if (!window.supabase || !window.supabase.createClient) {
+      console.error('Supabase client not loaded.');
+      return;
+    }
+    if (!supabase || !supabase.auth) {
+      console.error('Supabase auth is undefined.');
+      return;
+    }
     supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         await this.handleSignIn(session);
@@ -26,14 +36,12 @@ class AuthManager {
   
   async checkSession() {
     try {
-      const { user, profile } = await getCurrentUser();
-      
-      if (user && profile) {
-        this.currentUser = user;
-        this.currentProfile = profile;
+      const current = await getCurrentUser();
+      if (current.user && current.profile) {
+        this.currentUser = current.user;
+        this.currentProfile = current.profile;
         return true;
       }
-      
       return false;
     } catch (error) {
       console.error('Session check error:', error);

@@ -302,11 +302,14 @@ export function exportToCSV(data, filename) {
 document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = getTheme();
   setTheme(savedTheme);
-  
+  document.documentElement.setAttribute('data-theme', savedTheme);
   // Setup theme toggles
   const themeToggles = document.querySelectorAll('.theme-toggle');
   themeToggles.forEach(toggle => {
-    toggle.addEventListener('click', toggleTheme);
+    toggle.addEventListener('click', () => {
+      const newTheme = toggleTheme();
+      document.documentElement.setAttribute('data-theme', newTheme);
+    });
   });
 });
 

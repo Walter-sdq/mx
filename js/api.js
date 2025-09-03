@@ -1,5 +1,6 @@
 // API client for Supabase operations
-import { supabase } from './supabase.js';
+// Use global supabase from CDN
+const supabase = window.supabaseClient || window.supabase;
 
 class ApiClient {
   constructor() {

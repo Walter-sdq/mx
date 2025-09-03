@@ -201,9 +201,199 @@
 
     <script src="js/config.js"></script>
     <script src="js/utils.js"></script>
-    <script src="js/crypto.js"></script>
-    <script src="js/session.js"></script>
-    <script src="js/state.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import { authManager } from './js/auth.js';
+        import { apiClient } from './js/api.js';
+        import { formatCurrency, showToast, showLoading } from './js/utils.js';
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            initWithdrawPage();
+        });
+
+        async function initWithdrawPage() {
+            // Check authentication
+            if (!authManager.isAuthenticated()) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            const profile = authManager.getProfile();
+            
+            if (profile) {
+                updateBalanceDisplay(profile);
+            }
+
+            setupWithdrawForm();
+        }
+
+        function updateBalanceDisplay(profile) {
+            const availableBalanceEl = document.getElementById('available-balance');
+            const balances = profile.balances || { USD: 0, BTC: 0, ETH: 0 };
+            
+            if (availableBalanceEl) {
+                availableBalanceEl.textContent = formatCurrency(balances.USD);
+            }
+        }
+
+        function setupWithdrawForm() {
+            const form = document.getElementById('withdraw-form');
+            const amountInput = document.getElementById('withdraw-amount');
+            const methodItems = document.querySelectorAll('.method-item');
+            const quickAmountBtns = document.querySelectorAll('.quick-amount-btn');
+            
+            let selectedMethod = 'bank';
+
+            // Method selection
+            methodItems.forEach(item => {
+                item.addEventListener('click', () => {
+                    if (item.classList.contains('method-item')) {
+                        selectedMethod = item.getAttribute('data-method');
+                        
+                        // Update active state
+                        methodItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                        
+                        // Show/hide withdrawal details
+                        document.querySelectorAll('.withdrawal-details').forEach(detail => {
+                            detail.style.display = 'none';
+                        });
+                        
+                        const detailsEl = document.getElementById(`${selectedMethod}-withdrawal`);
+                        if (detailsEl) {
+                            detailsEl.style.display = 'block';
+                        }
+                        
+                        updateFeeSummary();
+                    }
+                });
+            });
+
+            // Quick amount buttons
+            quickAmountBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const amount = btn.getAttribute('data-amount');
+                    
+                    if (amount === 'max') {
+                        const profile = authManager.getProfile();
+                        const balances = profile.balances || { USD: 0 };
+                        const maxAmount = Math.max(0, balances.USD - 2.50); // Subtract fee
+                        amountInput.value = maxAmount.toFixed(2);
+                    } else {
+                        amountInput.value = amount;
+                    }
+                    
+                    updateFeeSummary();
+                    
+                    // Visual feedback
+                    btn.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        btn.style.transform = '';
+                    }, 150);
+                });
+            });
+
+            // Amount input
+            amountInput.addEventListener('input', updateFeeSummary);
+
+            // Form submission
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await processWithdrawal(selectedMethod);
+            });
+
+            function updateFeeSummary() {
+                const amount = parseFloat(amountInput.value) || 0;
+                const fee = 2.50; // Fixed withdrawal fee
+                const total = Math.max(0, amount - fee);
+                
+                document.getElementById('withdraw-fee-amount').textContent = formatCurrency(amount);
+                document.getElementById('withdraw-fee-processing').textContent = formatCurrency(fee);
+                document.getElementById('withdraw-fee-total').textContent = formatCurrency(total);
+            }
+
+            async function processWithdrawal(method) {
+                const amount = parseFloat(amountInput.value);
+                const profile = authManager.getProfile();
+                const balances = profile.balances || { USD: 0 };
+                
+                if (!amount || amount < 10) {
+                    showToast('Minimum withdrawal amount is $10.00', 'error');
+                    return;
+                }
+
+                if (amount > balances.USD) {
+                    showToast('Insufficient balance', 'error');
+                    return;
+                }
+
+                const submitBtn = document.getElementById('withdraw-submit');
+                
+                try {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                    showLoading(true);
+
+                    // Create withdrawal request
+                    const withdrawal = {
+                        user_id: authManager.getUser().id,
+                        amount: amount,
+                        currency: 'USD',
+                        method: method,
+                        address_or_account: method === 'bank' ? '****1234' : 
+                                          method === 'paypal' ? profile.email : 
+                                          document.getElementById('crypto-wallet')?.value || '',
+                        status: 'pending'
+                    };
+                    
+                    const { data, error } = await apiClient.createWithdrawal(withdrawal);
+                    
+                    if (error) {
+                        throw new Error(error.message);
+                    }
+                    
+                    // Create transaction
+                    await apiClient.createTransaction({
+                        user_id: authManager.getUser().id,
+                        type: 'withdrawal',
+                        amount: amount,
+                        currency: 'USD',
+                        status: 'pending',
+                        note: `Withdrawal request via ${method}`,
+                        metadata: { withdrawal_id: data.id, method }
+                    });
+                    
+                    // Update user balance (deduct immediately)
+                    const newBalances = { ...balances, USD: balances.USD - amount };
+                    await apiClient.updateUser(authManager.getUser().id, {
+                        balances: newBalances
+                    });
+                    
+                    // Add notification
+                    await apiClient.createNotification({
+                        user_id: authManager.getUser().id,
+                        title: 'Withdrawal Request Submitted',
+                        body: `Your withdrawal request for ${formatCurrency(amount)} has been submitted and is being processed.`,
+                        type: 'withdrawal',
+                        read: false
+                    });
+
+                    showToast(`Withdrawal request of ${formatCurrency(amount)} submitted successfully!`, 'success');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'dashboard.html';
+                    }, 1500);
+
+                } catch (error) {
+                    console.error('Withdrawal error:', error);
+                    showToast('Withdrawal request failed. Please try again.', 'error');
+                } finally {
+                    showLoading(false);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-minus"></i> Submit Withdrawal';
+                }
+            }
+        }
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             initWithdrawPage();

@@ -147,6 +147,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module">
         import { authManager } from './js/auth.js';
+        import { showToast, showLoading, isValidEmail, checkPasswordStrength } from './js/utils.js';
         
         document.addEventListener('DOMContentLoaded', () => {
             initSignupPage();

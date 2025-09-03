@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MaxProfit Trading - Professional Trading Platform</title>
+    <meta
+      name="description"
+      content="AI-powered trading platform for crypto, forex, and stocks. Advanced analytics and secure trading."
+    />
+
+    <link rel="icon" type="image/svg+xml" href="img/logo.svg" />
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/landing.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <nav class="navbar" id="navbar">
+      <div class="nav-container">
+        <div class="nav-logo">
+          <i class="fas fa-chart-line"></i>
+          <span>MaxProfit</span>
+        </div>
+
+        <ul class="nav-menu" id="nav-menu">
+          <li><a href="#home" class="nav-link">Home</a></li>
+          <li><a href="#about" class="nav-link">About</a></li>
+          <li><a href="#features" class="nav-link">Features</a></li>
+          <li><a href="#testimonials" class="nav-link">Testimonials</a></li>
+        </ul>
+
+        <div class="nav-actions">
+          <button class="theme-toggle" id="theme-toggle">
+            <i class="fas fa-sun"></i>
+          </button>
+          <a href="login.html" class="btn btn-outline">Login</a>
+          <a href="signup.html" class="btn btn-primary">Get Started</a>
+        </div>
+
+        <div class="hamburger" id="hamburger">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </nav>
+
+    <section class="hero" id="home">
+      <div class="hero-container">
+        <div class="hero-content">
+          <h1 class="hero-title">
+            Maximize Your <span class="gradient-text">Trading Profits</span>
+            with Professional Tools
+          </h1>
+          <p class="hero-subtitle">
+            Trade crypto, forex, and stocks with our next-generation platform.
+            Get real-time analytics, secure transactions, and 24/7 support.
+          </p>
+          <div class="hero-actions">
+            <a href="signup.html" class="btn btn-primary btn-large">
+              <i class="fas fa-rocket"></i>
+              Start Trading Now
+            </a>
+            <a href="login.html" class="btn btn-outline btn-large">
+              <i class="fas fa-sign-in-alt"></i>
+              Login
+            </a>
+          </div>
+          <div class="hero-stats">
+            <div class="stat-item">
+              <span class="stat-number">$2.5B+</span>
+              <span class="stat-label">Daily Volume</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">150K+</span>
+              <span class="stat-label">Active Traders</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-number">99.9%</span>
+              <span class="stat-label">Uptime</span>
+            </div>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="live-chart-card">
+            <div class="chart-header">
+              <div class="chart-title">
+                <h3>Bitcoin Live Chart</h3>
+                <span class="status-indicator"></span>
+              </div>
+              <div class="price-info">
+                <span class="current-price" id="hero-btc-price">$43,250.00</span>
+                <span class="price-change positive" id="hero-btc-change">+2.45%</span>
+              </div>
+            </div>
+            <div class="live-chart-container">
+              <div class="tradingview-widget-container">
+                <div id="tradingview_hero"></div>
+              </div>
+            </div>
+            <div class="chart-stats">
+              <div class="stat">
+                <span class="label">24h High</span>
+                <span class="value" id="btc-high">$43,850</span>
+              </div>
+              <div class="stat">
+                <span class="label">24h Low</span>
+                <span class="value" id="btc-low">$42,150</span>
+              </div>
+              <div class="stat">
+                <span class="label">Volume</span>
+                <span class="value" id="btc-volume">$2.1B</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="market-ticker">
+      <div class="ticker-container">
+        <div class="ticker-content" id="ticker-content">
+          <div class="ticker-item">
+            <span class="ticker-symbol">BTC/USD</span>
+            <span class="ticker-price">$43,250.00</span>
+            <span class="ticker-change positive">+2.45%</span>
+          </div>
+          <div class="ticker-item">
+            <span class="ticker-symbol">ETH/USD</span>
+            <span class="ticker-price">$2,580.00</span>
+            <span class="ticker-change positive">+1.23%</span>
+          </div>
+          <div class="ticker-item">
+            <span class="ticker-symbol">EUR/USD</span>
+            <span class="ticker-price">1.0856</span>
+            <span class="ticker-change negative">-0.15%</span>
+          </div>
+          <div class="ticker-item">
+            <span class="ticker-symbol">GBP/USD</span>
+            <span class="ticker-price">1.2734</span>
+            <span class="ticker-change positive">+0.34%</span>
+          </div>
+          <div class="ticker-item">
+            <span class="ticker-symbol">AAPL</span>
+            <span class="ticker-price">$185.23</span>
+            <span class="ticker-change positive">+0.89%</span>
+          </div>
+          <div class="ticker-item">
+            <span class="ticker-symbol">TSLA</span>
+            <span class="ticker-price">$234.67</span>
+            <span class="ticker-change negative">-1.45%</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="about" id="about">
+      <div class="container">
+        <div class="section-header">
+          <h2>About MaxProfit Trading</h2>
+          <p>
+            Building the future of financial markets with cutting-edge
+            technology
+          </p>
+        </div>
+
+        <div class="about-grid">
+          <div class="about-content">
+            <h3>Our Mission</h3>
+            <p>
+              To democratize financial markets by providing retail traders with
+              institutional-grade tools and professional insights.
+            </p>
+
+            <h3>Our Vision</h3>
+            <p>
+              To become the world's most trusted trading platform, empowering
+              millions of traders through smart technology.
+            </p>
+
+            <div class="about-features">
+              <div class="feature-item">
+                <i class="fas fa-shield-alt"></i>
+                <span>Bank-Grade Security</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-chart-line"></i>
+                <span>Professional Analytics</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-globe"></i>
+                <span>Global Markets Access</span>
+              </div>
+              <div class="feature-item">
+                <i class="fas fa-clock"></i>
+                <span>24/7 Trading Support</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="about-visual">
+            <div class="glass-card">
+              <div class="card-content">
+                <h4>Platform Statistics</h4>
+                <div class="stats-grid">
+                  <div class="stat">
+                    <span class="number">150,000+</span>
+                    <span class="label">Active Users</span>
+                  </div>
+                  <div class="stat">
+                    <span class="number">50+</span>
+                    <span class="label">Cryptocurrencies</span>
+                  </div>
+                  <div class="stat">
+                    <span class="number">100+</span>
+                    <span class="label">Forex Pairs</span>
+                  </div>
+                  <div class="stat">
+                    <span class="number">5,000+</span>
+                    <span class="label">Stocks</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features" id="features">
+      <div class="container">
+        <div class="section-header">
+          <h2>Platform Features</h2>
+          <p>
+            Everything you need for successful trading in one powerful platform
+          </p>
+        </div>
+
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-chart-line"></i>
+            </div>
+            <h3>Professional Analytics</h3>
+            <p>
+              Get comprehensive market analysis and trading insights powered by
+              advanced algorithms and real-time data.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-coins"></i>
+            </div>
+            <h3>Multi-Asset Trading</h3>
+            <p>
+              Trade cryptocurrencies, forex pairs, and stocks all from one
+              unified platform with competitive spreads.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-mobile-alt"></i>
+            </div>
+            <h3>Mobile-First Design</h3>
+            <p>
+              Access your portfolio and trade on-the-go with our responsive
+              platform optimized for all devices.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-lock"></i>
+            </div>
+            <h3>Enterprise Security</h3>
+            <p>
+              Your funds and data are protected by military-grade encryption and
+              multi-factor authentication.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-tachometer-alt"></i>
+            </div>
+            <h3>Real-Time Execution</h3>
+            <p>
+              Lightning-fast order execution with minimal latency for optimal
+              trading performance.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-headset"></i>
+            </div>
+            <h3>24/7 Support</h3>
+            <p>
+              Get help whenever you need it with our round-the-clock customer
+              support team.
+            </p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="testimonials" id="testimonials">
+      <div class="container">
+        <div class="section-header">
+          <h2>What Our Traders Say</h2>
+          <p>Join thousands of successful traders who trust MaxProfit</p>
+        </div>
+
+        <div class="testimonials-grid">
+          <div class="testimonial-card">
+            <div class="testimonial-content">
+              <div class="stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p>
+                "MaxProfit's professional tools have completely transformed my trading
+                strategy. I've increased my portfolio by 40% in just 6 months."
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <img
+                src="https://images.pexels.com/photos/3777946/pexels-photo-3777946.jpeg?w=100&h=100&fit=crop&crop=face"
+                alt="Sarah Chen"
+              />
+              <div class="author-info">
+                <span class="name">Sarah Chen</span>
+                <span class="title">Cryptocurrency Trader</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testimonial-content">
+              <div class="stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p>
+                "The platform is incredibly intuitive and the customer support
+                is outstanding. I switched from my previous broker and couldn't
+                be happier."
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <img
+                src="https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?w=100&h=100&fit=crop&crop=face"
+                alt="Marcus Rodriguez"
+              />
+              <div class="author-info">
+                <span class="name">Marcus Rodriguez</span>
+                <span class="title">Forex Trader</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="testimonial-card">
+            <div class="testimonial-content">
+              <div class="stars">
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+                <i class="fas fa-star"></i>
+              </div>
+              <p>
+                "As a day trader, execution speed is everything. MaxProfit
+                delivers lightning-fast trades with zero slippage. Highly
+                recommended!"
+              </p>
+            </div>
+            <div class="testimonial-author">
+              <img
+                src="https://images.pexels.com/photos/3184317/pexels-photo-3184317.jpeg?w=100&h=100&fit=crop&crop=face"
+                alt="Jessica Wu"
+              />
+              <div class="author-info">
+                <span class="name">Jessica Wu</span>
+                <span class="title">Day Trader</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta">
+      <div class="container">
+        <div class="cta-content">
+          <h2>Ready to Start Your Trading Journey?</h2>
+          <p>
+            Join over 150,000 traders who trust MaxProfit for their financial
+            success
+          </p>
+          <div class="cta-actions">
+            <a href="signup.html" class="btn btn-primary btn-large">
+              <i class="fas fa-rocket"></i>
+              Create Free Account
+            </a>
+            <button class="btn btn-outline btn-large" onclick="scrollToSection('features')">
+              <i class="fas fa-info-circle"></i>
+              Learn More
+            </button>
+          </div>
+          <p class="cta-note">
+            <i class="fas fa-shield-alt"></i>
+            No hidden fees • Bank-grade security • Instant setup
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer">
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-section">
+            <div class="footer-logo">
+              <i class="fas fa-chart-line"></i>
+              <span>MaxProfit Trading</span>
+            </div>
+            <p>
+              The next-generation trading platform powered by advanced technology, designed for
+              both beginner and professional traders.
+            </p>
+            <div class="social-links">
+              <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+              <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+              <a href="#" aria-label="Facebook"><i class="fab fa-facebook"></i></a>
+              <a href="#" aria-label="Telegram"><i class="fab fa-telegram"></i></a>
+            </div>
+          </div>
+
+          <div class="footer-section">
+            <h4>Platform</h4>
+            <ul>
+              <li><a href="login.html">Login</a></li>
+              <li><a href="signup.html">Sign Up</a></li>
+              <li><a href="#features">Features</a></li>
+              <li><a href="#about">About</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h4>Resources</h4>
+            <ul>
+              <li><a href="#">FAQ</a></li>
+              <li><a href="#">Support</a></li>
+              <li><a href="#">API Documentation</a></li>
+              <li><a href="#">Trading Guide</a></li>
+            </ul>
+          </div>
+
+          <div class="footer-section">
+            <h4>Legal</h4>
+            <ul>
+              <li><a href="#">Terms of Service</a></li>
+              <li><a href="#">Privacy Policy</a></li>
+              <li><a href="#">Risk Disclosure</a></li>
+              <li><a href="#">Compliance</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="footer-bottom">
+          <p>&copy; 2025 MaxProfit Trading. All rights reserved.</p>
+          <p>
+            <strong>Risk Warning:</strong> Trading involves substantial risk and
+            may result in loss of capital.
+          </p>
+        </div>
+      </div>
+    </footer>
+
+    <!-- TradingView Widget Script -->
+    <script src="https://s3.tradingview.com/tv.js"></script>
+    <script type="module">
+      import { realTimePrices } from './js/realtime.js';
+      
+      // Initialize TradingView widget
+      function initTradingViewWidget() {
+        try {
+          new TradingView.widget({
+            width: "100%",
+            height: 250,
+            symbol: "BINANCE:BTCUSDT",
+            interval: "15",
+            timezone: "Etc/UTC",
+            theme: document.documentElement.getAttribute('data-theme') || 'dark',
+            style: "1",
+            locale: "en",
+            toolbar_bg: "transparent",
+            enable_publishing: false,
+            allow_symbol_change: false,
+            hide_top_toolbar: true,
+            hide_legend: true,
+            save_image: false,
+            hide_side_toolbar: true,
+            studies: [],
+            overrides: {
+              "paneProperties.background": "transparent",
+              "paneProperties.backgroundType": "solid"
+            },
+            container_id: "tradingview_hero",
+            autosize: true,
+            studies_overrides: {}
+          });
+        } catch (error) {
+          console.error('TradingView widget error:', error);
+          // Fallback: show static chart placeholder
+          document.getElementById('tradingview_hero').innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; height: 250px; background: var(--bg-tertiary); border-radius: 8px; color: var(--text-secondary);">
+              <i class="fas fa-chart-line" style="font-size: 2rem; margin-right: 1rem;"></i>
+              <span>Live Chart Loading...</span>
+            </div>
+          `;
+        }
+      }
+      
+      // Initialize landing page functionality
+      class LandingPage {
+        constructor() {
+          this.init();
+        }
+        
+        init() {
+          this.setupNavigation();
+          this.setupScrollEffects();
+          this.setupAnimations();
+          this.startPriceUpdates();
+          
+          // Initialize TradingView widget after DOM is ready
+          setTimeout(initTradingViewWidget, 1000);
+        }
+        
+        setupNavigation() {
+          const navbar = document.getElementById('navbar');
+          const hamburger = document.getElementById('hamburger');
+          const navMenu = document.getElementById('nav-menu');
+          
+          // Navbar scroll effect
+          window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+              navbar.classList.add('scrolled');
+            } else {
+              navbar.classList.remove('scrolled');
+            }
+          });
+          
+          // Mobile menu toggle
+          if (hamburger && navMenu) {
+            hamburger.addEventListener('click', () => {
+              hamburger.classList.toggle('active');
+              navMenu.classList.toggle('active');
+            });
+          }
+          
+          // Smooth scroll for navigation links
+          const navLinks = document.querySelectorAll('.nav-link');
+          navLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+              const href = link.getAttribute('href');
+              if (href.startsWith('#')) {
+                e.preventDefault();
+                const target = document.querySelector(href);
+                if (target) {
+                  target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                  });
+                }
+                
+                // Close mobile menu
+                hamburger?.classList.remove('active');
+                navMenu?.classList.remove('active');
+              }
+            });
+          });
+        }
+        
+        setupScrollEffects() {
+          // Intersection Observer for animations
+          const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+          };
+          
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('animate-in');
+              }
+            });
+          }, observerOptions);
+          
+          // Observe elements for animation
+          const animateElements = document.querySelectorAll(
+            '.feature-card, .testimonial-card, .stat-item, .about-content, .about-visual'
+          );
+          
+          animateElements.forEach(el => {
+            observer.observe(el);
+          });
+        }
+        
+        setupAnimations() {
+          // Add CSS for animations
+          const style = document.createElement('style');
+          style.textContent = `
+            .feature-card,
+            .testimonial-card,
+            .stat-item,
+            .about-content,
+            .about-visual {
+              opacity: 0;
+              transform: translateY(30px);
+              transition: all 0.6s ease-out;
+            }
+            
+            .animate-in {
+              opacity: 1 !important;
+              transform: translateY(0) !important;
+            }
+            
+            .feature-card:nth-child(2) { transition-delay: 0.1s; }
+            .feature-card:nth-child(3) { transition-delay: 0.2s; }
+            .testimonial-card:nth-child(2) { transition-delay: 0.1s; }
+            .testimonial-card:nth-child(3) { transition-delay: 0.2s; }
+            .stat-item:nth-child(2) { transition-delay: 0.1s; }
+            .stat-item:nth-child(3) { transition-delay: 0.2s; }
+          `;
+          
+          document.head.appendChild(style);
+        }
+        
+        startPriceUpdates() {
+          // Start real-time price engine
+          realTimePrices.start();
+          
+          // Subscribe to BTC price updates
+          realTimePrices.subscribe('BTC/USD', (priceData) => {
+            this.updateHeroPrice(priceData);
+          });
+          
+          // Update ticker prices
+          this.updateTickerPrices();
+          setInterval(() => this.updateTickerPrices(), 10000);
+        }
+        
+        updateHeroPrice(priceData) {
+          const priceElement = document.getElementById('hero-btc-price');
+          const changeElement = document.getElementById('hero-btc-change');
+          
+          if (priceElement) {
+            priceElement.textContent = `$${priceData.price.toLocaleString()}`;
+          }
+          
+          if (changeElement) {
+            const isPositive = priceData.changePercent >= 0;
+            changeElement.textContent = `${isPositive ? '+' : ''}${priceData.changePercent.toFixed(2)}%`;
+            changeElement.className = `price-change ${isPositive ? 'positive' : 'negative'}`;
+          }
+        }
+        
+        updateTickerPrices() {
+          const tickerItems = document.querySelectorAll('.ticker-item');
+          const symbols = ['BTC/USD', 'ETH/USD', 'EUR/USD', 'GBP/USD', 'AAPL', 'TSLA'];
+          
+          tickerItems.forEach((item, index) => {
+            if (symbols[index]) {
+              const priceData = realTimePrices.getPriceData(symbols[index]);
+              if (priceData) {
+                const priceEl = item.querySelector('.ticker-price');
+                const changeEl = item.querySelector('.ticker-change');
+                
+                if (priceEl) {
+                  priceEl.textContent = `$${priceData.price.toLocaleString()}`;
+                }
+                
+                if (changeEl) {
+                  const isPositive = priceData.changePercent >= 0;
+                  changeEl.textContent = `${isPositive ? '+' : ''}${priceData.changePercent.toFixed(2)}%`;
+                  changeEl.className = `ticker-change ${isPositive ? 'positive' : 'negative'}`;
+                }
+              }
+            }
+          });
+        }
+      }
+      
+      // Global functions
+      window.scrollToSection = function(sectionId) {
+        const section = document.getElementById(sectionId);
+        if (section) {
+          section.scrollIntoView({ behavior: 'smooth' });
+        }
+      };
+      
+      // Initialize landing page
+      new LandingPage();
+    </script>
+</body>
+</html>

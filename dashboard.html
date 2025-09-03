@@ -453,11 +453,35 @@
     </div>
 
     <!-- Scripts -->
-    <script src="js/utils.js"></script>
-    <script src="js/config.js"></script>
-    <script src="js/state.js"></script>
-    <script src="js/session.js"></script>
-    <script type="module" src="js/charts.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://s3.tradingview.com/tv.js"></script>
     <script type="module" src="js/dashboard.js"></script>
+    <script type="text/javascript">
+      // Initialize TradingView widget for dashboard
+      document.addEventListener('DOMContentLoaded', () => {
+        setTimeout(() => {
+          try {
+            new TradingView.widget({
+              "width": "100%",
+              "height": 400,
+              "symbol": "BINANCE:BTCUSDT",
+              "interval": "15",
+              "timezone": "Etc/UTC",
+              "theme": document.documentElement.getAttribute('data-theme') || 'dark',
+              "style": "1",
+              "locale": "en",
+              "toolbar_bg": "transparent",
+              "enable_publishing": false,
+              "allow_symbol_change": true,
+              "hide_side_toolbar": false,
+              "container_id": "tradingview_dashboard",
+              "autosize": true
+            });
+          } catch (error) {
+            console.error('TradingView widget error:', error);
+          }
+        }, 1000);
+      });
+    </script>
 </body>
 </html>

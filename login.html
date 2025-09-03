@@ -64,7 +64,7 @@
                         <span class="checkmark"></span>
                         Remember me
                     </label>
-                    <a href="#" class="forgot-password">Forgot Password?</a>
+                    <a href="#" class="forgot-password" id="forgot-password">Forgot Password?</a>
                 </div>
 
                 <button type="submit" class="btn btn-primary btn-large" id="login-btn">
@@ -108,25 +108,23 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/crypto.js"></script>
-    <script src="js/session.js"></script>
-    <script src="js/state.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
+    <script type="module">
+        import { authManager } from './js/auth.js';
+        
         document.addEventListener('DOMContentLoaded', () => {
             initLoginPage();
         });
 
-        const supabaseUrl = 'https://cwwcyqhzmelevlcrrecc.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3d2N5cWh6bWVsZXZsY3JyZWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDg3OTIsImV4cCI6MjA3MDc4NDc5Mn0.iE6sZQHqb_wjGk19DBcKtw-xePnpzVqd-Lfw2DafKho';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
         async function initLoginPage() {
             // Check if user is already logged in
-            if (SessionManager.isAuthenticated()) {
-                window.location.href = 'dashboard.html';
+            if (await authManager.checkSession()) {
+                const profile = authManager.getProfile();
+                if (profile?.role === 'admin') {
+                    window.location.href = 'admin.html';
+                } else {
+                    window.location.href = 'dashboard.html';
+                }
                 return;
             }
 
@@ -135,6 +133,7 @@
             const passwordInput = document.getElementById('password');
             const passwordToggle = document.getElementById('password-toggle');
             const submitBtn = document.getElementById('login-btn');
+            const forgotPasswordLink = document.getElementById('forgot-password');
 
             // Password visibility toggle
             passwordToggle.addEventListener('click', () => {
@@ -145,7 +144,39 @@
                     : '<i class="fas fa-eye-slash"></i>';
             });
 
-            // Form validation and submission
+            // Forgot password handler
+            forgotPasswordLink.addEventListener('click', async (e) => {
+                e.preventDefault();
+                const email = emailInput.value.trim();
+                
+                if (!email) {
+                    showToast('Please enter your email address first', 'warning');
+                    emailInput.focus();
+                    return;
+                }
+                
+                if (!isValidEmail(email)) {
+                    showToast('Please enter a valid email address', 'error');
+                    return;
+                }
+                
+                try {
+                    showLoading(true);
+                    const result = await authManager.forgotPassword(email);
+                    
+                    if (result.success) {
+                        showToast('Password reset email sent! Check your inbox.', 'success');
+                    } else {
+                        showToast(result.error || 'Failed to send reset email', 'error');
+                    }
+                } catch (error) {
+                    showToast('Failed to send reset email', 'error');
+                } finally {
+                    showLoading(false);
+                }
+            });
+
+            // Form submission
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 
@@ -158,42 +189,22 @@
 
                     const email = emailInput.value.trim().toLowerCase();
                     const password = passwordInput.value;
-                    const rememberMe = document.getElementById('remember').checked;
                     
-                    // Check if user exists in local state and is verified
-                    const localUser = state.getUserByEmail(email);
-                    if (!localUser) {
-                        showToast('User not found. Please sign up first.', 'error');
-                        return;
-                    }
+                    const result = await authManager.login(email, password);
                     
-                    if (!localUser.emailVerified) {
-                        showToast('Please verify your email before logging in.', 'error');
-                        setTimeout(() => {
-                            window.location.href = `verify.html?email=${encodeURIComponent(email)}`;
-                        }, 2000);
-                        return;
-                    }
-                    
-                    // Supabase authentication
-                    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-                    if (error) {
-                        showToast(error.message, 'error');
-                    } else {
-                        // Update last login time
-                        state.updateUser(localUser._id, { lastLoginAt: Date.now() });
-                        
-                        // Create session
-                        SessionManager.createSession(localUser, rememberMe);
-                        
+                    if (result.success) {
                         showToast('Login successful! Redirecting...', 'success');
+                        
                         setTimeout(() => {
-                            if (localUser.role === 'admin') {
+                            const profile = authManager.getProfile();
+                            if (profile?.role === 'admin') {
                                 window.location.href = 'admin.html';
                             } else {
                                 window.location.href = 'dashboard.html';
                             }
                         }, 1000);
+                    } else {
+                        showToast(result.error || 'Login failed', 'error');
                     }
                 } catch (error) {
                     console.error('Login error:', error);
@@ -239,24 +250,6 @@
                 return validateField('email') && validateField('password');
             }
         }
-        
-        // Add forgot password modal functionality
-        document.addEventListener('click', async (e) => {
-            if (e.target.classList.contains('forgot-password')) {
-                e.preventDefault();
-                const email = document.getElementById('email').value.trim();
-                if (!email) {
-                    showToast('Please enter your email above first.', 'info');
-                    return;
-                }
-                const { error } = await supabase.auth.resetPasswordForEmail(email);
-                if (error) {
-                    showToast(error.message, 'error');
-                } else {
-                    showToast('Password reset email sent! Check your inbox.', 'success');
-                }
-            }
-        });
     </script>
 </body>
 </html>

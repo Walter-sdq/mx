@@ -69,13 +69,18 @@
         </div>
     </div>
 
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+    </div>
+
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/state.js"></script>
-    <script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module">
+        import { authManager } from './js/auth.js';
+        
         document.addEventListener('DOMContentLoaded', () => {
             initVerificationPage();
         });
@@ -89,9 +94,9 @@
                 document.getElementById('user-email').textContent = email;
             }
             
-            // If token is provided, verify automatically
+            // If token is provided, handle email confirmation
             if (token) {
-                await verifyEmailToken(token);
+                await handleEmailConfirmation(token);
                 return;
             }
             
@@ -100,53 +105,52 @@
 
         function setupVerificationHandlers(email) {
             const resendBtn = document.getElementById('resend-btn');
+            
             resendBtn.addEventListener('click', async () => {
                 if (!email) {
                     showToast('Email address not found', 'error');
                     return;
                 }
+                
                 try {
+                    showLoading(true);
                     resendBtn.disabled = true;
                     resendBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-                    // Supabase resend verification email
-                    const { error } = await window.supabase.auth.resend({
-                        type: 'signup',
-                        email: email
-                    });
-                    if (error) {
-                        showToast('Failed to send verification email', 'error');
+                    
+                    const result = await authManager.resendVerification(email);
+                    
+                    if (result.success) {
+                        showToast('Verification email sent successfully! Check your inbox.', 'success');
                     } else {
-                        showToast('Verification email sent successfully', 'success');
+                        showToast(result.error || 'Failed to send verification email', 'error');
                     }
                 } catch (error) {
+                    console.error('Resend verification error:', error);
                     showToast('Failed to send verification email', 'error');
                 } finally {
+                    showLoading(false);
                     resendBtn.disabled = false;
                     resendBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Resend Verification Email';
                 }
             });
         }
 
-        async function verifyEmailToken(token) {
+        async function handleEmailConfirmation(token) {
             try {
-                // Auto-verify for demo purposes
-                const urlParams = new URLSearchParams(window.location.search);
-                const email = urlParams.get('email');
+                showLoading(true);
                 
-                if (email) {
-                    const user = state.getUserByEmail(email);
-                    if (user) {
-                        state.updateUser(user._id, { emailVerified: true });
-                    }
-                    showToast('Email verified successfully! You can now login.', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'login.html';
-                    }, 2000);
-                } else {
-                    showToast('Verification failed', 'error');
-                }
+                // Supabase handles email confirmation automatically
+                showToast('Email verified successfully! You can now login.', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'login.html';
+                }, 2000);
+                
             } catch (error) {
-                showToast('Verification failed', 'error');
+                console.error('Email confirmation error:', error);
+                showToast('Email verification failed. Please try again.', 'error');
+            } finally {
+                showLoading(false);
             }
         }
     </script>

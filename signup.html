@@ -144,24 +144,17 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="js/crypto.js"></script>
-    <script src="js/session.js"></script>
-    <script src="js/state.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
+    <script type="module">
+        import { authManager } from './js/auth.js';
+        
         document.addEventListener('DOMContentLoaded', () => {
             initSignupPage();
         });
 
-        const supabaseUrl = 'https://cwwcyqhzmelevlcrrecc.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3d2N5cWh6bWVsZXZsY3JyZWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDg3OTIsImV4cCI6MjA3MDc4NDc5Mn0.iE6sZQHqb_wjGk19DBcKtw-xePnpzVqd-Lfw2DafKho';
-        const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-
         async function initSignupPage() {
             // Check if user is already logged in
-            if (SessionManager.isAuthenticated()) {
+            if (await authManager.checkSession()) {
                 window.location.href = 'dashboard.html';
                 return;
             }
@@ -180,43 +173,38 @@
             setupPasswordToggle('password', 'password-toggle');
             setupPasswordToggle('confirmPassword', 'confirm-password-toggle');
 
-            // Form validation and submission
+            // Form submission
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                const email = document.getElementById('email').value.trim();
-                const password = document.getElementById('password').value;
+                
                 if (!validateForm()) return;
-                showLoading(true);
+
                 try {
-                    const { data, error } = await supabase.auth.signUp({ email, password });
-                    if (error) {
-                        showToast(error.message, 'error');
-                    } else if (data && data.user && data.user.id) {
-                        // Create user profile in local state
-                        const userData = {
-                            email: email,
-                            fullName: inputs.fullName.value.trim(),
-                            role: 'user'
-                        };
-                        state.createUser(userData);
-                        // Insert user profile into Supabase users table
-                        await supabase.from('users').insert({
-                            id: data.user.id,
-                            email: email,
-                            full_name: inputs.fullName.value.trim()
-                        });
-                        showToast('Signup successful! You can now log in.', 'success');
+                    showLoading(true);
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+
+                    const email = inputs.email.value.trim().toLowerCase();
+                    const password = inputs.password.value;
+                    const fullName = inputs.fullName.value.trim();
+                    
+                    const result = await authManager.register(email, password, fullName);
+                    
+                    if (result.success) {
+                        showToast('Account created successfully! Please check your email to verify your account.', 'success');
                         setTimeout(() => {
-                            window.location.href = 'login.html';
-                        }, 1500);
+                            window.location.href = `verify.html?email=${encodeURIComponent(email)}`;
+                        }, 2000);
                     } else {
-                        showToast('Signup failed: No user returned.', 'error');
+                        showToast(result.error || 'Failed to create account', 'error');
                     }
                 } catch (error) {
                     console.error('Signup error:', error);
                     showToast('An error occurred during signup. Please try again.', 'error');
                 } finally {
                     showLoading(false);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = '<i class="fas fa-rocket"></i> Create Account';
                 }
             });
 
@@ -249,12 +237,17 @@
                 const strengthElement = document.getElementById('password-strength');
                 const strength = checkPasswordStrength(password);
                 
-                strengthElement.innerHTML = `
-                    <div class="strength-bar ${strength.class}">
-                        <div class="strength-fill"></div>
-                    </div>
-                    <span class="strength-text">${strength.text}</span>
-                `;
+                if (password) {
+                    strengthElement.classList.add('visible');
+                    strengthElement.innerHTML = `
+                        <div class="strength-bar ${strength.class}">
+                            <div class="strength-fill"></div>
+                        </div>
+                        <span class="strength-text">${strength.text}</span>
+                    `;
+                } else {
+                    strengthElement.classList.remove('visible');
+                }
             }
 
             function validateField(fieldName) {

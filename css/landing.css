@@ -304,9 +304,21 @@
 .live-chart-container {
   height: 200px;
   margin-bottom: var(--spacing-4);
-  background: transparent;
+  background: var(--bg-tertiary);
   border-radius: var(--border-radius-lg);
   position: relative;
+  overflow: hidden;
+}
+
+.tradingview-widget-container {
+  width: 100%;
+  height: 100%;
+  border-radius: var(--border-radius-lg);
+  overflow: hidden;
+}
+
+.tradingview-widget-container iframe {
+  border-radius: var(--border-radius-lg);
 }
 
 .chart-stats {
@@ -1070,7 +1082,7 @@
   }
   
   .live-chart-container {
-    height: 150px;
+    height: 180px;
   }
   
   .chart-stats {
@@ -1088,5 +1100,18 @@
   
   .chart-stats .value {
     font-size: var(--font-size-sm);
+  }
+  
+  .hero-container {
+    gap: var(--spacing-6);
+  }
+  
+  .hero-stats {
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--spacing-3);
+  }
+  
+  .stat-number {
+    font-size: var(--font-size-lg);
   }
 }

@@ -1,8 +1,13 @@
-// Dashboard JavaScript - Mobile Trading App
+// Dashboard JavaScript - Production Ready
+import { authManager } from './auth.js';
+import { apiClient } from './api.js';
+import { realTimePrices } from './realtime.js';
+import { formatCurrency, formatDateTime, getRelativeTime, showToast, showLoading } from './utils.js';
 
 class TradingDashboard {
     constructor() {
         this.currentUser = null;
+        this.currentProfile = null;
         this.currentPage = 'home';
         this.isBalanceVisible = true;
         this.currentSymbol = 'BTC/USD';
@@ -13,64 +18,78 @@ class TradingDashboard {
         this.init();
     }
 
-    init() {
+    async init() {
+        // Check authentication
+        if (!authManager.isAuthenticated()) {
+            window.location.href = 'login.html';
+            return;
+        }
+
+        this.currentUser = authManager.getUser();
+        this.currentProfile = authManager.getProfile();
+
+        if (!this.currentUser || !this.currentProfile) {
+            window.location.href = 'login.html';
+            return;
+        }
+
         this.updateTime();
         this.setupEventListeners();
-        this.loadUserData();
+        await this.loadUserData();
         this.updateUI();
         this.startRealTimeUpdates();
         setInterval(() => this.updateTime(), 60000);
     }
     
     async loadUserData() {
-        const session = SessionManager.getSession();
-        if (!session) {
-            window.location.href = 'login.html';
-            return;
+        try {
+            // Load user transactions
+            const { data: transactions } = await apiClient.getTransactions(this.currentUser.id);
+            this.transactions = transactions || [];
+            
+            // Load user trades
+            const { data: trades } = await apiClient.getTrades(this.currentUser.id);
+            this.positions = (trades || []).filter(trade => trade.status === 'open');
+            
+            // Load user notifications
+            const { data: notifications } = await apiClient.getNotifications(this.currentUser.id);
+            this.notifications = notifications || [];
+            
+            this.updateUserInterface();
+        } catch (error) {
+            console.error('Failed to load user data:', error);
+            showToast('Failed to load user data', 'error');
         }
-        
-        // Get user from local state
-        this.currentUser = state.getUserById(session.userId);
-        if (!this.currentUser) {
-            SessionManager.clearSession();
-            window.location.href = 'login.html';
-            return;
-        }
-        
-        this.updateUserInterface();
-        this.loadUserTransactions();
-        this.loadUserNotifications();
     }
 
     updateUserInterface() {
-        if (!this.currentUser) return;
+        if (!this.currentProfile) return;
         
         // Update username display
         const usernameEl = document.getElementById('username');
-        if (usernameEl) usernameEl.textContent = this.currentUser.fullName;
+        if (usernameEl) usernameEl.textContent = this.currentProfile.full_name;
         
         // Update profile page
-        const profileNameEl = document.getElementById('profile-name');
-        const profileEmailEl = document.getElementById('profile-email');
-        if (profileNameEl) profileNameEl.textContent = this.currentUser.fullName;
-        if (profileEmailEl) profileEmailEl.textContent = this.currentUser.email;
+        const profileNameEl = document.getElementById('profileName');
+        const profileEmailEl = document.getElementById('profileEmail');
+        if (profileNameEl) profileNameEl.textContent = this.currentProfile.full_name;
+        if (profileEmailEl) profileEmailEl.textContent = this.currentProfile.email;
         
         this.updatePortfolioFromUser();
         this.updateProfileStats();
     }
     
     updateProfileStats() {
-        if (!this.currentUser) return;
+        if (!this.currentProfile) return;
         
-        const trades = state.getTrades(this.currentUser._id);
-        const totalTrades = trades.length;
-        const winningTrades = trades.filter(t => t.pnl > 0).length;
+        const totalTrades = this.transactions.filter(t => t.type === 'trade').length;
+        const winningTrades = this.transactions.filter(t => t.type === 'trade' && t.amount > 0).length;
         const winRate = totalTrades > 0 ? (winningTrades / totalTrades * 100).toFixed(1) : 0;
-        const daysActive = Math.floor((Date.now() - this.currentUser.createdAt) / (24 * 60 * 60 * 1000));
+        const daysActive = Math.floor((Date.now() - new Date(this.currentProfile.created_at).getTime()) / (24 * 60 * 60 * 1000));
         
-        const totalTradesEl = document.getElementById('total-trades');
-        const winRateEl = document.getElementById('win-rate');
-        const daysActiveEl = document.getElementById('days-active');
+        const totalTradesEl = document.getElementById('profileTotalTrades');
+        const winRateEl = document.getElementById('profileWinRate');
+        const daysActiveEl = document.getElementById('profileDaysActive');
         
         if (totalTradesEl) totalTradesEl.textContent = totalTrades;
         if (winRateEl) winRateEl.textContent = `${winRate}%`;
@@ -78,11 +97,13 @@ class TradingDashboard {
     }
 
     updatePortfolioFromUser() {
-        if (!this.currentUser) return;
+        if (!this.currentProfile) return;
         
-        const { USD, BTC, ETH } = this.currentUser.balances;
-        const prices = state.getPrices();
-        const totalValue = USD + (BTC * prices['BTC/USD']) + (ETH * prices['ETH/USD']);
+        const balances = this.currentProfile.balances || { USD: 0, BTC: 0, ETH: 0 };
+        const prices = realTimePrices.getAllPrices();
+        const totalValue = balances.USD + 
+                          (balances.BTC * (prices['BTC/USD'] || 43250)) + 
+                          (balances.ETH * (prices['ETH/USD'] || 2580));
         
         const balanceEl = document.getElementById('portfolioBalance');
         const availableEl = document.getElementById('available-balance');
@@ -92,14 +113,16 @@ class TradingDashboard {
         }
         
         if (availableEl) {
-            availableEl.textContent = formatCurrency(USD);
+            availableEl.textContent = formatCurrency(balances.USD);
         }
         
         // Calculate today's P&L from trades
         const todayStart = new Date().setHours(0, 0, 0, 0);
-        const todayTrades = state.getTrades(this.currentUser._id)
-            .filter(t => t.openedAt >= todayStart && t.status === 'closed');
-        const todayPnL = todayTrades.reduce((sum, trade) => sum + (trade.pnl || 0), 0);
+        const todayTrades = this.transactions.filter(t => 
+            t.type === 'trade' && 
+            new Date(t.created_at).getTime() >= todayStart
+        );
+        const todayPnL = todayTrades.reduce((sum, trade) => sum + (trade.amount || 0), 0);
         
         const pnlEl = document.getElementById('pnl-today');
         if (pnlEl) {
@@ -108,28 +131,13 @@ class TradingDashboard {
         }
         
         // Calculate margin used from open trades
-        const openTrades = state.getTrades(this.currentUser._id)
-            .filter(t => t.status === 'open');
-        const marginUsed = openTrades.reduce((sum, trade) => sum + (trade.qty * trade.entryPrice), 0);
+        const marginUsed = this.positions.reduce((sum, trade) => 
+            sum + (trade.quantity * trade.entry_price), 0);
         
         const marginEl = document.getElementById('margin-used');
         if (marginEl) {
             marginEl.textContent = formatCurrency(marginUsed);
         }
-    }
-    
-    loadUserTransactions() {
-        if (!this.currentUser) return;
-        
-        this.transactions = state.getTransactions(this.currentUser._id)
-            .sort((a, b) => b.createdAt - a.createdAt);
-    }
-    
-    loadUserNotifications() {
-        if (!this.currentUser) return;
-        
-        this.notifications = state.getNotifications(this.currentUser._id)
-            .sort((a, b) => b.createdAt - a.createdAt);
     }
 
     setupEventListeners() {
@@ -196,13 +204,35 @@ class TradingDashboard {
         const symbolList = document.getElementById('symbolList');
         if (!symbolList) return;
         
-        const symbols = APP_CONFIG.SYMBOLS[category] || [];
-        const prices = state.getPrices();
+        const symbols = {
+            crypto: [
+                { symbol: 'BTC/USD', name: 'Bitcoin' },
+                { symbol: 'ETH/USD', name: 'Ethereum' },
+                { symbol: 'LTC/USD', name: 'Litecoin' },
+                { symbol: 'XRP/USD', name: 'Ripple' },
+                { symbol: 'ADA/USD', name: 'Cardano' },
+                { symbol: 'DOT/USD', name: 'Polkadot' }
+            ],
+            forex: [
+                { symbol: 'EUR/USD', name: 'Euro / US Dollar' },
+                { symbol: 'GBP/USD', name: 'British Pound / US Dollar' },
+                { symbol: 'USD/JPY', name: 'US Dollar / Japanese Yen' },
+                { symbol: 'AUD/USD', name: 'Australian Dollar / US Dollar' }
+            ],
+            stocks: [
+                { symbol: 'AAPL', name: 'Apple Inc.' },
+                { symbol: 'GOOGL', name: 'Alphabet Inc.' },
+                { symbol: 'MSFT', name: 'Microsoft Corporation' },
+                { symbol: 'TSLA', name: 'Tesla Inc.' }
+            ]
+        };
         
-        symbolList.innerHTML = symbols.map(symbol => {
-            const price = prices[symbol.symbol] || 0;
-            const change = (Math.random() - 0.5) * price * 0.02; // Simulate change
-            const changePercent = (change / price) * 100;
+        const categorySymbols = symbols[category] || [];
+        
+        symbolList.innerHTML = categorySymbols.map(symbol => {
+            const priceData = realTimePrices.getPriceData(symbol.symbol);
+            const price = priceData?.price || 0;
+            const changePercent = priceData?.changePercent || 0;
             
             return `
                 <div class="symbol-item" onclick="tradingDashboard.selectSymbol('${symbol.symbol}')">
@@ -211,9 +241,9 @@ class TradingDashboard {
                         <span class="symbol-description">${symbol.name}</span>
                     </div>
                     <div class="symbol-price">
-                        <span class="price">$${price.toFixed(symbol.decimals)}</span>
-                        <span class="change ${change >= 0 ? 'positive' : 'negative'}">
-                            ${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%
+                        <span class="price">$${price.toFixed(2)}</span>
+                        <span class="change ${changePercent >= 0 ? 'positive' : 'negative'}">
+                            ${changePercent >= 0 ? '+' : ''}${changePercent.toFixed(2)}%
                         </span>
                     </div>
                 </div>
@@ -240,31 +270,28 @@ class TradingDashboard {
     }
     
     updateTradingPrices() {
-        const prices = state.getPrices();
-        const currentPrice = prices[this.currentSymbol] || 0;
-        const spread = currentPrice * 0.0002; // 0.02% spread
+        const priceData = realTimePrices.getPriceData(this.currentSymbol);
+        if (!priceData) return;
+        
+        const spread = priceData.price * 0.0002; // 0.02% spread
         
         const bidPriceEl = document.getElementById('bid-price');
         const askPriceEl = document.getElementById('ask-price');
         const symbolChangeEl = document.getElementById('symbol-change');
         
-        if (bidPriceEl) bidPriceEl.textContent = (currentPrice - spread).toFixed(2);
-        if (askPriceEl) askPriceEl.textContent = (currentPrice + spread).toFixed(2);
-        
-        // Simulate price change
-        const change = (Math.random() - 0.5) * currentPrice * 0.01;
-        const changePercent = (change / currentPrice) * 100;
+        if (bidPriceEl) bidPriceEl.textContent = (priceData.price - spread).toFixed(2);
+        if (askPriceEl) askPriceEl.textContent = (priceData.price + spread).toFixed(2);
         
         if (symbolChangeEl) {
-            symbolChangeEl.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)} (${change >= 0 ? '+' : ''}${changePercent.toFixed(2)}%)`;
-            symbolChangeEl.className = `price-change ${change >= 0 ? 'positive' : 'negative'}`;
+            symbolChangeEl.textContent = `${priceData.changePercent >= 0 ? '+' : ''}${priceData.changePercent.toFixed(2)}%`;
+            symbolChangeEl.className = `price-change ${priceData.changePercent >= 0 ? 'positive' : 'negative'}`;
         }
     }
 
     setupQuickActions() {
         const actions = {
-            'depositBtn': () => this.showDepositModal(),
-            'withdrawBtn': () => this.showWithdrawModal(),
+            'depositBtn': () => window.location.href = 'deposit.html',
+            'withdrawBtn': () => window.location.href = 'withdraw.html',
             'transferBtn': () => this.showTransferModal(),
             'historyBtn': () => this.navigateToPage('transactions')
         };
@@ -288,27 +315,10 @@ class TradingDashboard {
         document.querySelectorAll('.volume-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const volume = e.currentTarget.dataset.volume;
-                document.querySelector('.volume-input').value = volume;
+                const volumeInput = document.querySelector('.volume-input');
+                if (volumeInput) volumeInput.value = volume;
                 document.querySelectorAll('.volume-btn').forEach(b => b.classList.remove('active'));
                 e.currentTarget.classList.add('active');
-            });
-        });
-
-        // Timeframe buttons
-        document.querySelectorAll('.tf-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                document.querySelectorAll('.tf-btn').forEach(b => b.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                this.updateChart();
-            });
-        });
-
-        // Trade tabs
-        document.querySelectorAll('.trade-tab').forEach(tab => {
-            tab.addEventListener('click', (e) => {
-                document.querySelectorAll('.trade-tab').forEach(t => t.classList.remove('active'));
-                e.currentTarget.classList.add('active');
-                this.updateTradeForm(e.currentTarget.dataset.tab);
             });
         });
 
@@ -331,15 +341,15 @@ class TradingDashboard {
 
     setupProfileMenu() {
         const menuItems = {
-            'personalInfo': () => console.log('Personal Info'),
-            'security': () => console.log('Security'),
-            'verification': () => console.log('Verification'),
-            'notifications': () => console.log('Notification Settings'),
-            'language': () => console.log('Language Settings'),
-            'currency': () => console.log('Currency Settings'),
-            'help': () => console.log('Help Center'),
-            'contact': () => console.log('Contact Support'),
-            'terms': () => console.log('Terms & Conditions'),
+            'personalInfo': () => window.location.href = 'settings.html',
+            'security': () => window.location.href = 'settings.html',
+            'verification': () => showToast('Verification coming soon', 'info'),
+            'notifications': () => window.location.href = 'settings.html',
+            'language': () => showToast('Language settings coming soon', 'info'),
+            'currency': () => showToast('Currency settings coming soon', 'info'),
+            'help': () => showToast('Help center coming soon', 'info'),
+            'contact': () => showToast('Contact support coming soon', 'info'),
+            'terms': () => showToast('Terms & conditions coming soon', 'info'),
             'logout': () => this.logout()
         };
 
@@ -372,7 +382,6 @@ class TradingDashboard {
         // Load page-specific data
         switch (page) {
             case 'trading':
-                this.initTradingChart();
                 this.updateTradingPrices();
                 break;
             case 'transactions':
@@ -388,52 +397,81 @@ class TradingDashboard {
     }
     
     loadLivePayments() {
-        // Initialize live payment manager
-        if (window.livePaymentManager) {
-            livePaymentManager.renderActivities();
-            
-            // Update stats
-            const stats = livePaymentManager.getTotalStats();
-            const totalDepositsEl = document.getElementById('total-deposits');
-            const totalWithdrawalsEl = document.getElementById('total-withdrawals');
-            
-            if (totalDepositsEl) totalDepositsEl.textContent = formatCurrency(stats.totalDeposits, 'USD', 0);
-            if (totalWithdrawalsEl) totalWithdrawalsEl.textContent = formatCurrency(stats.totalWithdrawals, 'USD', 0);
+        // Show recent transactions as live payment feed
+        const container = document.getElementById('live-activities-list');
+        if (!container) return;
+        
+        const recentTransactions = this.transactions
+            .filter(t => t.type === 'deposit' || t.type === 'withdrawal')
+            .slice(0, 10);
+        
+        if (recentTransactions.length === 0) {
+            container.innerHTML = '<div class="empty-state">No recent payment activity</div>';
+            return;
         }
+        
+        container.innerHTML = recentTransactions.map(transaction => `
+            <div class="live-activity-item">
+                <div class="activity-avatar">
+                    <img src="https://images.pexels.com/photos/3777946/pexels-photo-3777946.jpeg?w=40&h=40&fit=crop&crop=face" alt="User">
+                </div>
+                <div class="activity-details">
+                    <div class="activity-user">
+                        <span class="user-name">${this.currentProfile.full_name}</span>
+                        <span class="user-country">Your Activity</span>
+                    </div>
+                    <div class="activity-action">
+                        <span class="action-type ${transaction.type}">${transaction.type}</span>
+                        <span class="action-amount">${formatCurrency(transaction.amount)}</span>
+                    </div>
+                </div>
+                <div class="activity-time">
+                    ${getRelativeTime(new Date(transaction.created_at).getTime())}
+                </div>
+            </div>
+        `).join('');
+        
+        // Update stats
+        const totalDeposits = this.transactions
+            .filter(t => t.type === 'deposit')
+            .reduce((sum, t) => sum + t.amount, 0);
+        const totalWithdrawals = this.transactions
+            .filter(t => t.type === 'withdrawal')
+            .reduce((sum, t) => sum + t.amount, 0);
+        
+        const totalDepositsEl = document.getElementById('total-deposits');
+        const totalWithdrawalsEl = document.getElementById('total-withdrawals');
+        
+        if (totalDepositsEl) totalDepositsEl.textContent = formatCurrency(totalDeposits, 'USD', 0);
+        if (totalWithdrawalsEl) totalWithdrawalsEl.textContent = formatCurrency(totalWithdrawals, 'USD', 0);
     }
     
     updateWatchlist() {
-        // Use real price data
-        const prices = state.getPrices();
         const symbols = ['BTC/USD', 'ETH/USD', 'EUR/USD', 'GBP/USD', 'AAPL'];
         
         this.watchlist = symbols.map(symbol => {
-            const price = prices[symbol] || 0;
-            const change = (Math.random() - 0.5) * price * 0.02;
-            const changePercent = (change / price) * 100;
-            
-            const symbolInfo = this.getSymbolInfo(symbol);
-            
+            const priceData = realTimePrices.getPriceData(symbol);
             return {
                 symbol,
-                name: symbolInfo ? symbolInfo.name : symbol,
-                price,
-                change,
-                changePercent
+                name: this.getSymbolName(symbol),
+                price: priceData?.price || 0,
+                change: priceData?.change || 0,
+                changePercent: priceData?.changePercent || 0
             };
         });
         
         this.renderWatchlist();
     }
     
-    getSymbolInfo(symbol) {
-        const allSymbols = [
-            ...APP_CONFIG.SYMBOLS.crypto,
-            ...APP_CONFIG.SYMBOLS.forex,
-            ...APP_CONFIG.SYMBOLS.stocks
-        ];
-        
-        return allSymbols.find(s => s.symbol === symbol);
+    getSymbolName(symbol) {
+        const names = {
+            'BTC/USD': 'Bitcoin',
+            'ETH/USD': 'Ethereum',
+            'EUR/USD': 'Euro / US Dollar',
+            'GBP/USD': 'British Pound / US Dollar',
+            'AAPL': 'Apple Inc.'
+        };
+        return names[symbol] || symbol;
     }
 
     updateTime() {
@@ -468,7 +506,7 @@ class TradingDashboard {
 
         if (balanceElement && toggleIcon) {
             if (this.isBalanceVisible) {
-                balanceElement.textContent = '$24,567.89';
+                this.updatePortfolioFromUser();
                 toggleIcon.className = 'fas fa-eye';
             } else {
                 balanceElement.textContent = '****';
@@ -484,33 +522,7 @@ class TradingDashboard {
     }
     
     updatePositions() {
-        // Load user's real positions
-        if (!this.currentUser) return;
-        
-        this.positions = state.getTrades(this.currentUser._id)
-            .filter(trade => trade.status === 'open')
-            .map(trade => {
-                const currentPrice = state.getPrices()[trade.symbol] || trade.entryPrice;
-                const pnl = this.calculateTradePnL(trade, currentPrice);
-                const pnlPercent = (pnl / (trade.entryPrice * trade.qty)) * 100;
-                
-                return {
-                    ...trade,
-                    currentPrice,
-                    pnl,
-                    pnlPercent
-                };
-            });
-        
         this.renderPositions();
-    }
-    
-    calculateTradePnL(trade, currentPrice) {
-        const priceDiff = trade.side === 'buy' 
-            ? currentPrice - trade.entryPrice 
-            : trade.entryPrice - currentPrice;
-        
-        return priceDiff * trade.qty;
     }
     
     renderWatchlist() {
@@ -524,9 +536,9 @@ class TradingDashboard {
                     <div class="symbol-description">${item.name}</div>
                 </div>
                 <div class="watchlist-price">
-                    <div class="price">${item.price.toFixed(item.symbol.includes('JPY') ? 2 : 4)}</div>
-                    <div class="price-change ${item.change >= 0 ? 'positive' : 'negative'}">
-                        ${item.change >= 0 ? '+' : ''}${item.change.toFixed(4)} (${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}%)
+                    <div class="price">${item.price.toFixed(2)}</div>
+                    <div class="price-change ${item.changePercent >= 0 ? 'positive' : 'negative'}">
+                        ${item.changePercent >= 0 ? '+' : ''}${item.changePercent.toFixed(2)}%
                     </div>
                 </div>
             </div>
@@ -548,25 +560,37 @@ class TradingDashboard {
             return;
         }
 
-        container.innerHTML = this.positions.map(position => `
-            <div class="position-item">
-                <div class="position-info">
-                    <div class="position-symbol">${position.symbol} ${position.side.toUpperCase()}</div>
-                    <div class="position-details">${position.qty} • $${position.entryPrice.toFixed(2)}</div>
-                </div>
-                <div class="position-pnl">
-                    <div class="pnl-amount ${position.pnl >= 0 ? 'positive' : 'negative'}">
-                        ${position.pnl >= 0 ? '+' : ''}$${Math.abs(position.pnl).toFixed(2)}
+        container.innerHTML = this.positions.map(position => {
+            const currentPrice = realTimePrices.getCurrentPrice(position.symbol);
+            const pnl = this.calculateTradePnL(position, currentPrice);
+            const pnlPercent = (pnl / (position.entry_price * position.quantity)) * 100;
+            
+            return `
+                <div class="position-item">
+                    <div class="position-info">
+                        <div class="position-symbol">${position.symbol} ${position.side.toUpperCase()}</div>
+                        <div class="position-details">${position.quantity} • $${position.entry_price.toFixed(2)}</div>
                     </div>
-                    <div class="pnl-percentage">${position.pnlPercent >= 0 ? '+' : ''}${position.pnlPercent.toFixed(2)}%</div>
+                    <div class="position-pnl">
+                        <div class="pnl-amount ${pnl >= 0 ? 'positive' : 'negative'}">
+                            ${pnl >= 0 ? '+' : ''}$${Math.abs(pnl).toFixed(2)}
+                        </div>
+                        <div class="pnl-percentage">${pnlPercent >= 0 ? '+' : ''}${pnlPercent.toFixed(2)}%</div>
+                    </div>
                 </div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
+    }
+    
+    calculateTradePnL(trade, currentPrice) {
+        const priceDiff = trade.side === 'buy' 
+            ? currentPrice - trade.entry_price 
+            : trade.entry_price - currentPrice;
+        
+        return priceDiff * trade.quantity;
     }
 
     updateRecentActivity() {
-        if (!this.currentUser) return;
-        
         const container = document.getElementById('recentActivity');
         if (!container) return;
 
@@ -584,7 +608,7 @@ class TradingDashboard {
                 </div>
                 <div class="activity-details">
                     <div class="activity-title">${transaction.note || transaction.type}</div>
-                    <div class="activity-subtitle">${getRelativeTime(transaction.createdAt)}</div>
+                    <div class="activity-subtitle">${getRelativeTime(new Date(transaction.created_at).getTime())}</div>
                 </div>
                 <div class="activity-amount ${this.isPositiveTransaction(transaction.type) ? 'positive' : 'negative'}">
                     ${this.isPositiveTransaction(transaction.type) ? '+' : '-'}${formatCurrency(transaction.amount)}
@@ -598,8 +622,6 @@ class TradingDashboard {
     }
 
     loadTransactions() {
-        if (!this.currentUser) return;
-        
         const container = document.getElementById('transactionsList');
         if (!container) return;
 
@@ -610,7 +632,7 @@ class TradingDashboard {
                 </div>
                 <div class="transaction-details">
                     <div class="transaction-title">${transaction.note || transaction.type}</div>
-                    <div class="transaction-subtitle">${getRelativeTime(transaction.createdAt)} • ${transaction.status}</div>
+                    <div class="transaction-subtitle">${getRelativeTime(new Date(transaction.created_at).getTime())} • ${transaction.status}</div>
                 </div>
                 <div class="transaction-amount">
                     <div class="amount-primary ${this.isPositiveTransaction(transaction.type) ? 'positive' : 'negative'}">
@@ -623,8 +645,6 @@ class TradingDashboard {
     }
 
     loadNotifications() {
-        if (!this.currentUser) return;
-        
         const container = document.getElementById('notificationsList');
         if (!container) return;
         
@@ -647,7 +667,7 @@ class TradingDashboard {
                 <div class="notification-content">
                     <div class="notification-title">${notification.title}</div>
                     <div class="notification-message">${notification.body}</div>
-                    <div class="notification-time">${getRelativeTime(notification.createdAt)}</div>
+                    <div class="notification-time">${getRelativeTime(new Date(notification.created_at).getTime())}</div>
                 </div>
             </div>
         `).join('');
@@ -680,12 +700,12 @@ class TradingDashboard {
                     <i class="fas fa-${this.getTransactionIcon(transaction.type)}"></i>
                 </div>
                 <div class="transaction-details">
-                    <div class="transaction-title">${transaction.title}</div>
-                    <div class="transaction-subtitle">${transaction.subtitle}</div>
+                    <div class="transaction-title">${transaction.note || transaction.type}</div>
+                    <div class="transaction-subtitle">${getRelativeTime(new Date(transaction.created_at).getTime())} • ${transaction.status}</div>
                 </div>
                 <div class="transaction-amount">
-                    <div class="amount-primary ${transaction.amount >= 0 ? 'positive' : 'negative'}">
-                        ${transaction.amount >= 0 ? '+' : ''}$${Math.abs(transaction.amount).toFixed(2)}
+                    <div class="amount-primary ${this.isPositiveTransaction(transaction.type) ? 'positive' : 'negative'}">
+                        ${this.isPositiveTransaction(transaction.type) ? '+' : '-'}${formatCurrency(transaction.amount)}
                     </div>
                     <div class="amount-secondary">${transaction.status}</div>
                 </div>
@@ -693,191 +713,98 @@ class TradingDashboard {
         `).join('');
     }
 
-    initTradingChart() {
-        const canvas = document.getElementById('tradingChart');
-        if (!canvas) return;
-
-        const ctx = canvas.getContext('2d');
-        const width = canvas.width;
-        const height = canvas.height;
-
-        // Clear canvas
-        ctx.clearRect(0, 0, width, height);
-
-        // Draw simple candlestick chart placeholder
-        this.drawSimpleChart(ctx, width, height);
-    }
-
-    drawSimpleChart(ctx, width, height) {
-        // Generate sample data
-        const data = [];
-        let price = 1.0847;
-        
-        for (let i = 0; i < 50; i++) {
-            const change = (Math.random() - 0.5) * 0.01;
-            price += change;
-            data.push({
-                price: price,
-                high: price + Math.random() * 0.005,
-                low: price - Math.random() * 0.005,
-                volume: Math.random() * 1000000
-            });
-        }
-
-        // Draw price line
-        ctx.strokeStyle = '#1a73e8';
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-
-        data.forEach((point, i) => {
-            const x = (i / (data.length - 1)) * width;
-            const y = height - ((point.price - 1.08) / 0.01) * height;
-            
-            if (i === 0) {
-                ctx.moveTo(x, y);
-            } else {
-                ctx.lineTo(x, y);
-            }
-        });
-
-        ctx.stroke();
-
-        // Draw grid lines
-        ctx.strokeStyle = '#e8eaed';
-        ctx.lineWidth = 1;
-        
-        // Horizontal lines
-        for (let i = 1; i < 5; i++) {
-            const y = (i / 5) * height;
-            ctx.beginPath();
-            ctx.moveTo(0, y);
-            ctx.lineTo(width, y);
-            ctx.stroke();
-        }
-
-        // Vertical lines
-        for (let i = 1; i < 10; i++) {
-            const x = (i / 10) * width;
-            ctx.beginPath();
-            ctx.moveTo(x, 0);
-            ctx.lineTo(x, height);
-            ctx.stroke();
-        }
-    }
-
-    updateChart() {
-        // Re-draw chart with new timeframe data
-        this.initTradingChart();
-    }
-
-    updateTradeForm(tabType) {
-        // Update trade form based on selected tab (market, limit, stop)
-        console.log('Updating trade form for:', tabType);
-    }
-
-    executeTrade() {
+    async executeTrade() {
         const orderType = document.querySelector('.order-btn.active');
-        const volume = document.querySelector('.volume-input').value;
+        const volumeInput = document.querySelector('.volume-input');
         
-        if (!orderType || !volume) {
-            alert('Please select order type and volume');
+        if (!orderType || !volumeInput) {
+            showToast('Please select order type and volume', 'error');
             return;
         }
 
-        this.showLoadingOverlay();
-        
-        // Simulate trade execution
-        setTimeout(() => {
-            this.hideLoadingOverlay();
-            alert(`${orderType.textContent} order executed successfully!`);
-            
-            // Add to positions (mock)
-            this.positions.push({
-                symbol: 'EUR/USD',
-                type: orderType.textContent.includes('BUY') ? 'BUY' : 'SELL',
-                volume: parseFloat(volume),
-                openPrice: 1.0847,
-                currentPrice: 1.0847,
-                pnl: 0,
-                pnlPercent: 0
-            });
-            
-            this.updatePositions();
-        }, 2000);
-    }
+        const side = orderType.classList.contains('buy') ? 'buy' : 'sell';
+        const quantity = parseFloat(volumeInput.value);
+        const currentPrice = realTimePrices.getCurrentPrice(this.currentSymbol);
 
-    showDepositModal() {
-        window.location.href = 'deposit.html';
-    }
+        if (!quantity || quantity <= 0) {
+            showToast('Please enter a valid quantity', 'error');
+            return;
+        }
 
-    showWithdrawModal() {
-        window.location.href = 'withdraw.html';
+        try {
+            showLoading(true);
+            
+            const trade = {
+                user_id: this.currentUser.id,
+                symbol: this.currentSymbol,
+                side: side,
+                quantity: quantity,
+                entry_price: currentPrice,
+                status: 'open',
+                opened_at: new Date().toISOString()
+            };
+
+            const { data, error } = await apiClient.createTrade(trade);
+            
+            if (error) {
+                throw new Error(error.message);
+            }
+
+            // Create transaction record
+            const transaction = {
+                user_id: this.currentUser.id,
+                type: 'trade',
+                amount: quantity * currentPrice,
+                currency: 'USD',
+                status: 'completed',
+                note: `${side.toUpperCase()} ${quantity} ${this.currentSymbol} at $${currentPrice.toFixed(2)}`
+            };
+
+            await apiClient.createTransaction(transaction);
+
+            showToast(`${side.toUpperCase()} order executed successfully!`, 'success');
+            
+            // Reload data
+            await this.loadUserData();
+            this.updateUI();
+            
+        } catch (error) {
+            console.error('Trade execution error:', error);
+            showToast('Failed to execute trade', 'error');
+        } finally {
+            showLoading(false);
+        }
     }
 
     showTransferModal() {
-        console.log('Show transfer modal');
-        // Implementation would show a transfer modal
+        showToast('Transfer feature coming soon', 'info');
     }
 
-    logout() {
+    async logout() {
         if (confirm('Are you sure you want to logout?')) {
-            SessionManager.clearSession();
-            window.location.href = 'login.html';
+            try {
+                await authManager.logout();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                showToast('Failed to logout', 'error');
+            }
         }
-    }
-
-    showLoadingOverlay() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) overlay.classList.add('show');
-    }
-
-    hideLoadingOverlay() {
-        const overlay = document.getElementById('loadingOverlay');
-        if (overlay) overlay.classList.remove('show');
     }
 
     startRealTimeUpdates() {
-        // Simulate real-time price updates
+        // Start price engine
+        realTimePrices.start();
+        
+        // Subscribe to price updates
+        realTimePrices.subscribe('all', () => {
+            this.updateUI();
+        });
+        
+        // Update UI periodically
         setInterval(() => {
-            this.updatePrices();
-        }, 3000);
-    }
-
-    updatePrices() {
-        // Update watchlist prices with random changes
-        this.watchlist.forEach(item => {
-            const change = (Math.random() - 0.5) * 0.001;
-            item.price += change;
-            item.change += change;
-            item.changePercent = (item.change / (item.price - item.change)) * 100;
-        });
-
-        // Update positions P&L
-        this.positions.forEach(position => {
-            const prices = state.getPrices();
-            position.currentPrice = prices[position.symbol] || position.entryPrice;
-            
-            if (position.side === 'buy') {
-                position.pnl = (position.currentPrice - position.entryPrice) * position.qty;
-            } else {
-                position.pnl = (position.entryPrice - position.currentPrice) * position.qty;
-            }
-            
-            position.pnlPercent = (position.pnl / (position.entryPrice * position.qty)) * 100;
-        });
-
-        // Update UI if we're on relevant pages
-        if (this.currentPage === 'home') {
-            this.updatePortfolioFromUser();
-            this.updateWatchlist();
-            this.updatePositions();
-            this.updateRecentActivity();
-        } else if (this.currentPage === 'trading') {
-            this.updatePositions();
-            this.updateTradingPrices();
-        } else if (this.currentPage === 'support') {
-            this.loadLivePayments();
-        }
+            this.updateUI();
+        }, 10000);
     }
 
     getTransactionIcon(type) {

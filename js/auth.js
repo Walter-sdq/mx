@@ -15,6 +15,8 @@ class AuthManager {
         await this.handleSignIn(session);
       } else if (event === 'SIGNED_OUT') {
         this.handleSignOut();
+      } else if (event === 'TOKEN_REFRESHED' && session) {
+        await this.handleSignIn(session);
       }
     });
     

@@ -1,8 +1,20 @@
 // Supabase client configuration
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://cwwcyqhzmelevlcrrecc.supabase.co';
-const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3d2N5cWh6bWVsZXZsY3JyZWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDg3OTIsImV4cCI6MjA3MDc4NDc5Mn0.iE6sZQHqb_wjGk19DBcKtw-xePnpzVqd-Lfw2DafKho';
+import { createClient } from '@supabase/supabase-js';
 
-export const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+const supabaseKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  throw new Error('Missing Supabase environment variables');
+}
+
+export const supabase = createClient(supabaseUrl, supabaseKey, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true
+  }
+});
 
 // Auth helpers
 export async function signUp(email, password, fullName) {
@@ -28,10 +40,16 @@ export async function signUp(email, password, fullName) {
           email: email,
           full_name: fullName,
           role: 'user',
+          email_verified: false,
           balances: {
             USD: 0,
             BTC: 0,
             ETH: 0
+          },
+          settings: {
+            dark_mode: true,
+            notifications: true,
+            biometric: false
           }
         });
       
@@ -66,6 +84,12 @@ export async function signIn(email, password) {
       if (profileError) {
         console.error('Profile fetch error:', profileError);
       }
+      
+      // Update last login
+      await supabase
+        .from('users')
+        .update({ last_login_at: new Date().toISOString() })
+        .eq('id', data.user.id);
       
       return { data: { ...data, profile }, error: null };
     }

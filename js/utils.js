@@ -1,12 +1,15 @@
 // Utility functions
-window.formatDate = function(timestamp) {
+
+// Date formatting
+export function formatDate(timestamp) {
   return new Date(timestamp).toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'short',
     day: 'numeric'
   });
-};
-window.formatDateTime = function(timestamp) {
+}
+
+export function formatDateTime(timestamp) {
   return new Date(timestamp).toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -14,14 +17,16 @@ window.formatDateTime = function(timestamp) {
     hour: '2-digit',
     minute: '2-digit'
   });
-};
-window.formatTime = function(timestamp) {
+}
+
+export function formatTime(timestamp) {
   return new Date(timestamp).toLocaleTimeString('en-US', {
     hour: '2-digit',
     minute: '2-digit'
   });
-};
-window.getRelativeTime = function(timestamp) {
+}
+
+export function getRelativeTime(timestamp) {
   const now = Date.now();
   const diff = now - timestamp;
   
@@ -39,10 +44,10 @@ window.getRelativeTime = function(timestamp) {
   if (diff < month) return `${Math.floor(diff / week)}w ago`;
   if (diff < year) return `${Math.floor(diff / month)}mo ago`;
   return `${Math.floor(diff / year)}y ago`;
-};
+}
 
 // Number formatting
-window.formatCurrency = function(amount, currency = 'USD', decimals = 2) {
+export function formatCurrency(amount, currency = 'USD', decimals = 2) {
   const formatter = new Intl.NumberFormat('en-US', {
     style: 'currency',
     currency: currency,
@@ -51,35 +56,39 @@ window.formatCurrency = function(amount, currency = 'USD', decimals = 2) {
   });
   
   return formatter.format(amount);
-};
-window.formatNumber = function(value, decimals = 2) {
+}
+
+export function formatNumber(value, decimals = 2) {
   return new Intl.NumberFormat('en-US', {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
   }).format(value);
-};
-window.formatPercent = function(value, decimals = 2) {
+}
+
+export function formatPercent(value, decimals = 2) {
   return new Intl.NumberFormat('en-US', {
     style: 'percent',
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
   }).format(value / 100);
-};
-window.formatCompactNumber = function(value) {
+}
+
+export function formatCompactNumber(value) {
   const formatter = new Intl.NumberFormat('en-US', {
     notation: 'compact',
     compactDisplay: 'short'
   });
   
   return formatter.format(value);
-};
+}
 
 // Validation functions
-window.isValidEmail = function(email) {
+export function isValidEmail(email) {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
-};
-window.checkPasswordStrength = function(password) {
+}
+
+export function checkPasswordStrength(password) {
   if (!password) return { score: 0, text: '', class: '' };
   
   let score = 0;
@@ -120,73 +129,30 @@ window.checkPasswordStrength = function(password) {
     class: strength[score].class,
     feedback: feedback.length > 0 ? `Missing: ${feedback.join(', ')}` : ''
   };
-};
-
-// DOM manipulation
-window.createElement = function(tag, className, textContent) {
-  const element = document.createElement(tag);
-  if (className) element.className = className;
-  if (textContent) element.textContent = textContent;
-  return element;
-};
-window.addEventDelegate = function(container, selector, event, handler) {
-  container.addEventListener(event, (e) => {
-    const target = e.target.closest(selector);
-    if (target) {
-      handler(e, target);
-    }
-  });
-};
-
-// Local storage helpers
-window.getStorageItem = function(key, defaultValue = null) {
-  try {
-    const item = localStorage.getItem(key);
-    return item ? JSON.parse(item) : defaultValue;
-  } catch (error) {
-    console.warn(`Failed to parse localStorage item '${key}':`, error);
-    return defaultValue;
-  }
-};
-window.setStorageItem = function(key, value) {
-  try {
-    localStorage.setItem(key, JSON.stringify(value));
-    return true;
-  } catch (error) {
-    console.warn(`Failed to store item '${key}':`, error);
-    return false;
-  }
-};
-window.removeStorageItem = function(key) {
-  try {
-    localStorage.removeItem(key);
-    return true;
-  } catch (error) {
-    console.warn(`Failed to remove item '${key}':`, error);
-    return false;
-  }
-};
+}
 
 // Theme management
-window.setTheme = function(theme) {
+export function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
-  setStorageItem('maxprofit_theme', theme);
+  localStorage.setItem('maxprofit_theme', theme);
   
   // Update theme toggle icons
   const themeToggles = document.querySelectorAll('.theme-toggle i');
   themeToggles.forEach(icon => {
     icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
   });
-};
-window.getTheme = function() {
-  return getStorageItem('maxprofit_theme', 'dark');
-};
-window.toggleTheme = function() {
+}
+
+export function getTheme() {
+  return localStorage.getItem('maxprofit_theme') || 'dark';
+}
+
+export function toggleTheme() {
   const currentTheme = getTheme();
   const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
   setTheme(newTheme);
   return newTheme;
-};
+}
 
 // Toast notifications
 let toastContainer = null;
@@ -204,7 +170,7 @@ function getToastContainer() {
   return toastContainer;
 }
 
-window.showToast = function(message, type = 'info', duration = 5000) {
+export function showToast(message, type = 'info', duration = 5000) {
   const container = getToastContainer();
   
   const toast = document.createElement('div');
@@ -249,7 +215,7 @@ function removeToast(toast) {
 }
 
 // Loading overlay
-window.showLoading = function(show = true) {
+export function showLoading(show = true) {
   let overlay = document.getElementById('loading-overlay');
   if (!overlay && show) {
     overlay = document.createElement('div');
@@ -265,7 +231,7 @@ window.showLoading = function(show = true) {
 }
 
 // Modal management
-window.openModal = function(modalId) {
+export function openModal(modalId) {
   const modal = document.getElementById(modalId);
   const overlay = document.getElementById('modal-overlay');
   
@@ -276,7 +242,7 @@ window.openModal = function(modalId) {
   }
 }
 
-window.closeModal = function(modalId) {
+export function closeModal(modalId) {
   const modal = document.getElementById(modalId);
   const overlay = document.getElementById('modal-overlay');
   
@@ -287,97 +253,8 @@ window.closeModal = function(modalId) {
   }
 }
 
-// Page navigation
-window.showPage = function(pageId) {
-  // Hide all pages
-  const pages = document.querySelectorAll('.page');
-  pages.forEach(page => page.classList.remove('active'));
-  
-  // Show target page
-  const targetPage = document.getElementById(`${pageId}-page`);
-  if (targetPage) {
-    targetPage.classList.add('active');
-  }
-  
-  // Update navigation active states
-  const navItems = document.querySelectorAll('.menu-item, .nav-item');
-  navItems.forEach(item => {
-    const isActive = item.getAttribute('data-page') === pageId;
-    item.classList.toggle('active', isActive);
-  });
-  
-  // Update page title
-  const pageTitle = document.getElementById('page-title');
-  if (pageTitle) {
-    const titles = {
-      home: 'Dashboard',
-      overview: 'Admin Overview',
-      trading: 'Trading',
-      transactions: 'Transactions',
-      notifications: 'Notifications',
-      profile: 'Profile',
-      users: 'User Management',
-      withdrawals: 'Withdrawal Management',
-      trades: 'Trade Management'
-    };
-    pageTitle.textContent = titles[pageId] || 'Dashboard';
-  }
-}
-
-// Array utilities
-window.chunk = function(array, size) {
-  const chunks = [];
-  for (let i = 0; i < array.length; i += size) {
-    chunks.push(array.slice(i, i + size));
-  }
-  return chunks;
-}
-window.sortBy = function(array, key, direction = 'asc') {
-  return array.sort((a, b) => {
-    let aVal = key.split('.').reduce((obj, k) => obj?.[k], a);
-    let bVal = key.split('.').reduce((obj, k) => obj?.[k], b);
-    
-    if (typeof aVal === 'string') aVal = aVal.toLowerCase();
-    if (typeof bVal === 'string') bVal = bVal.toLowerCase();
-    
-    if (aVal < bVal) return direction === 'asc' ? -1 : 1;
-    if (aVal > bVal) return direction === 'asc' ? 1 : -1;
-    return 0;
-  });
-}
-window.filterBy = function(array, filters) {
-  return array.filter(item => {
-    return Object.entries(filters).every(([key, value]) => {
-      if (!value) return true;
-      
-      const itemValue = key.split('.').reduce((obj, k) => obj?.[k], item);
-      
-      if (typeof itemValue === 'string') {
-        return itemValue.toLowerCase().includes(value.toLowerCase());
-      }
-      
-      return itemValue === value;
-    });
-  });
-}
-
-// URL utilities
-window.getQueryParam = function(param) {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get(param);
-}
-window.setQueryParam = function(param, value) {
-  const url = new URL(window.location);
-  if (value) {
-    url.searchParams.set(param, value);
-  } else {
-    url.searchParams.delete(param);
-  }
-  window.history.replaceState({}, '', url);
-}
-
 // Debounce function
-window.debounce = function(func, wait) {
+export function debounce(func, wait) {
   let timeout;
   return function executedFunction(...args) {
     const later = () => {
@@ -389,43 +266,13 @@ window.debounce = function(func, wait) {
   };
 }
 
-// Throttle function
-window.throttle = function(func, limit) {
-  let inThrottle;
-  return function() {
-    const args = arguments;
-    const context = this;
-    if (!inThrottle) {
-      func.apply(context, args);
-      inThrottle = true;
-      setTimeout(() => inThrottle = false, limit);
-    }
-  };
-}
-
 // Generate unique ID
-window.generateId = function() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
-
-// Deep clone object
-window.deepClone = function(obj) {
-  if (obj === null || typeof obj !== 'object') return obj;
-  if (obj instanceof Date) return new Date(obj);
-  if (obj instanceof Array) return obj.map(item => deepClone(item));
-  if (typeof obj === 'object') {
-    const cloned = {};
-    for (const key in obj) {
-      if (obj.hasOwnProperty(key)) {
-        cloned[key] = deepClone(obj[key]);
-      }
-    }
-    return cloned;
-  }
+export function generateId() {
+  return crypto.randomUUID();
 }
 
 // CSV export
-window.exportToCSV = function(data, filename) {
+export function exportToCSV(data, filename) {
   if (!data.length) return;
   
   const headers = Object.keys(data[0]);
@@ -462,3 +309,25 @@ document.addEventListener('DOMContentLoaded', () => {
     toggle.addEventListener('click', toggleTheme);
   });
 });
+
+// Make functions available globally for backward compatibility
+window.formatDate = formatDate;
+window.formatDateTime = formatDateTime;
+window.formatTime = formatTime;
+window.getRelativeTime = getRelativeTime;
+window.formatCurrency = formatCurrency;
+window.formatNumber = formatNumber;
+window.formatPercent = formatPercent;
+window.formatCompactNumber = formatCompactNumber;
+window.isValidEmail = isValidEmail;
+window.checkPasswordStrength = checkPasswordStrength;
+window.setTheme = setTheme;
+window.getTheme = getTheme;
+window.toggleTheme = toggleTheme;
+window.showToast = showToast;
+window.showLoading = showLoading;
+window.openModal = openModal;
+window.closeModal = closeModal;
+window.debounce = debounce;
+window.generateId = generateId;
+window.exportToCSV = exportToCSV;

@@ -1,11 +1,12 @@
-// Real-time price data using external APIs
+// Real-time price data using external APIs and Supabase
+import { apiClient } from './api.js';
+
 class RealTimePriceEngine {
   constructor() {
     this.prices = new Map();
     this.subscribers = new Map();
     this.isRunning = false;
     this.updateInterval = null;
-    this.wsConnections = new Map();
     
     // Initialize with base prices
     this.initializePrices();
@@ -50,10 +51,13 @@ class RealTimePriceEngine {
     
     this.isRunning = true;
     
+    // Load prices from Supabase first
+    await this.loadPricesFromDB();
+    
     // Start price updates using external APIs
     this.updateInterval = setInterval(() => {
       this.updatePricesFromAPI();
-    }, 5000); // Update every 5 seconds
+    }, 30000); // Update every 30 seconds
     
     console.log('Real-time price engine started');
   }
@@ -68,15 +72,27 @@ class RealTimePriceEngine {
       this.updateInterval = null;
     }
     
-    // Close WebSocket connections
-    this.wsConnections.forEach(ws => {
-      if (ws.readyState === WebSocket.OPEN) {
-        ws.close();
-      }
-    });
-    this.wsConnections.clear();
-    
     console.log('Real-time price engine stopped');
+  }
+  
+  async loadPricesFromDB() {
+    try {
+      const { data: prices } = await apiClient.getPrices();
+      
+      if (prices && prices.length > 0) {
+        prices.forEach(priceData => {
+          this.prices.set(priceData.symbol, {
+            price: priceData.price,
+            change: priceData.change_24h || 0,
+            changePercent: priceData.change_percent_24h || 0,
+            timestamp: new Date(priceData.updated_at).getTime(),
+            volume: priceData.volume_24h || 0
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Failed to load prices from database:', error);
+    }
   }
   
   async updatePricesFromAPI() {
@@ -84,11 +100,9 @@ class RealTimePriceEngine {
       // Fetch crypto prices from CoinGecko API
       await this.fetchCryptoPrices();
       
-      // Fetch forex prices (using simulation for demo)
-      await this.fetchForexPrices();
-      
-      // Fetch stock prices (using simulation for demo)
-      await this.fetchStockPrices();
+      // Simulate forex and stock prices for demo
+      await this.simulateForexPrices();
+      await this.simulateStockPrices();
       
     } catch (error) {
       console.error('Price update error:', error);
@@ -98,7 +112,7 @@ class RealTimePriceEngine {
   async fetchCryptoPrices() {
     try {
       const response = await fetch(
-        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,litecoin,ripple,cardano,polkadot&vs_currencies=usd&include_24hr_change=true'
+        'https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,litecoin,ripple,cardano,polkadot&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true'
       );
       
       if (!response.ok) {
@@ -117,22 +131,28 @@ class RealTimePriceEngine {
         'polkadot': 'DOT/USD'
       };
       
-      Object.entries(mapping).forEach(([coinId, symbol]) => {
+      for (const [coinId, symbol] of Object.entries(mapping)) {
         if (data[coinId]) {
           const price = data[coinId].usd;
           const changePercent = data[coinId].usd_24h_change || 0;
+          const volume = data[coinId].usd_24h_vol || 0;
           const previousPrice = this.prices.get(symbol)?.price || price;
           const change = price - previousPrice;
           
-          this.updatePrice(symbol, {
+          const priceData = {
             price,
             change,
             changePercent,
             timestamp: now,
-            volume: Math.random() * 1000000
-          });
+            volume
+          };
+          
+          this.updatePrice(symbol, priceData);
+          
+          // Save to Supabase
+          await apiClient.updatePrice(symbol, priceData);
         }
-      });
+      }
       
     } catch (error) {
       console.error('Crypto price fetch error:', error);
@@ -141,22 +161,18 @@ class RealTimePriceEngine {
     }
   }
   
-  async fetchForexPrices() {
-    // For demo purposes, simulate forex prices
-    // In production, use a forex API like Fixer.io or Alpha Vantage
+  async simulateForexPrices() {
     this.simulatePriceUpdates(['EUR/USD', 'GBP/USD', 'USD/JPY', 'AUD/USD', 'USD/CAD', 'USD/CHF']);
   }
   
-  async fetchStockPrices() {
-    // For demo purposes, simulate stock prices
-    // In production, use a stock API like Alpha Vantage or IEX Cloud
+  async simulateStockPrices() {
     this.simulatePriceUpdates(['AAPL', 'GOOGL', 'MSFT', 'AMZN', 'TSLA', 'NVDA']);
   }
   
   simulatePriceUpdates(symbols) {
     const now = Date.now();
     
-    symbols.forEach(symbol => {
+    symbols.forEach(async (symbol) => {
       const current = this.prices.get(symbol);
       if (!current) return;
       
@@ -167,13 +183,22 @@ class RealTimePriceEngine {
       const change = newPrice - current.price;
       const changePercent = (change / current.price) * 100;
       
-      this.updatePrice(symbol, {
+      const priceData = {
         price: newPrice,
         change,
         changePercent,
         timestamp: now,
         volume: Math.random() * 1000000
-      });
+      };
+      
+      this.updatePrice(symbol, priceData);
+      
+      // Save to Supabase
+      try {
+        await apiClient.updatePrice(symbol, priceData);
+      } catch (error) {
+        console.error('Failed to save price to database:', error);
+      }
     });
   }
   

@@ -15,6 +15,8 @@ class TradingDashboard {
         this.notifications = [];
         this.transactionFilter = 'all';
         this.transactionSearch = '';
+        this.notificationFilter = 'all';
+        this.notificationSearch = '';
         this.init();
     }
 
@@ -28,11 +30,7 @@ class TradingDashboard {
         this.currentUser = authManager.getUser();
         this.currentProfile = authManager.getProfile();
 
-        // Display name from Supabase profile
-        if (this.currentProfile && this.currentProfile.full_name) {
-            const nameEl = document.getElementById('dashboard-display-name');
-            if (nameEl) nameEl.textContent = this.currentProfile.full_name;
-        }
+        // Display name from Supabase profile - will be updated in updateUserInterface()
 
         if (!this.currentUser || !this.currentProfile) {
             window.location.href = 'login.html';
@@ -46,6 +44,12 @@ class TradingDashboard {
         showLoading(false);
         this.updateUI();
         this.startRealTimeUpdates();
+
+        // Ensure username is updated after everything loads
+        setTimeout(() => {
+            this.updateUserInterface();
+        }, 1000);
+
         setInterval(() => this.updateTime(), 60000);
     }
     
@@ -71,17 +75,33 @@ class TradingDashboard {
     }
 
     updateUserInterface() {
-        if (!this.currentProfile) return;
+        if (!this.currentProfile) {
+            console.warn('No user profile available for UI update');
+            return;
+        }
 
-        // Update username display
+        // Update username display in header
         const usernameEl = document.getElementById('username');
-        if (usernameEl) usernameEl.textContent = this.currentProfile.full_name;
+        if (usernameEl) {
+            const displayName = this.currentProfile.full_name || this.currentProfile.email || 'User';
+            usernameEl.textContent = displayName;
+            console.log('Updated username display:', displayName);
+        }
 
-        // Update profile page
-        const profileNameEl = document.getElementById('profileName');
-        const profileEmailEl = document.getElementById('profileEmail');
-        if (profileNameEl) profileNameEl.textContent = this.currentProfile.full_name;
-        if (profileEmailEl) profileEmailEl.textContent = this.currentProfile.email;
+        // Update greeting with user's name
+        const greetingEl = document.getElementById('greeting');
+        if (greetingEl) {
+            const hour = new Date().getHours();
+            let timeGreeting = 'Good morning';
+            if (hour >= 12 && hour < 18) timeGreeting = 'Good afternoon';
+            else if (hour >= 18) timeGreeting = 'Good evening';
+
+            const userName = this.currentProfile.full_name ? this.currentProfile.full_name.split(' ')[0] : 'there';
+            greetingEl.textContent = `${timeGreeting}, ${userName}!`;
+        }
+
+        // Update profile modal data
+        this.updateProfileModalData();
 
         // Update notification count
         const unreadCount = this.notifications.filter(n => !n.read).length;
@@ -96,6 +116,30 @@ class TradingDashboard {
 
         this.updatePortfolioFromUser();
         this.updateProfileStats();
+    }
+
+    updateProfileModalData() {
+        // Update profile modal name
+        const profileModalNameEl = document.getElementById('profileModalName');
+        if (profileModalNameEl) {
+            const displayName = this.currentProfile.full_name || this.currentProfile.email || 'User';
+            profileModalNameEl.textContent = displayName;
+        }
+
+        // Update profile modal email
+        const profileModalEmailEl = document.getElementById('profileModalEmail');
+        if (profileModalEmailEl) {
+            profileModalEmailEl.textContent = this.currentProfile.email || 'No email provided';
+        }
+
+        // Update profile modal balance
+        const profileModalBalanceEl = document.getElementById('profileModalBalance');
+        if (profileModalBalanceEl && this.currentProfile.balances) {
+            const totalBalance = this.currentProfile.balances.USD +
+                               (this.currentProfile.balances.BTC * (realTimePrices.getCurrentPrice('BTC/USD') || 43250)) +
+                               (this.currentProfile.balances.ETH * (realTimePrices.getCurrentPrice('ETH/USD') || 2580));
+            profileModalBalanceEl.textContent = formatCurrency(totalBalance);
+        }
     }
     
     updateProfileStats() {
@@ -552,21 +596,84 @@ class TradingDashboard {
     }
 
     setupTransactionFilters() {
-        document.querySelectorAll('.filter-tab').forEach(tab => {
+        // Enhanced transaction filter tabs
+        const transactionFilterTabs = document.querySelectorAll('#transactionsPage .filter-tab');
+        transactionFilterTabs.forEach(tab => {
             tab.addEventListener('click', (e) => {
-                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                transactionFilterTabs.forEach(t => t.classList.remove('active'));
                 e.currentTarget.classList.add('active');
                 this.transactionFilter = e.currentTarget.dataset.filter;
                 this.applyTransactionFilters();
             });
         });
 
-        // Search input
-        const searchInput = document.getElementById('transactionSearch');
-        if (searchInput) {
-            searchInput.addEventListener('input', (e) => {
+        // Enhanced transaction search
+        const transactionSearchInput = document.getElementById('transactionSearch');
+        if (transactionSearchInput) {
+            transactionSearchInput.addEventListener('input', (e) => {
                 this.transactionSearch = e.target.value.toLowerCase();
                 this.applyTransactionFilters();
+            });
+        }
+
+        // Enhanced notification filter tabs
+        const notificationFilterTabs = document.querySelectorAll('#notificationsPage .filter-tab');
+        notificationFilterTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                notificationFilterTabs.forEach(t => t.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+                this.notificationFilter = e.currentTarget.dataset.filter;
+                this.applyNotificationFilters();
+            });
+        });
+
+        // Enhanced notification search
+        const notificationSearchInput = document.getElementById('notificationSearch');
+        if (notificationSearchInput) {
+            notificationSearchInput.addEventListener('input', (e) => {
+                this.notificationSearch = e.target.value.toLowerCase();
+                this.applyNotificationFilters();
+            });
+        }
+
+        // Enhanced notification actions
+        this.setupNotificationActions();
+    }
+
+    setupNotificationActions() {
+        // Mark all notifications as read
+        const markAllReadBtn = document.getElementById('markAllRead');
+        if (markAllReadBtn) {
+            markAllReadBtn.addEventListener('click', async () => {
+                try {
+                    await apiClient.markAllNotificationsRead(this.currentUser.id);
+                    this.notifications = this.notifications.map(n => ({ ...n, read: true }));
+                    this.updateUserInterface();
+                    this.loadNotifications();
+                    showToast('All notifications marked as read', 'success');
+                } catch (error) {
+                    console.error('Mark all read error:', error);
+                    showToast('Failed to mark notifications as read', 'error');
+                }
+            });
+        }
+
+        // Clear all notifications
+        const clearAllBtn = document.getElementById('clearAllNotifications');
+        if (clearAllBtn) {
+            clearAllBtn.addEventListener('click', async () => {
+                if (confirm('Are you sure you want to clear all notifications?')) {
+                    try {
+                        await apiClient.clearAllNotifications(this.currentUser.id);
+                        this.notifications = [];
+                        this.updateUserInterface();
+                        this.loadNotifications();
+                        showToast('All notifications cleared', 'success');
+                    } catch (error) {
+                        console.error('Clear all notifications error:', error);
+                        showToast('Failed to clear notifications', 'error');
+                    }
+                }
             });
         }
     }
@@ -833,56 +940,281 @@ class TradingDashboard {
         if (!container) return;
 
         if (this.transactions.length === 0) {
-            container.innerHTML = '<div class="empty-state">No transactions found</div>';
+            this.showTransactionEmptyState();
             return;
         }
 
-        container.innerHTML = this.transactions.map(transaction => `
-            <div class="transaction-item">
-                <div class="transaction-icon ${transaction.type}">
-                    <i class="fas fa-${this.getTransactionIcon(transaction.type)}"></i>
-                </div>
-                <div class="transaction-details">
-                    <div class="transaction-title">${transaction.note || transaction.type}</div>
-                    <div class="transaction-subtitle">${getRelativeTime(new Date(transaction.created_at).getTime())} • ${transaction.status}</div>
-                </div>
-                <div class="transaction-amount">
-                    <div class="amount-primary ${this.isPositiveTransaction(transaction.type) ? 'positive' : 'negative'}">
-                        ${this.isPositiveTransaction(transaction.type) ? '+' : '-'}${formatCurrency(transaction.amount)}
+        // Apply filters and render
+        this.renderEnhancedTransactions();
+        this.updateTransactionSummary();
+    }
+
+    renderEnhancedTransactions() {
+        const container = document.getElementById('transactionsList');
+        if (!container) return;
+
+        let filteredTransactions = this.transactions;
+
+        // Apply filters
+        if (this.transactionFilter !== 'all') {
+            filteredTransactions = filteredTransactions.filter(t => {
+                switch (this.transactionFilter) {
+                    case 'deposits':
+                        return t.type === 'deposit';
+                    case 'withdrawals':
+                        return t.type === 'withdrawal';
+                    case 'trades':
+                        return t.type === 'trade';
+                    case 'transfers':
+                        return t.type === 'transfer';
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // Apply search
+        if (this.transactionSearch && this.transactionSearch.trim() !== '') {
+            filteredTransactions = filteredTransactions.filter(t => {
+                const note = (t.note || '').toLowerCase();
+                const type = (t.type || '').toLowerCase();
+                const amount = (t.amount || '').toString().toLowerCase();
+                const status = (t.status || '').toLowerCase();
+                return note.includes(this.transactionSearch) ||
+                       type.includes(this.transactionSearch) ||
+                       amount.includes(this.transactionSearch) ||
+                       status.includes(this.transactionSearch);
+            });
+        }
+
+        if (filteredTransactions.length === 0) {
+            this.showTransactionEmptyState();
+            return;
+        }
+
+        container.innerHTML = filteredTransactions.map(transaction => `
+            <div class="transaction-card fade-in">
+                <div class="transaction-card-header">
+                    <div class="transaction-icon ${transaction.type}">
+                        <i class="fas fa-${this.getTransactionIcon(transaction.type)}"></i>
                     </div>
-                    <div class="amount-secondary">${transaction.status}</div>
+                    <div class="transaction-main-info">
+                        <div class="transaction-title">${transaction.note || transaction.type}</div>
+                        <div class="transaction-subtitle">
+                            <span>${getRelativeTime(new Date(transaction.created_at).getTime())}</span>
+                            <span class="status-badge ${transaction.status.toLowerCase()}">${transaction.status}</span>
+                        </div>
+                    </div>
+                    <div class="transaction-amount">
+                        <div class="transaction-amount-main ${this.isPositiveTransaction(transaction.type) ? 'positive' : 'negative'}">
+                            ${this.isPositiveTransaction(transaction.type) ? '+' : '-'}${formatCurrency(transaction.amount)}
+                        </div>
+                        <div class="transaction-amount-secondary">${transaction.currency || 'USD'}</div>
+                    </div>
+                </div>
+                <div class="transaction-card-footer">
+                    <div class="transaction-status">
+                        <span>Type: ${transaction.type}</span>
+                        <span>ID: ${transaction.id?.slice(0, 8) || 'N/A'}</span>
+                    </div>
+                    <div class="transaction-time">${new Date(transaction.created_at).toLocaleDateString()}</div>
                 </div>
             </div>
         `).join('');
     }
 
+    showTransactionEmptyState() {
+        const container = document.getElementById('transactionsList');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-receipt"></i>
+                <h3>No transactions found</h3>
+                <p>${this.transactionFilter !== 'all' ? 'Try changing your filter' : 'Start trading to see your transactions here'}</p>
+            </div>
+        `;
+    }
+
+    updateTransactionSummary() {
+        const totalTransactions = this.transactions.length;
+        const totalVolume = this.transactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+        const monthlyTransactions = this.transactions.filter(t => {
+            const transactionDate = new Date(t.created_at);
+            const now = new Date();
+            return transactionDate.getMonth() === now.getMonth() &&
+                   transactionDate.getFullYear() === now.getFullYear();
+        });
+        const monthlyVolume = monthlyTransactions.reduce((sum, t) => sum + (t.amount || 0), 0);
+
+        const totalTransactionsEl = document.getElementById('totalTransactions');
+        const totalVolumeEl = document.getElementById('totalVolume');
+        const monthlyVolumeEl = document.getElementById('monthlyVolume');
+
+        if (totalTransactionsEl) totalTransactionsEl.textContent = totalTransactions;
+        if (totalVolumeEl) totalVolumeEl.textContent = formatCurrency(totalVolume);
+        if (monthlyVolumeEl) monthlyVolumeEl.textContent = formatCurrency(monthlyVolume);
+    }
+
     loadNotifications() {
         const container = document.getElementById('notificationsList');
         if (!container) return;
-        
+
         if (this.notifications.length === 0) {
-            container.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-bell-slash"></i>
-                    <h3>No notifications</h3>
-                    <p>You're all caught up!</p>
-                </div>
-            `;
+            this.showNotificationEmptyState();
             return;
         }
 
-        container.innerHTML = this.notifications.map(notification => `
-            <div class="notification-item ${!notification.read ? 'unread' : ''}">
-                <div class="notification-icon ${notification.type || 'info'}">
-                    <i class="fas fa-${this.getNotificationIcon(notification.type)}"></i>
+        // Apply filters and render
+        this.renderEnhancedNotifications();
+        this.updateNotificationSummary();
+    }
+
+    renderEnhancedNotifications() {
+        const container = document.getElementById('notificationsList');
+        if (!container) return;
+
+        let filteredNotifications = this.notifications;
+
+        // Apply filters
+        if (this.notificationFilter !== 'all') {
+            filteredNotifications = filteredNotifications.filter(n => {
+                switch (this.notificationFilter) {
+                    case 'unread':
+                        return !n.read;
+                    case 'info':
+                        return n.type === 'info';
+                    case 'success':
+                        return n.type === 'success';
+                    case 'warning':
+                        return n.type === 'warning';
+                    case 'error':
+                        return n.type === 'error';
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // Apply search
+        if (this.notificationSearch && this.notificationSearch.trim() !== '') {
+            filteredNotifications = filteredNotifications.filter(n => {
+                const title = (n.title || '').toLowerCase();
+                const body = (n.body || '').toLowerCase();
+                const type = (n.type || '').toLowerCase();
+                return title.includes(this.notificationSearch) ||
+                       body.includes(this.notificationSearch) ||
+                       type.includes(this.notificationSearch);
+            });
+        }
+
+        if (filteredNotifications.length === 0) {
+            this.showNotificationEmptyState();
+            return;
+        }
+
+        container.innerHTML = filteredNotifications.map(notification => `
+            <div class="notification-card ${!notification.read ? 'unread' : ''} fade-in" onclick="tradingDashboard.markNotificationAsRead('${notification.id}')">
+                <div class="notification-card-header">
+                    <div class="notification-icon ${notification.type || 'info'}">
+                        <i class="fas fa-${this.getNotificationIcon(notification.type)}"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${notification.title}</div>
+                        <div class="notification-message">${notification.body}</div>
+                    </div>
                 </div>
-                <div class="notification-content">
-                    <div class="notification-title">${notification.title}</div>
-                    <div class="notification-message">${notification.body}</div>
+                <div class="notification-card-footer">
                     <div class="notification-time">${getRelativeTime(new Date(notification.created_at).getTime())}</div>
+                    <div class="notification-actions">
+                        <button class="notification-action-btn" onclick="event.stopPropagation(); tradingDashboard.deleteNotification('${notification.id}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button class="notification-action-btn" onclick="event.stopPropagation(); tradingDashboard.archiveNotification('${notification.id}')">
+                            <i class="fas fa-archive"></i>
+                        </button>
+                    </div>
                 </div>
             </div>
         `).join('');
+    }
+
+    showNotificationEmptyState() {
+        const container = document.getElementById('notificationsList');
+        if (!container) return;
+
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="fas fa-bell-slash"></i>
+                <h3>No notifications found</h3>
+                <p>${this.notificationFilter !== 'all' ? 'Try changing your filter' : 'You\'re all caught up!'}</p>
+            </div>
+        `;
+    }
+
+    updateNotificationSummary() {
+        const totalNotifications = this.notifications.length;
+        const unreadNotifications = this.notifications.filter(n => !n.read).length;
+        const weeklyNotifications = this.notifications.filter(n => {
+            const notificationDate = new Date(n.created_at);
+            const weekAgo = new Date();
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            return notificationDate >= weekAgo;
+        }).length;
+
+        const totalNotificationsEl = document.getElementById('totalNotifications');
+        const unreadNotificationsEl = document.getElementById('unreadNotifications');
+        const weeklyNotificationsEl = document.getElementById('weeklyNotifications');
+
+        if (totalNotificationsEl) totalNotificationsEl.textContent = totalNotifications;
+        if (unreadNotificationsEl) unreadNotificationsEl.textContent = unreadNotifications;
+        if (weeklyNotificationsEl) weeklyNotificationsEl.textContent = weeklyNotifications;
+    }
+
+    async markNotificationAsRead(notificationId) {
+        try {
+            await apiClient.markNotificationAsRead(notificationId);
+            const notification = this.notifications.find(n => n.id === notificationId);
+            if (notification) {
+                notification.read = true;
+            }
+            this.updateUserInterface();
+            this.loadNotifications();
+            showToast('Notification marked as read', 'success');
+        } catch (error) {
+            console.error('Mark notification as read error:', error);
+            showToast('Failed to mark notification as read', 'error');
+        }
+    }
+
+    async deleteNotification(notificationId) {
+        if (!confirm('Are you sure you want to delete this notification?')) {
+            return;
+        }
+
+        try {
+            await apiClient.deleteNotification(notificationId);
+            this.notifications = this.notifications.filter(n => n.id !== notificationId);
+            this.updateUserInterface();
+            this.loadNotifications();
+            showToast('Notification deleted', 'success');
+        } catch (error) {
+            console.error('Delete notification error:', error);
+            showToast('Failed to delete notification', 'error');
+        }
+    }
+
+    async archiveNotification(notificationId) {
+        try {
+            await apiClient.archiveNotification(notificationId);
+            this.notifications = this.notifications.filter(n => n.id !== notificationId);
+            this.updateUserInterface();
+            this.loadNotifications();
+            showToast('Notification archived', 'success');
+        } catch (error) {
+            console.error('Archive notification error:', error);
+            showToast('Failed to archive notification', 'error');
+        }
     }
 
     filterTransactions(filter) {

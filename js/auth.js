@@ -54,7 +54,7 @@ class AuthManager {
       const { user, profile } = await getCurrentUser();
       this.currentUser = user;
       this.currentProfile = profile;
-      
+
       // Update last login
       if (profile) {
         await supabase
@@ -62,6 +62,9 @@ class AuthManager {
           .update({ last_login_at: new Date().toISOString() })
           .eq('id', user.id);
       }
+
+      // Refresh dashboard UI if available
+      this.refreshDashboardUI();
     } catch (error) {
       console.error('Sign in handler error:', error);
     }
@@ -156,6 +159,14 @@ class AuthManager {
   
   getProfile() {
     return this.currentProfile;
+  }
+
+  refreshDashboardUI() {
+    // Refresh dashboard UI if tradingDashboard is available
+    if (window.tradingDashboard && window.tradingDashboard.updateUserInterface) {
+      console.log('Refreshing dashboard UI with user data');
+      window.tradingDashboard.updateUserInterface();
+    }
   }
 }
 

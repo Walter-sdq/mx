@@ -1,4 +1,4 @@
-// Admin dashboard functionality
+// Enhanced 3D Admin Dashboard
 const admin = {
     currentUser: null,
     currentPage: 'dashboard',
@@ -6,34 +6,190 @@ const admin = {
     filteredUsers: [],
     currentPageNum: 1,
     itemsPerPage: 10,
+    isLoading: false,
+    animations: {
+        fadeIn: 'fadeIn 0.6s ease-out forwards',
+        slideUp: 'slideUp 0.8s ease-out forwards',
+        scaleIn: 'scaleIn 0.5s ease-out forwards',
+        bounceIn: 'bounceIn 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards'
+    },
 
-    // Initialize admin dashboard
+    // Initialize admin dashboard with enhanced 3D effects
     async init() {
-        // Check authentication and role
-        const { data: { user }, error } = await supabase.auth.getUser();
-        if (error || !user) {
-            window.location.href = 'login.html';
-            return;
+        this.addLoadingAnimation();
+        this.setup3DEffects();
+
+        try {
+            // Check authentication and role
+            const { data: { user }, error } = await supabase.auth.getUser();
+            if (error || !user) {
+                this.redirectToLogin();
+                return;
+            }
+
+            this.currentUser = user;
+            await this.validateAdminAccess(user.id);
+
+            this.setupEventListeners();
+            await this.loadDashboardData();
+            this.showPage('dashboard');
+            this.removeLoadingAnimation();
+
+            // Add welcome animation
+            this.showWelcomeAnimation();
+        } catch (error) {
+            console.error('Initialization error:', error);
+            this.handleInitError(error);
         }
+    },
 
-        this.currentUser = user;
+    // Add loading animation
+    addLoadingAnimation() {
+        const loadingHTML = `
+            <div id="admin-loading" style="
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; opacity: 1; transition: opacity 0.5s ease;
+            ">
+                <div style="text-align: center; color: white;">
+                    <div style="
+                        width: 80px; height: 80px; border: 4px solid rgba(255,255,255,0.3);
+                        border-top: 4px solid white; border-radius: 50%;
+                        animation: spin 1s linear infinite; margin: 0 auto 20px;
+                    "></div>
+                    <h2 style="margin: 0; font-size: 1.5rem;">Loading Admin Panel</h2>
+                    <p style="margin: 10px 0 0 0; opacity: 0.8;">Initializing 3D interface...</p>
+                </div>
+            </div>
+            <style>
+                @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+                @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+                @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+                @keyframes scaleIn { from { opacity: 0; transform: scale(0.9); } to { opacity: 1; transform: scale(1); } }
+                @keyframes bounceIn { 0% { opacity: 0; transform: scale(0.3); } 50% { transform: scale(1.05); } 70% { transform: scale(0.9); } 100% { opacity: 1; transform: scale(1); } }
+            </style>
+        `;
+        document.body.insertAdjacentHTML('beforeend', loadingHTML);
+    },
 
-        // Check if user has admin role
+    // Remove loading animation
+    removeLoadingAnimation() {
+        const loading = document.getElementById('admin-loading');
+        if (loading) {
+            loading.style.opacity = '0';
+            setTimeout(() => loading.remove(), 500);
+        }
+    },
+
+    // Setup 3D effects
+    setup3DEffects() {
+        // Add CSS for 3D effects
+        const style = document.createElement('style');
+        style.textContent = `
+            .stat-card {
+                transform-style: preserve-3d;
+                transition: transform 0.3s ease, box-shadow 0.3s ease;
+            }
+            .stat-card:hover {
+                transform: translateY(-5px) rotateX(5deg);
+                box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            }
+            .menu-item {
+                transform-style: preserve-3d;
+                transition: transform 0.3s ease;
+            }
+            .menu-item:hover {
+                transform: translateY(-2px) translateZ(10px);
+            }
+            .btn {
+                transform-style: preserve-3d;
+                transition: transform 0.2s ease;
+            }
+            .btn:hover {
+                transform: translateY(-2px) translateZ(5px);
+            }
+            .activity-item {
+                transition: transform 0.2s ease;
+            }
+            .activity-item:hover {
+                transform: translateX(10px);
+            }
+        `;
+        document.head.appendChild(style);
+    },
+
+    // Validate admin access
+    async validateAdminAccess(userId) {
         const { data: profile, error: profileError } = await supabase
             .from('profiles')
-            .select('role')
-            .eq('id', user.id)
+            .select('role, full_name')
+            .eq('id', userId)
             .single();
 
         if (profileError || !profile || !['admin', 'super_admin'].includes(profile.role)) {
-            showToast('Access denied. Admin privileges required.', 'error');
-            window.location.href = 'dashboard.html';
-            return;
+            throw new Error('Admin access denied');
         }
 
-        this.setupEventListeners();
-        await this.loadDashboardData();
-        this.showPage('dashboard');
+        // Update header with admin name
+        const header = document.querySelector('.admin-header h1');
+        if (header && profile.full_name) {
+            header.innerHTML = `<i class="fas fa-crown"></i> Welcome back, ${profile.full_name}`;
+        }
+    },
+
+    // Redirect to login
+    redirectToLogin() {
+        showToast('Please log in to access the admin panel', 'warning');
+        setTimeout(() => {
+            window.location.href = 'login.html';
+        }, 2000);
+    },
+
+    // Handle initialization error
+    handleInitError(error) {
+        this.removeLoadingAnimation();
+        showToast(`Initialization failed: ${error.message}`, 'error');
+
+        // Show error screen
+        const errorHTML = `
+            <div style="
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                display: flex; align-items: center; justify-content: center;
+                z-index: 9999; color: white; text-align: center;
+            ">
+                <div>
+                    <i class="fas fa-exclamation-triangle" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                    <h1>Access Denied</h1>
+                    <p>Admin privileges required to access this panel.</p>
+                    <button onclick="window.location.href='dashboard.html'" style="
+                        background: white; color: #667eea; border: none; padding: 12px 24px;
+                        border-radius: 8px; margin-top: 20px; cursor: pointer;
+                    ">Return to Dashboard</button>
+                </div>
+            </div>
+        `;
+        document.body.insertAdjacentHTML('beforeend', errorHTML);
+    },
+
+    // Show welcome animation
+    showWelcomeAnimation() {
+        const sidebar = document.querySelector('.admin-sidebar');
+        const main = document.querySelector('.admin-main');
+
+        if (sidebar) {
+            sidebar.style.animation = this.animations.slideUp;
+        }
+        if (main) {
+            main.style.animation = this.animations.fadeIn;
+        }
+
+        // Animate stats cards
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.animation = `${this.animations.bounceIn} ${0.6 + index * 0.1}s`;
+        });
     },
 
     // Setup event listeners

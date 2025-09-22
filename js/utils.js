@@ -29,14 +29,14 @@ export function formatTime(timestamp) {
 export function getRelativeTime(timestamp) {
   const now = Date.now();
   const diff = now - timestamp;
-  
+
   const minute = 60 * 1000;
   const hour = 60 * minute;
   const day = 24 * hour;
   const week = 7 * day;
   const month = 30 * day;
   const year = 365 * day;
-  
+
   if (diff < minute) return 'Just now';
   if (diff < hour) return `${Math.floor(diff / minute)}m ago`;
   if (diff < day) return `${Math.floor(diff / hour)}h ago`;
@@ -54,7 +54,7 @@ export function formatCurrency(amount, currency = 'USD', decimals = 2) {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
   });
-  
+
   return formatter.format(amount);
 }
 
@@ -78,7 +78,7 @@ export function formatCompactNumber(value) {
     notation: 'compact',
     compactDisplay: 'short'
   });
-  
+
   return formatter.format(value);
 }
 
@@ -90,69 +90,108 @@ export function isValidEmail(email) {
 
 export function checkPasswordStrength(password) {
   if (!password) return { score: 0, text: '', class: '' };
-  
+
   let score = 0;
   let feedback = [];
-  
+
   // Length check
-  if (password.length >= 8) score++;
-  else feedback.push('8+ characters');
-  
+  if (password.length >= 8) {
+    score += 1;
+  } else {
+    feedback.push('At least 8 characters');
+  }
+
   // Lowercase check
-  if (/[a-z]/.test(password)) score++;
-  else feedback.push('lowercase letter');
-  
+  if (/[a-z]/.test(password)) {
+    score += 1;
+  } else {
+    feedback.push('One lowercase letter');
+  }
+
   // Uppercase check
-  if (/[A-Z]/.test(password)) score++;
-  else feedback.push('uppercase letter');
-  
+  if (/[A-Z]/.test(password)) {
+    score += 1;
+  } else {
+    feedback.push('One uppercase letter');
+  }
+
   // Number check
-  if (/\d/.test(password)) score++;
-  else feedback.push('number');
-  
-  // Symbol check
-  if (/[@$!%*?&]/.test(password)) score++;
-  else feedback.push('symbol (@$!%*?&)');
-  
+  if (/[0-9]/.test(password)) {
+    score += 1;
+  } else {
+    feedback.push('One number');
+  }
+
+  // Special character check
+  if (/[^A-Za-z0-9]/.test(password)) {
+    score += 1;
+  } else {
+    feedback.push('One special character');
+  }
+
   const strength = {
-    0: { text: 'Enter password', class: '' },
-    1: { text: 'Very weak', class: 'weak' },
-    2: { text: 'Weak', class: 'weak' },
-    3: { text: 'Fair', class: 'fair' },
-    4: { text: 'Good', class: 'good' },
-    5: { text: 'Strong', class: 'strong' }
+    0: { text: 'Very Weak', class: 'very-weak' },
+    1: { text: 'Weak', class: 'weak' },
+    2: { text: 'Fair', class: 'fair' },
+    3: { text: 'Good', class: 'good' },
+    4: { text: 'Strong', class: 'strong' },
+    5: { text: 'Very Strong', class: 'very-strong' }
   };
-  
+
   return {
-    score,
+    score: score,
     text: strength[score].text,
     class: strength[score].class,
-    feedback: feedback.length > 0 ? `Missing: ${feedback.join(', ')}` : ''
+    feedback: feedback
   };
 }
 
 // Theme management
+// utils.js
+
+
+
+// Set the theme (dark or light)
 export function setTheme(theme) {
   document.documentElement.setAttribute('data-theme', theme);
   localStorage.setItem('maxprofit_theme', theme);
-  
+
   // Update theme toggle icons
   const themeToggles = document.querySelectorAll('.theme-toggle i');
   themeToggles.forEach(icon => {
     icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
   });
+
+  // Optional: Update TradingView widget if exists
+  if (window.TradingView && window.tradingViewWidget) {
+    tradingViewWidget.changeTheme(theme);
+  }
 }
 
+// Get the current theme from localStorage or system preference
 export function getTheme() {
-  return localStorage.getItem('maxprofit_theme') || 'dark';
+  return localStorage.getItem('maxprofit_theme') ||
+         (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 }
 
+// Toggle between dark and light theme
 export function toggleTheme() {
   const currentTheme = getTheme();
   const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
   setTheme(newTheme);
   return newTheme;
 }
+
+// Setup theme toggle button(s)
+function setupThemeToggle() {
+  const themeToggleButtons = document.querySelectorAll('.theme-toggle');
+  themeToggleButtons.forEach(button => {
+    button.addEventListener('click', () => {
+      toggleTheme();
+    });
+  });
+}
+
 
 // Toast notifications
 let toastContainer = null;
@@ -171,37 +210,43 @@ function getToastContainer() {
 }
 
 export function showToast(message, type = 'info', duration = 5000) {
-  const container = getToastContainer();
-  
-  const toast = document.createElement('div');
-  toast.className = `toast ${type}`;
-  
-  const icon = {
-    success: 'fas fa-check-circle',
-    error: 'fas fa-exclamation-circle',
-    warning: 'fas fa-exclamation-triangle',
-    info: 'fas fa-info-circle'
-  }[type] || 'fas fa-info-circle';
-  
-  toast.innerHTML = `
-    <i class="${icon}"></i>
-    <span>${message}</span>
-  `;
-  
-  container.appendChild(toast);
-  
-  // Auto remove after duration
-  const timeout = setTimeout(() => {
-    removeToast(toast);
-  }, duration);
-  
-  // Click to dismiss
-  toast.addEventListener('click', () => {
-    clearTimeout(timeout);
-    removeToast(toast);
-  });
-  
-  return toast;
+  try {
+    const container = getToastContainer();
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+
+    const icon = {
+      success: 'fas fa-check-circle',
+      error: 'fas fa-exclamation-circle',
+      warning: 'fas fa-exclamation-triangle',
+      info: 'fas fa-info-circle'
+    }[type] || 'fas fa-info-circle';
+
+    toast.innerHTML = `
+      <i class="${icon}"></i>
+      <span>${message}</span>
+    `;
+
+    container.appendChild(toast);
+
+    // Auto remove after duration
+    const timeout = setTimeout(() => {
+      removeToast(toast);
+    }, duration);
+
+    // Click to dismiss
+    toast.addEventListener('click', () => {
+      clearTimeout(timeout);
+      removeToast(toast);
+    });
+
+    return toast;
+  } catch (error) {
+    console.error('Error showing toast:', error);
+    // Fallback to console.log if DOM manipulation fails
+    console.log(`[${type.toUpperCase()}] ${message}`);
+  }
 }
 
 function removeToast(toast) {
@@ -224,9 +269,27 @@ export function showLoading(show = true) {
     overlay.innerHTML = '<div class="loading-spinner"></div>';
     document.body.appendChild(overlay);
   }
-  
+
   if (overlay) {
     overlay.classList.toggle('active', show);
+  }
+}
+
+// Show loading state on a specific element
+export function showElementLoading(elementId, message = 'Loading...') {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${message}`;
+    element.disabled = true;
+  }
+}
+
+// Hide loading state from a specific element
+export function hideElementLoading(elementId, originalText = 'Submit') {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.innerHTML = originalText;
+    element.disabled = false;
   }
 }
 
@@ -234,7 +297,7 @@ export function showLoading(show = true) {
 export function openModal(modalId) {
   const modal = document.getElementById(modalId);
   const overlay = document.getElementById('modal-overlay');
-  
+
   if (modal) {
     modal.classList.add('active');
     if (overlay) overlay.classList.add('active');
@@ -302,7 +365,6 @@ export function exportToCSV(data, filename) {
 document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = getTheme();
   setTheme(savedTheme);
-  document.documentElement.setAttribute('data-theme', savedTheme);
   // Setup theme toggles
   const themeToggles = document.querySelectorAll('.theme-toggle');
   themeToggles.forEach(toggle => {
@@ -329,6 +391,8 @@ window.getTheme = getTheme;
 window.toggleTheme = toggleTheme;
 window.showToast = showToast;
 window.showLoading = showLoading;
+window.showElementLoading = showElementLoading;
+window.hideElementLoading = hideElementLoading;
 window.openModal = openModal;
 window.closeModal = closeModal;
 window.debounce = debounce;

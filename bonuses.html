@@ -1,0 +1,267 @@
+<!-- filename: bonuses.html -->
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Bonuses & Promotions - MaxProfit Trading</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/trading.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <style>
+      /* ✅ GLOBAL RESPONSIVENESS + NO OVERFLOW */
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        overflow-x: hidden;
+      }
+
+      .app-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        box-sizing: border-box;
+      }
+
+      .main-content {
+        flex: 1;
+        padding: 16px;
+        box-sizing: border-box;
+        padding-bottom: 90px; /* space for bottom nav */
+      }
+
+      /* ✅ PROMO INPUT GROUP */
+      .promo-input-group {
+        display: flex;
+        gap: var(--spacing-2);
+        align-items: center;
+        flex-wrap: wrap;
+      }
+
+      .promo-input-group input {
+        flex: 1;
+        min-width: 180px;
+      }
+
+      /* ✅ RESPONSIVE GRID FOR PROMOTIONS */
+      .promotions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-5);
+        margin-top: var(--spacing-4);
+        width: 100%;
+      }
+
+      /* ✅ FEATURE CARDS */
+      .feature-card {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-4);
+        width: 100%;
+        max-width: 100%;
+      }
+
+      /* ✅ BOTTOM NAVIGATION FIXED */
+      
+
+      /* ✅ BONUS LIST ADJUSTMENTS */
+      .bonuses-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-4);
+        width: 100%;
+      }
+
+      .bonus-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-4);
+        padding: var(--spacing-4);
+        background: var(--bg-tertiary);
+        border-radius: var(--border-radius-lg);
+        border: 1px solid var(--border-secondary);
+        flex-wrap: wrap;
+      }
+
+      .bonus-info {
+        flex: 1;
+        min-width: 160px;
+      }
+
+      .bonus-amount {
+        text-align: right;
+        min-width: 100px;
+      }
+
+      /* ✅ MOBILE STYLING */
+      @media (max-width: 768px) {
+        .promo-input-group {
+          flex-direction: column;
+          align-items: stretch;
+        }
+
+        .bonus-item {
+          flex-direction: column;
+          text-align: center;
+        }
+
+        .bonus-amount {
+          text-align: center;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-container" id="app">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button class="back-btn" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="user-info">
+            <span class="greeting">Bonuses & Promotions</span>
+            <span class="username">Boost Your Trading</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="header-btn" id="notificationBtn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-count">0</span>
+          </button>
+          <button class="header-btn" id="profileBtn">
+            <i class="fas fa-user-circle"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="container">
+          <!-- Bonus Balance -->
+          <section class="balance-overview">
+            <div class="card">
+              <h2>Bonus Balance</h2>
+              <p>Track your active bonuses and promotional credits here.</p>
+              <div class="balance-amount">$0.00</div>
+              <div class="balance-breakdown">
+                <div class="breakdown-item">
+                  <span>Active Bonuses</span><span>$0.00</span>
+                </div>
+                <div class="breakdown-item">
+                  <span>Pending Rewards</span><span>$0.00</span>
+                </div>
+                <div class="breakdown-item">
+                  <span>Lifetime Earned</span><span>$0.00</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Promo Code Entry -->
+          <section class="promo-code-section">
+            <div class="card">
+              <h3>Have a Promo Code?</h3>
+              <p>Enter your promotional code to claim exclusive bonuses.</p>
+              <div class="form-group">
+                <div class="promo-input-group">
+                  <input type="text" class="form-control" id="promo-code" placeholder="Enter promo code" style="text-transform: uppercase;" maxlength="20"/>
+                  <button type="button" class="btn btn-primary" onclick="applyPromoCode()">
+                    <i class="fas fa-gift"></i> Apply
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Current Promotions -->
+          <section class="promotions-section">
+            <div class="section-header">
+              <h3>Current Promotions</h3><span class="promo-count">4 Active</span>
+            </div>
+            <div class="promotions-grid">
+              <!-- Promotion Cards (same as before) -->
+              <!-- ... keep your promo cards here ... -->
+            </div>
+          </section>
+
+          <!-- Active Bonuses -->
+          <section class="active-bonuses">
+            <div class="card">
+              <div class="section-header">
+                <h3>Your Active Bonuses</h3>
+                <button class="section-action">View History</button>
+              </div>
+              <div class="bonuses-list">
+                <!-- Bonus items same as before -->
+              </div>
+            </div>
+          </section>
+
+          <!-- Bonus Terms & VIP -->
+          <section class="bonus-terms">
+            <div class="card">
+              <h3>Bonus Terms & Conditions</h3>
+              <div class="terms-list">
+                <!-- term items same as before -->
+              </div>
+              <button class="btn btn-outline" style="width: 100%; margin-top: 16px;">
+                <i class="fas fa-file-alt"></i> Read Full Terms
+              </button>
+            </div>
+          </section>
+
+          <div class="deposit-note">
+            <i class="fas fa-diamond"></i>
+            <div><strong>VIP Program:</strong> Unlock exclusive bonuses and higher rewards as you trade more. Contact support to learn about VIP benefits and how to qualify.</div>
+          </div>
+        </div>
+      </main>
+
+      <!-- ✅ Bottom Navigation -->
+      <nav class="bottom-nav">
+        <button class="nav-item active"><i class="fas fa-home"></i><span>Home</span></button>
+        <button class="nav-item"><i class="fas fa-chart-line"></i><span>Trading</span></button>
+        <button class="nav-item"><i class="fas fa-exchange-alt"></i><span>Transactions</span></button>
+        <button class="nav-item"><i class="fas fa-bell"></i><span>Notifications</span></button>
+        <button class="nav-item"><i class="fas fa-globe"></i><span>Live Payments</span></button>
+        <button class="nav-item"><i class="fas fa-user"></i><span>Profile</span></button>
+      </nav>
+
+      <div class="toast-container" id="toast-container"></div>
+    </div>
+
+    <script>
+      function applyPromoCode() {
+        const promoCode = document.getElementById('promo-code').value.trim().toUpperCase();
+        if (!promoCode) return showToast('Please enter a promo code', 'warning');
+        if (promoCode === 'BONUS50') {
+          showToast('Promo code applied successfully! $50 bonus added.', 'success');
+          document.getElementById('promo-code').value = '';
+        } else {
+          showToast('Invalid promo code.', 'error');
+        }
+      }
+
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas fa-info-circle"></i>${message}`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+      }
+    </script>
+  </body>
+</html>

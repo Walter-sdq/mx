@@ -1,0 +1,575 @@
+<!-- filename: withdraw.html -->
+<!-- created from: dashboard.html, base.css, dashboard.css, trading.css -->
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Withdraw Funds - MaxProfit Trading</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/trading.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+
+  <style>
+    /* Make sure nothing overflows */
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      max-width: 100%;
+      overflow-x: hidden;
+      font-family: 'Inter', sans-serif;
+      background: var(--background, #0b0b0b);
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    .main-content {
+      flex: 1;
+      padding: 1rem;
+      max-width: 100%;
+      box-sizing: border-box;
+    }
+
+    .card {
+      background: var(--card-bg, #1a1a1a);
+      border-radius: 12px;
+      padding: 1rem;
+      margin-bottom: 1rem;
+      box-sizing: border-box;
+    }
+
+    .balance-amount {
+      font-size: 1.8rem;
+      font-weight: 700;
+      word-wrap: break-word;
+    }
+
+    .methods-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .method-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--method-bg, #222);
+      border-radius: 8px;
+      padding: 0.75rem;
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    .method-item.active {
+      background: var(--accent-bg, #2a2a2a);
+      border: 1px solid var(--accent-color, #4cafef);
+    }
+
+    .method-icon {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #333;
+    }
+
+    .method-info {
+      flex: 1;
+      padding: 0 0.75rem;
+      min-width: 0;
+    }
+
+    .method-info h4 {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 600;
+    }
+
+    .method-info p {
+      margin: 0;
+      font-size: 0.85rem;
+      opacity: 0.8;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .amount-input-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .amount-input-group input {
+      flex: 1;
+      min-width: 0;
+      padding: 0.5rem;
+      font-size: 1rem;
+      border-radius: 6px;
+      border: 1px solid #444;
+      background: #111;
+      color: white;
+    }
+
+    .quick-amounts {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+    }
+
+    .quick-amount-btn {
+      flex: 1 1 calc(50% - 0.5rem);
+      padding: 0.5rem;
+      background: #222;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+    }
+
+   
+
+    .btn.btn-primary.btn-large {
+      display: block;
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: bold;
+      background: #4cafef;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    /* Responsive Tweaks */
+    @media (max-width: 768px) {
+      .methods-list {
+        flex-direction: column;
+      }
+
+      .balance-amount {
+        font-size: 1.5rem;
+      }
+
+      .quick-amount-btn {
+        flex: 1 1 calc(50% - 0.5rem);
+      }
+    }
+
+    @media (max-width: 480px) {
+      .balance-amount {
+        font-size: 1.3rem;
+      }
+      .quick-amount-btn {
+        flex: 1 1 100%;
+      }
+      .method-info h4 {
+        font-size: 0.9rem;
+      }
+      .method-info p {
+        font-size: 0.75rem;
+      }
+    }
+  </style>
+
+  <body>
+    <div class="app-container" id="app">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button class="back-btn" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="user-info">
+            <span class="greeting">Withdraw Funds</span>
+            <span class="username">Cash Out Your Profits</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="header-btn" id="notificationBtn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-count">0</span>
+          </button>
+          <button class="header-btn" id="profileBtn">
+            <i class="fas fa-user-circle"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="withdraw-container">
+          <!-- Balance Overview -->
+          <section class="balance-overview">
+            <div class="card">
+              <h2>Available Balance</h2>
+              <p>Your available balance for withdrawal after reserved amounts.</p>
+              <div class="balance-amount">$0.00</div>
+              <div class="balance-breakdown">
+                <div class="breakdown-item">
+                  <span>Total Balance</span>
+                  <span>$0.00</span>
+                </div>
+                <div class="breakdown-item">
+                  <span>Reserved</span>
+                  <span>$0.00</span>
+                </div>
+                <div class="breakdown-item">
+                  <span>Available</span>
+                  <span>$0.00</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Withdrawal Currency -->
+          <section class="currency-selection">
+            <div class="card">
+              <h3>Select Withdrawal Method</h3>
+              <div class="methods-list">
+                <div class="method-item active" data-method="crypto">
+                  <div class="method-icon">
+                    <i class="fab fa-bitcoin"></i>
+                  </div>
+                  <div class="method-info">
+                    <h4>Cryptocurrency</h4>
+                    <p>Bitcoin, Ethereum, USDT • Fast processing</p>
+                  </div>
+                  <div class="method-status verified">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Available</span>
+                  </div>
+                </div>
+                
+                <div class="method-item" data-method="bank">
+                  <div class="method-icon" style="background: linear-gradient(135deg, #2E7D32 0%, #1B5E20 100%);">
+                    <i class="fas fa-university"></i>
+                  </div>
+                  <div class="method-info">
+                    <h4>Bank Transfer</h4>
+                    <p>Direct to your bank account • 1-3 business days</p>
+                  </div>
+                  <div class="method-status verified">
+                    <i class="fas fa-check-circle"></i>
+                    <span>Verified</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Crypto Currency Selection -->
+          <section class="crypto-selection" id="crypto-selection">
+            <div class="card">
+              <div class="form-group">
+                <label for="crypto-currency">Select Cryptocurrency</label>
+                <select class="form-control" id="crypto-currency" required>
+                  <option value="">Choose currency...</option>
+                  <option value="BTC">Bitcoin (BTC)</option>
+                  <option value="ETH">Ethereum (ETH)</option>
+                  <option value="USDT">Tether (USDT)</option>
+                </select>
+              </div>
+            </div>
+          </section>
+
+          <!-- Destination Address -->
+          <section class="destination-address">
+            <div class="card">
+              <h3>Withdrawal Details</h3>
+              <div class="form-group">
+                <label for="destination-address">Destination Address</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="destination-address" 
+                  placeholder="Enter your wallet address"
+                  required
+                  aria-describedby="address-help"
+                />
+                <small id="address-help" class="form-text">Double-check this address. Transactions cannot be reversed.</small>
+              </div>
+
+              <div class="form-group">
+                <label for="address-label">Address Label (Optional)</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="address-label" 
+                  placeholder="e.g., My Hardware Wallet"
+                />
+              </div>
+            </div>
+          </section>
+
+          <!-- Amount Input -->
+          <section class="withdraw-amount">
+            <div class="card">
+              <div class="form-group">
+                <label for="withdraw-amount">Amount to Withdraw</label>
+                <div class="amount-input-group">
+                  <span class="currency-symbol">$</span>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    id="withdraw-amount" 
+                    placeholder="100.00"
+                    min="10"
+                    max="10200"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                <div class="amount-note">
+                  Minimum withdrawal: $10.00 • Maximum: $10,200.00
+                </div>
+              </div>
+
+              <div class="quick-amounts">
+                <button type="button" class="quick-amount-btn" data-amount="100">$100</button>
+                <button type="button" class="quick-amount-btn" data-amount="500">$500</button>
+                <button type="button" class="quick-amount-btn" data-amount="1000">$1,000</button>
+                <button type="button" class="quick-amount-btn max-btn" data-amount="10200">Max</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- 2FA Verification -->
+          <section class="two-factor-auth">
+            <div class="card">
+              <h3>Security Verification</h3>
+              <div class="form-group">
+                <label for="two-factor-code">Two-Factor Authentication Code</label>
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  id="two-factor-code" 
+                  placeholder="Enter 6-digit code"
+                  maxlength="6"
+                  pattern="[0-9]{6}"
+                  required
+                  aria-describedby="2fa-help"
+                />
+                <small id="2fa-help" class="form-text">Enter the code from your authenticator app</small>
+              </div>
+              
+              <div class="form-group">
+                <label for="withdrawal-password">Confirm Password</label>
+                <div class="input-group">
+                  <i class="fas fa-lock"></i>
+                  <input 
+                    type="password" 
+                    class="form-control" 
+                    id="withdrawal-password" 
+                    placeholder="Enter your account password"
+                    required
+                  />
+                  <button type="button" class="password-toggle" onclick="togglePassword('withdrawal-password')">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Fee Summary -->
+          <section class="fee-summary">
+            <div class="card">
+              <h4>Transaction Summary</h4>
+              <div class="fee-item">
+                <span>Withdrawal Amount</span>
+                <span id="withdrawal-amount-display">$0.00</span>
+              </div>
+              <div class="fee-item">
+                <span>Network Fee</span>
+                <span id="network-fee">$2.50</span>
+              </div>
+              <div class="fee-item">
+                <span>Processing Fee</span>
+                <span>Free</span>
+              </div>
+              <div class="fee-item">
+                <span>Processing Time</span>
+                <span id="processing-time">10-30 minutes</span>
+              </div>
+              <div class="fee-item total">
+                <span>Total Deducted</span>
+                <span id="total-deducted">$0.00</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Bank Details (hidden by default) -->
+          <section class="bank-details" id="bank-details" style="display: none;">
+            <div class="card">
+              <h3>Bank Account Details</h3>
+              <div class="account-display">
+                <div class="account-info">
+                  <div class="account-name">Chase Checking Account</div>
+                  <div class="account-number">****1234</div>
+                </div>
+                <button class="change-btn">Change</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Important Notes -->
+          <div class="withdraw-note">
+            <i class="fas fa-shield-alt"></i>
+            <div>
+              <strong>Security Note:</strong> All withdrawals are processed securely and require two-factor authentication. Processing times may vary depending on network conditions and verification requirements.
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button type="button" class="btn btn-primary btn-large" style="width: 100%; margin-top: 24px;" onclick="confirmWithdrawal()">
+            <i class="fas fa-paper-plane"></i>
+            Confirm Withdrawal
+          </button>
+        </div>
+      </main>
+
+      <!-- Bottom Navigation -->
+       <!-- Bottom Navigation -->
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-page="home">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </button>
+        <button class="nav-item" data-page="trading">
+          <i class="fas fa-chart-line"></i>
+          <span>Trading</span>
+        </button>
+        <button class="nav-item" data-page="transactions">
+          <i class="fas fa-exchange-alt"></i>
+          <span>Transactions</span>
+        </button>
+        <button class="nav-item" data-page="notifications">
+          <i class="fas fa-bell"></i>
+          <span>Notifications</span>
+        </button>
+        <button class="nav-item" data-page="support">
+          <i class="fas fa-globe"></i>
+          <span>Live Payments</span>
+        </button>
+        <button class="nav-item" data-page="profile">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </button>
+      </nav>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <script>
+      function confirmWithdrawal() {
+        // TODO: server call to process withdrawal
+        showToast('Withdrawal request submitted successfully. Processing will begin shortly.', 'success');
+      }
+
+      function togglePassword(inputId) {
+        const input = document.getElementById(inputId);
+        const button = input.nextElementSibling;
+        const icon = button.querySelector('i');
+        
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.classList.replace('fa-eye', 'fa-eye-slash');
+        } else {
+          input.type = 'password';
+          icon.classList.replace('fa-eye-slash', 'fa-eye');
+        }
+      }
+
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas fa-check"></i>${message}`;
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.remove();
+        }, 5000);
+      }
+
+      // Quick amount selection
+      document.querySelectorAll('.quick-amount-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('withdraw-amount').value = btn.dataset.amount;
+          updateAmountDisplays();
+        });
+      });
+
+      // Method selection
+      document.querySelectorAll('.method-item').forEach(item => {
+        item.addEventListener('click', function() {
+          document.querySelectorAll('.method-item').forEach(i => i.classList.remove('active'));
+          this.classList.add('active');
+          
+          const method = this.dataset.method;
+          if (method === 'crypto') {
+            document.getElementById('crypto-selection').style.display = 'block';
+            document.getElementById('bank-details').style.display = 'none';
+            document.querySelector('.currency-symbol').textContent = '$';
+          } else {
+            document.getElementById('crypto-selection').style.display = 'none';
+            document.getElementById('bank-details').style.display = 'block';
+            document.querySelector('.currency-symbol').textContent = '$';
+          }
+        });
+      });
+
+      // Amount calculation
+      document.getElementById('withdraw-amount').addEventListener('input', updateAmountDisplays);
+
+      function updateAmountDisplays() {
+        const amount = parseFloat(document.getElementById('withdraw-amount').value) || 0;
+        const networkFee = 2.50;
+        const total = amount + networkFee;
+        
+        document.getElementById('withdrawal-amount-display').textContent = '$' + amount.toFixed(2);
+        document.getElementById('total-deducted').textContent = '$' + total.toFixed(2);
+      }
+
+      // Currency change updates
+      document.getElementById('crypto-currency').addEventListener('change', function() {
+        const fees = { BTC: 0.0001, ETH: 0.001, USDT: 1.00 };
+        const times = { BTC: '10-30 minutes', ETH: '2-5 minutes', USDT: '1-2 minutes' };
+        
+        const currency = this.value;
+        if (currency) {
+          const fee = fees[currency];
+          document.getElementById('network-fee').textContent = 
+            currency === 'USDT' ? '$' + fee.toFixed(2) : fee.toFixed(4) + ' ' + currency;
+          document.getElementById('processing-time').textContent = times[currency];
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -1,6 +1,10 @@
 /* Landing Page Styles */
 
 /* Navigation */
+
+
+
+
 .navbar {
   position: fixed;
   top: 0;
@@ -468,6 +472,7 @@
   animation: scroll-left 60s linear infinite;
   white-space: nowrap;
 }
+#tradingview_hero{height:100%}
 
 @keyframes scroll-left {
   from {
@@ -481,12 +486,12 @@
 .ticker-item {
   display: inline-flex;
   align-items: center;
-  gap: var(--spacing-2);
+  gap: var(--spacing-4);
   margin-right: var(--spacing-8);
   padding: var(--spacing-2) var(--spacing-4);
   border-radius: var(--border-radius-lg);
   background: var(--bg-tertiary);
-  min-width: 180px;
+  min-width: fit-content;
 }
 
 .ticker-symbol {

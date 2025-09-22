@@ -13,6 +13,8 @@ class TradingDashboard {
         this.positions = [];
         this.transactions = [];
         this.notifications = [];
+        this.transactionFilter = 'all';
+        this.transactionSearch = '';
         this.init();
     }
 
@@ -39,7 +41,9 @@ class TradingDashboard {
 
         this.updateTime();
         this.setupEventListeners();
+        showLoading(true);
         await this.loadUserData();
+        showLoading(false);
         this.updateUI();
         this.startRealTimeUpdates();
         setInterval(() => this.updateTime(), 60000);
@@ -68,17 +72,17 @@ class TradingDashboard {
 
     updateUserInterface() {
         if (!this.currentProfile) return;
-        
+
         // Update username display
         const usernameEl = document.getElementById('username');
         if (usernameEl) usernameEl.textContent = this.currentProfile.full_name;
-        
+
         // Update profile page
         const profileNameEl = document.getElementById('profileName');
         const profileEmailEl = document.getElementById('profileEmail');
         if (profileNameEl) profileNameEl.textContent = this.currentProfile.full_name;
         if (profileEmailEl) profileEmailEl.textContent = this.currentProfile.email;
-        
+
         // Update notification count
         const unreadCount = this.notifications.filter(n => !n.read).length;
         const notificationCountEl = document.getElementById('notification-count');
@@ -86,7 +90,10 @@ class TradingDashboard {
             notificationCountEl.textContent = unreadCount;
             notificationCountEl.style.display = unreadCount > 0 ? 'block' : 'none';
         }
-        
+
+        // Update page headers with user name
+        this.updatePageHeaders(this.currentPage);
+
         this.updatePortfolioFromUser();
         this.updateProfileStats();
     }
@@ -348,7 +355,10 @@ class TradingDashboard {
     }
 
     setupTradingControls() {
-        // Order type buttons
+        // Enhanced Trade Panel Controls
+        this.setupEnhancedTradePanel();
+
+        // Legacy order type buttons (for backward compatibility)
         document.querySelectorAll('.order-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 document.querySelectorAll('.order-btn').forEach(b => b.classList.remove('active'));
@@ -356,7 +366,7 @@ class TradingDashboard {
             });
         });
 
-        // Volume buttons
+        // Legacy volume buttons (for backward compatibility)
         document.querySelectorAll('.volume-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const volume = e.currentTarget.dataset.volume;
@@ -374,14 +384,191 @@ class TradingDashboard {
         }
     }
 
+    setupEnhancedTradePanel() {
+        // Order type selection
+        const orderTypeButtons = document.querySelectorAll('.order-type-btn');
+        orderTypeButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                orderTypeButtons.forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+
+                const orderType = e.currentTarget.dataset.type;
+                this.handleOrderTypeChange(orderType);
+            });
+        });
+
+        // Trade direction selection
+        const directionButtons = document.querySelectorAll('.direction-btn');
+        directionButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                directionButtons.forEach(b => b.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+
+                const direction = e.currentTarget.dataset.direction;
+                this.handleDirectionChange(direction);
+            });
+        });
+
+        // Volume input and presets
+        const volumeInput = document.getElementById('volumeInput');
+        const volumePresets = document.querySelectorAll('.volume-preset');
+
+        if (volumeInput) {
+            volumeInput.addEventListener('input', () => this.updateOrderSummary());
+        }
+
+        volumePresets.forEach(preset => {
+            preset.addEventListener('click', (e) => {
+                const volume = e.currentTarget.dataset.volume;
+                if (volumeInput) volumeInput.value = volume;
+                this.updateOrderSummary();
+            });
+        });
+
+        // Price input (for limit/stop orders)
+        const priceInput = document.getElementById('priceInput');
+        if (priceInput) {
+            priceInput.addEventListener('input', () => this.updateOrderSummary());
+        }
+
+        // Risk management inputs
+        const stopLossInput = document.getElementById('stopLossInput');
+        const takeProfitInput = document.getElementById('takeProfitInput');
+
+        if (stopLossInput) {
+            stopLossInput.addEventListener('input', () => this.validateRiskInputs());
+        }
+
+        if (takeProfitInput) {
+            takeProfitInput.addEventListener('input', () => this.validateRiskInputs());
+        }
+
+        // Execute trade button
+        const executeTradeBtn = document.getElementById('executeTradeBtn');
+        if (executeTradeBtn) {
+            executeTradeBtn.addEventListener('click', () => this.executeEnhancedTrade());
+        }
+
+        // Initialize order summary
+        this.updateOrderSummary();
+    }
+
+    handleOrderTypeChange(orderType) {
+        const priceSection = document.getElementById('priceSection');
+        const priceInput = document.getElementById('priceInput');
+
+        if (orderType === 'market') {
+            if (priceSection) priceSection.style.display = 'none';
+            if (priceInput) priceInput.value = '';
+        } else {
+            if (priceSection) priceSection.style.display = 'block';
+            if (priceInput) {
+                const currentPrice = realTimePrices.getCurrentPrice(this.currentSymbol);
+                priceInput.value = currentPrice.toFixed(2);
+            }
+        }
+
+        this.updateOrderSummary();
+    }
+
+    handleDirectionChange(direction) {
+        this.updateOrderSummary();
+    }
+
+    updateOrderSummary() {
+        const volumeInput = document.getElementById('volumeInput');
+        const priceInput = document.getElementById('priceInput');
+        const orderTypeButtons = document.querySelectorAll('.order-type-btn');
+        const directionButtons = document.querySelectorAll('.direction-btn');
+
+        // Get current values
+        const volume = parseFloat(volumeInput?.value) || 0;
+        const price = parseFloat(priceInput?.value) || 0;
+        const orderType = Array.from(orderTypeButtons).find(btn => btn.classList.contains('active'))?.dataset.type || 'market';
+        const direction = Array.from(directionButtons).find(btn => btn.classList.contains('active'))?.dataset.direction || 'buy';
+
+        // Update summary display
+        const summarySymbol = document.getElementById('summarySymbol');
+        const summaryDirection = document.getElementById('summaryDirection');
+        const summaryVolume = document.getElementById('summaryVolume');
+        const summaryPrice = document.getElementById('summaryPrice');
+        const summaryTotal = document.getElementById('summaryTotal');
+
+        if (summarySymbol) summarySymbol.textContent = this.currentSymbol;
+        if (summaryDirection) summaryDirection.textContent = direction.toUpperCase();
+        if (summaryVolume) summaryVolume.textContent = volume.toFixed(4);
+
+        if (orderType === 'market') {
+            if (summaryPrice) summaryPrice.textContent = 'Market';
+            const currentPrice = realTimePrices.getCurrentPrice(this.currentSymbol);
+            const total = volume * currentPrice;
+            if (summaryTotal) summaryTotal.textContent = `$${total.toFixed(2)}`;
+        } else {
+            if (summaryPrice) summaryPrice.textContent = `$${price.toFixed(2)}`;
+            const total = volume * price;
+            if (summaryTotal) summaryTotal.textContent = `$${total.toFixed(2)}`;
+        }
+
+        // Update execute button state
+        const executeBtn = document.getElementById('executeTradeBtn');
+        if (executeBtn) {
+            executeBtn.disabled = volume <= 0 || (orderType !== 'market' && price <= 0);
+        }
+    }
+
+    validateRiskInputs() {
+        const stopLossInput = document.getElementById('stopLossInput');
+        const takeProfitInput = document.getElementById('takeProfitInput');
+        const directionButtons = document.querySelectorAll('.direction-btn');
+
+        const direction = Array.from(directionButtons).find(btn => btn.classList.contains('active'))?.dataset.direction || 'buy';
+        const currentPrice = realTimePrices.getCurrentPrice(this.currentSymbol);
+
+        if (stopLossInput && stopLossInput.value) {
+            const stopLoss = parseFloat(stopLossInput.value);
+            if (direction === 'buy' && stopLoss >= currentPrice) {
+                stopLossInput.classList.add('error');
+                showToast('Stop loss should be below current price for buy orders', 'warning');
+            } else if (direction === 'sell' && stopLoss <= currentPrice) {
+                stopLossInput.classList.add('error');
+                showToast('Stop loss should be above current price for sell orders', 'warning');
+            } else {
+                stopLossInput.classList.remove('error');
+            }
+        }
+
+        if (takeProfitInput && takeProfitInput.value) {
+            const takeProfit = parseFloat(takeProfitInput.value);
+            if (direction === 'buy' && takeProfit <= currentPrice) {
+                takeProfitInput.classList.add('error');
+                showToast('Take profit should be above current price for buy orders', 'warning');
+            } else if (direction === 'sell' && takeProfit >= currentPrice) {
+                takeProfitInput.classList.add('error');
+                showToast('Take profit should be below current price for sell orders', 'warning');
+            } else {
+                takeProfitInput.classList.remove('error');
+            }
+        }
+    }
+
     setupTransactionFilters() {
         document.querySelectorAll('.filter-tab').forEach(tab => {
             tab.addEventListener('click', (e) => {
                 document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
                 e.currentTarget.classList.add('active');
-                this.filterTransactions(e.currentTarget.dataset.filter);
+                this.transactionFilter = e.currentTarget.dataset.filter;
+                this.applyTransactionFilters();
             });
         });
+
+        // Search input
+        const searchInput = document.getElementById('transactionSearch');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.transactionSearch = e.target.value.toLowerCase();
+                this.applyTransactionFilters();
+            });
+        }
     }
 
     setupProfileMenu() {
@@ -407,7 +594,7 @@ class TradingDashboard {
     navigateToPage(page) {
         // Hide all pages
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-        
+
         // Show selected page
         const targetPage = document.getElementById(`${page}Page`);
         if (targetPage) {
@@ -424,6 +611,9 @@ class TradingDashboard {
 
         this.currentPage = page;
 
+        // Update page headers with user name
+        this.updatePageHeaders(page);
+
         // Load page-specific data
         switch (page) {
             case 'trading':
@@ -435,61 +625,38 @@ class TradingDashboard {
             case 'notifications':
                 this.loadNotifications();
                 break;
+
+        }
+    }
+
+    updatePageHeaders(page) {
+        if (!this.currentProfile) return;
+
+        const userName = this.currentProfile.full_name || 'User';
+
+        switch (page) {
+            case 'transactions':
+                const transactionsHeader = document.querySelector('#transactionsPage .page-header h2');
+                if (transactionsHeader) {
+                    transactionsHeader.textContent = `${userName}'s Transactions`;
+                }
+                break;
+            case 'notifications':
+                const notificationsHeader = document.querySelector('#notificationsPage .page-header h2');
+                if (notificationsHeader) {
+                    notificationsHeader.textContent = `${userName}'s Notifications`;
+                }
+                break;
             case 'support':
-                this.loadLivePayments();
+                const supportHeader = document.querySelector('#supportPage .page-header h2');
+                if (supportHeader) {
+                    supportHeader.textContent = `${userName}'s Live Payments`;
+                }
                 break;
         }
     }
     
-    loadLivePayments() {
-        // Show recent transactions as live payment feed
-        const container = document.getElementById('live-activities-list');
-        if (!container) return;
-        
-        const recentTransactions = this.transactions
-            .filter(t => t.type === 'deposit' || t.type === 'withdrawal')
-            .slice(0, 10);
-        
-        if (recentTransactions.length === 0) {
-            container.innerHTML = '<div class="empty-state">No recent payment activity</div>';
-            return;
-        }
-        
-        container.innerHTML = recentTransactions.map(transaction => `
-            <div class="live-activity-item">
-                <div class="activity-avatar">
-                    <img src="https://images.pexels.com/photos/3777946/pexels-photo-3777946.jpeg?w=40&h=40&fit=crop&crop=face" alt="User">
-                </div>
-                <div class="activity-details">
-                    <div class="activity-user">
-                        <span class="user-name">${this.currentProfile.full_name}</span>
-                        <span class="user-country">Your Activity</span>
-                    </div>
-                    <div class="activity-action">
-                        <span class="action-type ${transaction.type}">${transaction.type}</span>
-                        <span class="action-amount">${formatCurrency(transaction.amount)}</span>
-                    </div>
-                </div>
-                <div class="activity-time">
-                    ${getRelativeTime(new Date(transaction.created_at).getTime())}
-                </div>
-            </div>
-        `).join('');
-        
-        // Update stats
-        const totalDeposits = this.transactions
-            .filter(t => t.type === 'deposit')
-            .reduce((sum, t) => sum + t.amount, 0);
-        const totalWithdrawals = this.transactions
-            .filter(t => t.type === 'withdrawal')
-            .reduce((sum, t) => sum + t.amount, 0);
-        
-        const totalDepositsEl = document.getElementById('total-deposits');
-        const totalWithdrawalsEl = document.getElementById('total-withdrawals');
-        
-        if (totalDepositsEl) totalDepositsEl.textContent = formatCurrency(totalDeposits, 'USD', 0);
-        if (totalWithdrawalsEl) totalWithdrawalsEl.textContent = formatCurrency(totalWithdrawals, 'USD', 0);
-    }
+
     
     updateWatchlist() {
         const symbols = ['BTC/USD', 'ETH/USD', 'EUR/USD', 'GBP/USD', 'AAPL'];
@@ -720,7 +887,7 @@ class TradingDashboard {
 
     filterTransactions(filter) {
         let filteredTransactions = this.transactions;
-        
+
         if (filter !== 'all') {
             filteredTransactions = this.transactions.filter(t => {
                 switch (filter) {
@@ -763,10 +930,65 @@ class TradingDashboard {
         `).join('');
     }
 
+    applyTransactionFilters() {
+        let filteredTransactions = this.transactions;
+
+        // Filter by type
+        if (this.transactionFilter !== 'all') {
+            filteredTransactions = filteredTransactions.filter(t => {
+                switch (this.transactionFilter) {
+                    case 'deposits':
+                        return t.type === 'deposit';
+                    case 'withdrawals':
+                        return t.type === 'withdrawal';
+                    case 'trades':
+                        return t.type === 'trade';
+                    default:
+                        return true;
+                }
+            });
+        }
+
+        // Filter by search text
+        if (this.transactionSearch && this.transactionSearch.trim() !== '') {
+            filteredTransactions = filteredTransactions.filter(t => {
+                const note = (t.note || '').toLowerCase();
+                const type = (t.type || '').toLowerCase();
+                return note.includes(this.transactionSearch) || type.includes(this.transactionSearch);
+            });
+        }
+
+        const container = document.getElementById('transactionsList');
+        if (!container) return;
+
+        if (filteredTransactions.length === 0) {
+            container.innerHTML = '<div class="empty-state">No transactions found</div>';
+            return;
+        }
+
+        container.innerHTML = filteredTransactions.map(transaction => `
+            <div class="transaction-item">
+                <div class="transaction-icon ${transaction.type}">
+                    <i class="fas fa-${this.getTransactionIcon(transaction.type)}"></i>
+                </div>
+                <div class="transaction-details">
+                    <div class="transaction-title">${transaction.note || transaction.type}</div>
+                    <div class="transaction-subtitle">${getRelativeTime(new Date(transaction.created_at).getTime())} • ${transaction.status}</div>
+                </div>
+                <div class="transaction-amount">
+                    <div class="amount-primary ${this.isPositiveTransaction(transaction.type) ? 'positive' : 'negative'}">
+                        ${this.isPositiveTransaction(transaction.type) ? '+' : '-'}${formatCurrency(transaction.amount)}
+                    </div>
+                    <div class="amount-secondary">${transaction.status}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
     async executeTrade() {
         const orderType = document.querySelector('.order-btn.active');
         const volumeInput = document.querySelector('.volume-input');
-        
+
         if (!orderType || !volumeInput) {
             showToast('Please select order type and volume', 'error');
             return;
@@ -784,7 +1006,7 @@ class TradingDashboard {
         // Check if user has sufficient balance
         const balances = this.currentProfile.balances || { USD: 0 };
         const tradeValue = quantity * currentPrice;
-        
+
         if (side === 'buy' && tradeValue > balances.USD) {
             showToast('Insufficient USD balance', 'error');
             return;
@@ -792,7 +1014,7 @@ class TradingDashboard {
 
         try {
             showLoading(true);
-            
+
             const trade = {
                 user_id: this.currentUser.id,
                 symbol: this.currentSymbol,
@@ -804,7 +1026,7 @@ class TradingDashboard {
             };
 
             const { data, error } = await apiClient.createTrade(trade);
-            
+
             if (error) {
                 throw new Error(error.message);
             }
@@ -826,18 +1048,125 @@ class TradingDashboard {
             if (side === 'buy') {
                 newBalances.USD -= tradeValue;
             }
-            
+
             await apiClient.updateUser(this.currentUser.id, { balances: newBalances });
             this.currentProfile.balances = newBalances;
 
             showToast(`${side.toUpperCase()} order executed successfully!`, 'success');
-            
+
             // Reload data
             await this.loadUserData();
             this.updateUI();
-            
+
         } catch (error) {
             console.error('Trade execution error:', error);
+            showToast('Failed to execute trade', 'error');
+        } finally {
+            showLoading(false);
+        }
+    }
+
+    async executeEnhancedTrade() {
+        const volumeInput = document.getElementById('volumeInput');
+        const priceInput = document.getElementById('priceInput');
+        const orderTypeButtons = document.querySelectorAll('.order-type-btn');
+        const directionButtons = document.querySelectorAll('.direction-btn');
+        const stopLossInput = document.getElementById('stopLossInput');
+        const takeProfitInput = document.getElementById('takeProfitInput');
+
+        if (!volumeInput || !volumeInput.value) {
+            showToast('Please enter a volume', 'error');
+            return;
+        }
+
+        const volume = parseFloat(volumeInput.value);
+        if (volume <= 0) {
+            showToast('Please enter a valid volume', 'error');
+            return;
+        }
+
+        const orderType = Array.from(orderTypeButtons).find(btn => btn.classList.contains('active'))?.dataset.type || 'market';
+        const direction = Array.from(directionButtons).find(btn => btn.classList.contains('active'))?.dataset.direction || 'buy';
+        const price = parseFloat(priceInput?.value) || 0;
+        const stopLoss = parseFloat(stopLossInput?.value) || null;
+        const takeProfit = parseFloat(takeProfitInput?.value) || null;
+
+        // Validate price for limit/stop orders
+        if (orderType !== 'market' && (!price || price <= 0)) {
+            showToast('Please enter a valid price for limit/stop orders', 'error');
+            return;
+        }
+
+        // Get execution price
+        const executionPrice = orderType === 'market' ? realTimePrices.getCurrentPrice(this.currentSymbol) : price;
+        const tradeValue = volume * executionPrice;
+
+        // Check balance
+        const balances = this.currentProfile.balances || { USD: 0 };
+        if (direction === 'buy' && tradeValue > balances.USD) {
+            showToast('Insufficient USD balance', 'error');
+            return;
+        }
+
+        try {
+            showLoading(true);
+
+            // Create trade record
+            const trade = {
+                user_id: this.currentUser.id,
+                symbol: this.currentSymbol,
+                side: direction,
+                quantity: volume,
+                entry_price: executionPrice,
+                order_type: orderType,
+                stop_loss: stopLoss,
+                take_profit: takeProfit,
+                status: 'open',
+                opened_at: new Date().toISOString()
+            };
+
+            const { data, error } = await apiClient.createTrade(trade);
+
+            if (error) {
+                throw new Error(error.message);
+            }
+
+            // Create transaction record
+            const transaction = {
+                user_id: this.currentUser.id,
+                type: 'trade',
+                amount: tradeValue,
+                currency: 'USD',
+                status: 'completed',
+                note: `${direction.toUpperCase()} ${volume} ${this.currentSymbol} at $${executionPrice.toFixed(2)} (${orderType} order)`
+            };
+
+            await apiClient.createTransaction(transaction);
+
+            // Update user balance
+            const newBalances = { ...balances };
+            if (direction === 'buy') {
+                newBalances.USD -= tradeValue;
+            }
+
+            await apiClient.updateUser(this.currentUser.id, { balances: newBalances });
+            this.currentProfile.balances = newBalances;
+
+            showToast(`${direction.toUpperCase()} ${orderType} order executed successfully!`, 'success');
+
+            // Reset form
+            if (volumeInput) volumeInput.value = '';
+            if (priceInput) priceInput.value = '';
+            if (stopLossInput) stopLossInput.value = '';
+            if (takeProfitInput) takeProfitInput.value = '';
+
+            // Reload data
+            await this.loadUserData();
+            this.updateUI();
+            this.updateOrderSummary();
+
+        } catch (error) {
+            console.error('Enhanced trade execution error:', error);
             showToast('Failed to execute trade', 'error');
         } finally {
             showLoading(false);

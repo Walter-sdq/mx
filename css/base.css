@@ -192,8 +192,8 @@ body {
   font-family: var(--font-family);
   font-size: var(--font-size-base);
   line-height: var(--line-height-normal);
-  color: var(--text-primary);
   background-color: var(--bg-primary);
+  color: var(--text-primary);
   transition: background-color var(--transition-normal), color var(--transition-normal);
   min-height: 100vh;
 }

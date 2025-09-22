@@ -5,13 +5,340 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Deposit Funds - MaxProfit Trading</title>
     <meta name="description" content="Deposit funds to your MaxProfit trading account">
-    
     <link rel="icon" type="image/svg+xml" href="img/logo.svg">
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/dashboard.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- ✅ ADD THIS: Wrap your CSS in <style> -->
+    <style>
+    /* ======= Dashboard & Deposit Page Styles ======= */
+
+    /* General Reset */
+    body {
+        margin: 0;
+        font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        background-color: #121212;
+        color: #f5f5f5;
+        line-height: 1.5;
+    }
+
+    h1, h3, h4 {
+        margin: 0;
+    }
+
+    button, input, select {
+        font-family: inherit;
+        outline: none;
+        border: none;
+        background: none;
+        color: inherit;
+    }
+
+    /* Layout */
+    .dashboard-container {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    /* ======= Top Bar ======= */
+    .topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        background-color: #1e1e1e;
+        border-bottom: 1px solid #2a2a2a;
+    }
+
+    .topbar-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .back-btn {
+        color: #fff;
+        font-size: 1.25rem;
+        transition: opacity 0.2s ease;
+    }
+
+    .back-btn:hover {
+        opacity: 0.7;
+    }
+
+    .page-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .theme-toggle {
+        background: #2a2a2a;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .theme-toggle:hover {
+        background: #3a3a3a;
+    }
+
+    /* ======= Main Content ======= */
+    .content {
+        flex: 1;
+        padding: 1.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    .deposit-container {
+        max-width: 800px;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+    }
+
+    /* ======= Balance Card ======= */
+    .balance-card {
+        background: #1e1e1e;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 0 8px rgba(0,0,0,0.2);
+    }
+
+    .balance-amount {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-top: 0.5rem;
+    }
+
+    .balance-breakdown {
+        margin-top: 0.5rem;
+        display: flex;
+        gap: 1rem;
+        font-size: 0.9rem;
+        color: #aaa;
+    }
+
+    .breakdown-item {
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* ======= Deposit Methods ======= */
+    .deposit-methods h3 {
+        margin-bottom: 0.75rem;
+    }
+
+    .methods-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 1rem;
+    }
+
+    .method-card {
+        background: #1e1e1e;
+        padding: 1rem;
+        border-radius: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+        border: 2px solid transparent;
+        cursor: pointer;
+        transition: border 0.2s ease, transform 0.15s ease;
+    }
+
+    .method-card:hover {
+        transform: translateY(-2px);
+        border-color: #444;
+    }
+
+    .method-card.active {
+        border-color: #3b82f6; /* blue highlight */
+    }
+
+    .method-icon i {
+        font-size: 1.5rem;
+        color: #3b82f6;
+    }
+
+    .method-info h4 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+
+    .method-info p {
+        font-size: 0.85rem;
+        color: #aaa;
+    }
+
+    .method-badge {
+        align-self: flex-start;
+        font-size: 0.75rem;
+        background: #3b82f6;
+        color: white;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+    }
+
+    /* ======= Deposit Form ======= */
+    .deposit-form {
+        background: #1e1e1e;
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.2);
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .amount-input-group {
+        display: flex;
+        align-items: center;
+        background: #2a2a2a;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .currency-symbol {
+        background: #333;
+        padding: 0.5rem 0.75rem;
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+
+    #deposit-amount {
+        flex: 1;
+        padding: 0.5rem;
+        background: none;
+        border: none;
+        color: #fff;
+        font-size: 1rem;
+    }
+
+    .amount-note {
+        font-size: 0.8rem;
+        color: #aaa;
+    }
+
+    /* Quick Amount Buttons */
+    .quick-amounts {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .quick-amount-btn {
+        background: #2a2a2a;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.2s ease;
+    }
+
+    .quick-amount-btn:hover {
+        background: #3a3a3a;
+    }
+
+    /* Payment Details */
+    .payment-details {
+        margin-top: 0.5rem;
+        display: block;
+    }
+
+    .form-row {
+        display: flex;
+        gap: 1rem;
+    }
+
+    /* Fee Summary */
+    .fee-summary {
+        border-top: 1px solid #2a2a2a;
+        padding-top: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .fee-item {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .fee-item.total {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    /* Buttons */
+    .btn-primary {
+        background: #3b82f6;
+        color: white;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.75rem 1rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        transition: background 0.2s ease;
+    }
+
+    .btn-primary:hover {
+        background: #2563eb;
+    }
+
+    /* Loading Overlay */
+    .loading-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+    }
+
+    .loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #ccc;
+        border-top: 4px solid #3b82f6;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+        .form-row {
+            flex-direction: column;
+        }
+    }
+    </style>
 </head>
 <body>
+
+
     <div class="dashboard-container">
         <!-- Simplified header for deposit page -->
         <header class="topbar">
@@ -119,7 +446,7 @@
                             <button type="button" class="quick-amount-btn" data-amount="5000">$5,000</button>
                         </div>
 
-                        <!-- Payment Details (shown based on selected method) -->
+                        <!-- Payment Details -->
                         <div class="payment-details" id="card-details">
                             <div class="form-group">
                                 <label for="card-number">Card Number</label>
@@ -217,5 +544,8 @@
         <div class="loading-spinner"></div>
     </div>
 
+    <!-- JS File -->
+   
+    <script src="js/deposit.js"></script>
 </body>
 </html>

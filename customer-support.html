@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Customer Support - MaxProfit Trading</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app-container" id="app">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button class="back-btn" id="backBtn">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <h1>Customer Support</h1>
+        </div>
+        <div class="header-right">
+          <button class="header-btn" id="notificationBtn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-count">0</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Support Categories -->
+        <section class="support-categories">
+          <div class="category-grid">
+            <div class="category-card" data-category="account">
+              <div class="category-icon">
+                <i class="fas fa-user-circle"></i>
+              </div>
+              <h3>Account Issues</h3>
+              <p>Login, registration, verification problems</p>
+            </div>
+
+            <div class="category-card" data-category="trading">
+              <div class="category-icon">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <h3>Trading Support</h3>
+              <p>Orders, positions, trading platform help</p>
+            </div>
+
+            <div class="category-card" data-category="deposits">
+              <div class="category-icon">
+                <i class="fas fa-arrow-down"></i>
+              </div>
+              <h3>Deposits</h3>
+              <p>Deposit methods, payment issues</p>
+            </div>
+
+            <div class="category-card" data-category="withdrawals">
+              <div class="category-icon">
+                <i class="fas fa-arrow-up"></i>
+              </div>
+              <h3>Withdrawals</h3>
+              <p>Withdrawal requests, processing times</p>
+            </div>
+
+            <div class="category-card" data-category="security">
+              <div class="category-icon">
+                <i class="fas fa-shield-alt"></i>
+              </div>
+              <h3>Security</h3>
+              <p>Account security, 2FA, suspicious activity</p>
+            </div>
+
+            <div class="category-card" data-category="technical">
+              <div class="category-icon">
+                <i class="fas fa-cog"></i>
+              </div>
+              <h3>Technical Issues</h3>
+              <p>Website bugs, mobile app problems</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Quick Actions -->
+        <section class="quick-actions-section">
+          <h2>Quick Actions</h2>
+          <div class="quick-actions-grid">
+            <button class="quick-action-btn" id="liveChatBtn">
+              <i class="fas fa-comments"></i>
+              <span>Live Chat</span>
+            </button>
+
+            <button class="quick-action-btn" id="emailSupportBtn">
+              <i class="fas fa-envelope"></i>
+              <span>Email Support</span>
+            </button>
+
+            <button class="quick-action-btn" id="faqBtn">
+              <i class="fas fa-question-circle"></i>
+              <span>FAQ</span>
+            </button>
+
+            <button class="quick-action-btn" id="contactFormBtn">
+              <i class="fas fa-file-alt"></i>
+              <span>Contact Form</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Support Tickets -->
+        <section class="support-tickets">
+          <div class="section-header">
+            <h2>My Support Tickets</h2>
+            <button class="btn btn-primary" id="newTicketBtn">
+              <i class="fas fa-plus"></i>
+              New Ticket
+            </button>
+          </div>
+
+          <div class="tickets-list" id="ticketsList">
+            <!-- Tickets will be populated by JavaScript -->
+          </div>
+        </section>
+
+        <!-- Contact Information -->
+        <section class="contact-info">
+          <h2>Contact Information</h2>
+          <div class="contact-methods">
+            <div class="contact-method">
+              <div class="contact-icon">
+                <i class="fas fa-envelope"></i>
+              </div>
+              <div class="contact-details">
+                <h4>Email Support</h4>
+                <p>support@maxprofittrading.com</p>
+                <span class="response-time">Response within 24 hours</span>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="contact-icon">
+                <i class="fas fa-phone"></i>
+              </div>
+              <div class="contact-details">
+                <h4>Phone Support</h4>
+                <p>+1 (555) 123-4567</p>
+                <span class="response-time">Mon-Fri, 9AM-6PM EST</span>
+              </div>
+            </div>
+
+            <div class="contact-method">
+              <div class="contact-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="contact-details">
+                <h4>Live Chat</h4>
+                <p>Available 24/7</p>
+                <span class="response-time">Average response: 2 minutes</span>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <!-- Modals -->
+      <!-- Live Chat Modal -->
+      <div class="modal" id="liveChatModal">
+        <div class="modal-content chat-modal">
+          <div class="modal-header">
+            <h3>Live Chat Support</h3>
+            <button class="modal-close" id="closeChatModal">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="chat-container" id="chatContainer">
+            <!-- Chat messages will be populated here -->
+          </div>
+          <div class="chat-input">
+            <input type="text" id="chatMessageInput" placeholder="Type your message..." />
+            <button class="btn btn-primary" id="sendChatMessage">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- New Ticket Modal -->
+      <div class="modal" id="newTicketModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Create New Support Ticket</h3>
+            <button class="modal-close" id="closeNewTicketModal">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <form class="ticket-form" id="ticketForm">
+            <div class="form-group">
+              <label for="ticketSubject">Subject</label>
+              <input type="text" id="ticketSubject" required />
+            </div>
+            <div class="form-group">
+              <label for="ticketCategory">Category</label>
+              <select id="ticketCategory" required>
+                <option value="">Select Category</option>
+                <option value="account">Account Issues</option>
+                <option value="trading">Trading Support</option>
+                <option value="deposits">Deposits</option>
+                <option value="withdrawals">Withdrawals</option>
+                <option value="security">Security</option>
+                <option value="technical">Technical Issues</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="ticketPriority">Priority</label>
+              <select id="ticketPriority">
+                <option value="low">Low</option>
+                <option value="medium" selected>Medium</option>
+                <option value="high">High</option>
+                <option value="urgent">Urgent</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="ticketMessage">Message</label>
+              <textarea id="ticketMessage" rows="5" required></textarea>
+            </div>
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" id="cancelTicket">Cancel</button>
+              <button type="submit" class="btn btn-primary">Submit Ticket</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- FAQ Modal -->
+      <div class="modal" id="faqModal">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h3>Frequently Asked Questions</h3>
+            <button class="modal-close" id="closeFaqModal">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+          <div class="faq-content">
+            <div class="faq-item">
+              <div class="faq-question">
+                <h4>How do I deposit funds?</h4>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                <p>You can deposit funds through various methods including bank transfer, credit card, and cryptocurrency. Visit the Deposits section in your dashboard to get started.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question">
+                <h4>How long do withdrawals take?</h4>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                <p>Withdrawal processing times vary by method: Bank transfers (1-3 business days), Cryptocurrency (10-60 minutes), Credit cards (instant to 24 hours).</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question">
+                <h4>How do I reset my password?</h4>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                <p>Click "Forgot Password" on the login page, enter your email address, and follow the instructions sent to your email.</p>
+              </div>
+            </div>
+
+            <div class="faq-item">
+              <div class="faq-question">
+                <h4>What are the trading fees?</h4>
+                <i class="fas fa-chevron-down"></i>
+              </div>
+              <div class="faq-answer">
+                <p>We offer competitive spreads starting from 0.1 pips. No commissions on standard accounts. Check our pricing page for detailed fee structure.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script type="module" src="js/customer-support.js"></script>
+  </body>
+</html>

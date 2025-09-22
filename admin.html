@@ -1,582 +1,300 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - MaxProfit Trading</title>
-    <meta name="description" content="MaxProfit admin dashboard">
-    
-    <link rel="icon" type="image/svg+xml" href="img/logo.svg">
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="stylesheet" href="css/admin.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - MaxProfit Trading</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Admin specific styles */
+    .admin-container { display: flex; min-height: 100vh; }
+    .admin-sidebar {
+      width: 250px; background: var(--card-bg); border-right: 1px solid var(--border-color);
+      padding: 1rem; position: fixed; height: 100vh; overflow-y: auto; z-index: 100;
+    }
+    .admin-main { flex: 1; margin-left: 250px; padding: 1rem; }
+    .admin-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
+    .admin-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+    .stat-card { background: var(--card-bg); padding: 1.5rem; border-radius: 12px; text-align: center; }
+    .stat-value { font-size: 2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .stat-label { color: var(--text-muted); }
+    .user-table { width: 100%; border-collapse: collapse; background: var(--card-bg); border-radius: 12px; overflow: hidden; }
+    .user-table th, .user-table td { padding: 1rem; text-align: left; border-bottom: 1px solid var(--border-color); }
+    .user-table th { background: var(--surface-color); font-weight: 600; }
+    .user-actions { display: flex; gap: 0.5rem; }
+    .btn-small { padding: 0.5rem 1rem; border: none; border-radius: 6px; cursor: pointer; font-size: 0.85rem; }
+    .btn-primary { background: var(--primary-color); color: white; }
+    .btn-danger { background: #dc3545; color: white; }
+    .btn-warning { background: #ffc107; color: black; }
+    .search-filter { display: flex; gap: 1rem; margin-bottom: 1rem; align-items: center; }
+    .search-input { padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--surface-color); color: var(--text-primary); }
+    .filter-select { padding: 0.5rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--surface-color); color: var(--text-primary); }
+    .activity-log { max-height: 400px; overflow-y: auto; background: var(--card-bg); border-radius: 12px; padding: 1rem; }
+    .activity-item { display: flex; align-items: center; gap: 1rem; padding: 0.5rem 0; border-bottom: 1px solid var(--border-color); }
+    .activity-item:last-child { border-bottom: none; }
+    .activity-icon { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: var(--primary-color); color: white; }
+    .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; }
+    .modal-content { background: var(--card-bg); margin: 5% auto; padding: 2rem; border-radius: 12px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; }
+    .form-group { margin-bottom: 1rem; }
+    .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; }
+    .form-control { width: 100%; padding: 0.75rem; border: 1px solid var(--border-color); border-radius: 6px; background: var(--surface-color); color: var(--text-primary); }
+    .pagination { display: flex; justify-content: center; gap: 0.5rem; margin-top: 1rem; }
+    .page-btn { padding: 0.5rem 1rem; border: 1px solid var(--border-color); background: var(--surface-color); color: var(--text-primary); cursor: pointer; border-radius: 6px; }
+    .page-btn.active { background: var(--primary-color); color: white; }
+    @media (max-width: 768px) {
+      .admin-sidebar { width: 100%; position: relative; height: auto; }
+      .admin-main { margin-left: 0; }
+      .search-filter { flex-direction: column; align-items: stretch; }
+      .user-table { font-size: 0.85rem; }
+    }
+  </style>
 </head>
 <body>
-    <div class="dashboard-container">
-        <!-- Admin Sidebar -->
-        <nav class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="sidebar-logo">
-                    <i class="fas fa-crown"></i>
-                    <span class="sidebar-logo-text">Admin Panel</span>
-                </div>
-                <button class="sidebar-toggle" id="sidebar-toggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
-            
-            <ul class="sidebar-menu">
-                <li class="menu-item active" data-page="overview">
-                    <i class="fas fa-tachometer-alt"></i>
-                    <span>Overview</span>
-                </li>
-                <li class="menu-item" data-page="users">
-                    <i class="fas fa-users"></i>
-                    <span>Users</span>
-                </li>
-                <li class="menu-item" data-page="withdrawals">
-                    <i class="fas fa-money-check-alt"></i>
-                    <span>Withdrawals</span>
-                    <span class="notification-badge" id="withdrawal-badge">5</span>
-                </li>
-                <li class="menu-item" data-page="trades">
-                    <i class="fas fa-chart-line"></i>
-                    <span>Trades</span>
-                </li>
-                <li class="menu-item" data-page="notifications">
-                    <i class="fas fa-bullhorn"></i>
-                    <span>Broadcast</span>
-                </li>
-            </ul>
-
-            <div class="sidebar-footer">
-                <div class="user-info">
-                    <img src="https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?w=40&h=40&fit=crop&crop=face" alt="Admin" class="user-avatar">
-                    <div class="user-details">
-                        <span class="user-name" id="sidebar-user-name">Admin User</span>
-                        <span class="user-role">Administrator</span>
-                    </div>
-                </div>
-                <a href="dashboard.html" class="switch-view-btn" title="Switch to User View">
-                    <i class="fas fa-user"></i>
-                </a>
-            </div>
-        </nav>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Admin Topbar -->
-            <header class="topbar admin-topbar">
-                <div class="topbar-left">
-                    <button class="mobile-menu-toggle" id="mobile-menu-toggle">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <h1 class="page-title" id="page-title">Admin Overview</h1>
-                </div>
-                
-                <div class="topbar-right">
-                    <div class="admin-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Online Users</span>
-                            <span class="stat-value" id="online-users">342</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Server Status</span>
-                            <span class="stat-value online">Online</span>
-                        </div>
-                    </div>
-                    <button class="theme-toggle" id="theme-toggle">
-                        <i class="fas fa-sun"></i>
-                    </button>
-                    <div class="user-menu" id="user-menu">
-                        <img src="https://images.pexels.com/photos/3184298/pexels-photo-3184298.jpeg?w=40&h=40&fit=crop&crop=face" alt="Admin" class="user-avatar">
-                        <div class="user-menu-dropdown" id="user-menu-dropdown">
-                            <a href="dashboard.html">Switch to User View</a>
-                            <div class="dropdown-divider"></div>
-                            <a href="#" id="logout-btn">Logout</a>
-                        </div>
-                    </div>
-                </div>
-            </header>
-
-            <!-- Admin Content -->
-            <main class="content admin-content" id="content">
-                <!-- Overview Page -->
-                <div class="page active" id="overview-page">
-                    <!-- KPI Cards -->
-                    <div class="kpi-grid">
-                        <div class="kpi-card">
-                            <div class="kpi-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="kpi-content">
-                                <div class="kpi-value" id="total-users">150,234</div>
-                                <div class="kpi-label">Total Users</div>
-                                <div class="kpi-change positive">+12.5%</div>
-                            </div>
-                        </div>
-
-                        <div class="kpi-card">
-                            <div class="kpi-icon">
-                                <i class="fas fa-dollar-sign"></i>
-                            </div>
-                            <div class="kpi-content">
-                                <div class="kpi-value" id="total-balance">$2.5B</div>
-                                <div class="kpi-label">Total Balance</div>
-                                <div class="kpi-change positive">+8.3%</div>
-                            </div>
-                        </div>
-
-                        <div class="kpi-card">
-                            <div class="kpi-icon">
-                                <i class="fas fa-chart-line"></i>
-                            </div>
-                            <div class="kpi-content">
-                                <div class="kpi-value" id="open-trades">8,432</div>
-                                <div class="kpi-label">Open Trades</div>
-                                <div class="kpi-change negative">-3.2%</div>
-                            </div>
-                        </div>
-
-                        <div class="kpi-card">
-                            <div class="kpi-icon">
-                                <i class="fas fa-money-check-alt"></i>
-                            </div>
-                            <div class="kpi-content">
-                                <div class="kpi-value" id="pending-withdrawals">127</div>
-                                <div class="kpi-label">Pending Withdrawals</div>
-                                <div class="kpi-change neutral">+5</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Charts -->
-                    <div class="admin-charts">
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h3>User Growth</h3>
-                                <div class="chart-controls">
-                                    <button class="chart-timeframe active" data-chart="users" data-timeframe="7d">7D</button>
-                                    <button class="chart-timeframe" data-chart="users" data-timeframe="30d">30D</button>
-                                    <button class="chart-timeframe" data-chart="users" data-timeframe="90d">90D</button>
-                                </div>
-                            </div>
-                            <div class="chart-area">
-                                <canvas id="users-chart" width="400" height="200"></canvas>
-                            </div>
-                        </div>
-
-                        <div class="chart-card">
-                            <div class="chart-header">
-                                <h3>Trading Volume</h3>
-                                <div class="chart-controls">
-                                    <button class="chart-timeframe active" data-chart="volume" data-timeframe="7d">7D</button>
-                                    <button class="chart-timeframe" data-chart="volume" data-timeframe="30d">30D</button>
-                                    <button class="chart-timeframe" data-chart="volume" data-timeframe="90d">90D</button>
-                                </div>
-                            </div>
-                            <div class="chart-area">
-                                <canvas id="volume-chart" width="400" height="200"></canvas>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="admin-activity">
-                        <div class="activity-header">
-                            <h3>Recent System Activity</h3>
-                            <div class="activity-actions">
-                                <button class="btn btn-outline" onclick="admin.exportUserData()">
-                                    <i class="fas fa-download"></i>
-                                    Export Users
-                                </button>
-                                <button class="btn btn-outline" onclick="admin.exportTransactionData()">
-                                    <i class="fas fa-file-export"></i>
-                                    Export Transactions
-                                </button>
-                                <button class="btn btn-outline" onclick="admin.refreshActivity()">
-                                    <i class="fas fa-refresh"></i>
-                                    Refresh
-                                </button>
-                            </div>
-                        </div>
-                        <div class="activity-list" id="admin-activity-list">
-                            <!-- Activity items will be populated here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Users Management Page -->
-                <div class="page" id="users-page">
-                    <div class="page-header">
-                        <div class="header-actions">
-                            <button class="btn btn-primary" onclick="openModal('create-user-modal')">
-                                <i class="fas fa-plus"></i>
-                                Create User
-                            </button>
-                            <button class="btn btn-outline" onclick="admin.exportUserData()">
-                                <i class="fas fa-download"></i>
-                                Export Users
-                            </button>
-                            <input type="text" id="users-search" placeholder="Search users...">
-                        </div>
-                    </div>
-
-                    <div class="admin-table">
-                        <div class="table-container">
-                            <table id="users-table">
-                                <thead>
-                                    <tr>
-                                        <th class="sortable" data-sort="email">User</th>
-                                        <th class="sortable" data-sort="role">Role</th>
-                                        <th class="sortable" data-sort="emailVerified">Verified</th>
-                                        <th class="sortable" data-sort="balances.USD">USD Balance</th>
-                                        <th class="sortable" data-sort="balances.BTC">BTC Balance</th>
-                                        <th class="sortable" data-sort="balances.ETH">ETH Balance</th>
-                                        <th class="sortable" data-sort="createdAt">Joined</th>
-                                        <th class="sortable" data-sort="lastLoginAt">Last Login</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="users-tbody">
-                                    <!-- Users will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="pagination" id="users-pagination">
-                        <!-- Pagination will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Withdrawals Management Page -->
-                <div class="page" id="withdrawals-page">
-                    <div class="page-header">
-                        <div class="header-filters">
-                            <button class="filter-btn active" data-filter="all">All</button>
-                            <button class="filter-btn" data-filter="pending">Pending</button>
-                            <button class="filter-btn" data-filter="approved">Approved</button>
-                            <button class="filter-btn" data-filter="denied">Denied</button>
-                            <button class="filter-btn" data-filter="paid">Paid</button>
-                        </div>
-                        <button class="btn btn-outline" onclick="admin.exportTransactionData()">
-                            <i class="fas fa-download"></i>
-                            Export Data
-                        </button>
-                        <input type="text" id="withdrawals-search" placeholder="Search withdrawals...">
-                    </div>
-
-                    <div class="admin-table">
-                        <div class="table-container">
-                            <table id="withdrawals-table">
-                                <thead>
-                                    <tr>
-                                        <th class="sortable" data-sort="createdAt">Date</th>
-                                        <th class="sortable" data-sort="userId">User</th>
-                                        <th class="sortable" data-sort="amount">Amount</th>
-                                        <th class="sortable" data-sort="currency">Currency</th>
-                                        <th class="sortable" data-sort="method">Method</th>
-                                        <th class="sortable" data-sort="status">Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="withdrawals-tbody">
-                                    <!-- Withdrawals will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="pagination" id="withdrawals-pagination">
-                        <!-- Pagination will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Trades Management Page -->
-                <div class="page" id="trades-page">
-                    <div class="page-header">
-                        <div class="header-filters">
-                            <button class="filter-btn active" data-filter="all">All</button>
-                            <button class="filter-btn" data-filter="open">Open</button>
-                            <button class="filter-btn" data-filter="closed">Closed</button>
-                        </div>
-                        <input type="text" id="trades-search" placeholder="Search trades...">
-                    </div>
-
-                    <div class="admin-table">
-                        <div class="table-container">
-                            <table id="trades-table">
-                                <thead>
-                                    <tr>
-                                        <th class="sortable" data-sort="openedAt">Date</th>
-                                        <th class="sortable" data-sort="userId">User</th>
-                                        <th class="sortable" data-sort="symbol">Symbol</th>
-                                        <th class="sortable" data-sort="side">Side</th>
-                                        <th class="sortable" data-sort="qty">Size</th>
-                                        <th class="sortable" data-sort="entryPrice">Entry</th>
-                                        <th class="sortable" data-sort="closePrice">Current/Close</th>
-                                        <th class="sortable" data-sort="pnl">P&L</th>
-                                        <th class="sortable" data-sort="status">Status</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="trades-tbody">
-                                    <!-- Trades will be populated here -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="pagination" id="trades-pagination">
-                        <!-- Pagination will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Notifications/Broadcast Page -->
-                <div class="page" id="notifications-page">
-                    <div class="broadcast-section">
-                        <div class="broadcast-header">
-                            <h3>Send Notification</h3>
-                        </div>
-                        
-                        <form class="broadcast-form" id="broadcast-form">
-                            <div class="form-group">
-                                <label>Recipients</label>
-                                <select id="broadcast-recipients" required>
-                                    <option value="all">All Users</option>
-                                    <option value="users">Users Only</option>
-                                    <option value="admins">Admins Only</option>
-                                    <option value="select">Select Users</option>
-                                </select>
-                            </div>
-
-                            <div class="form-group" id="user-selector" style="display: none;">
-                                <label>Select Users</label>
-                                <div class="user-selector">
-                                    <!-- User checkboxes will be populated here -->
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Title</label>
-                                <input type="text" id="broadcast-title" placeholder="Notification title" required maxlength="100">
-                            </div>
-
-                            <div class="form-group">
-                                <label>Message</label>
-                                <textarea id="broadcast-message" placeholder="Notification message" required maxlength="500" rows="4"></textarea>
-                            </div>
-
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-primary btn-large">
-                                    <i class="fas fa-paper-plane"></i>
-                                    Send Notification
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-
-                    <div class="sent-notifications">
-                        <div class="sent-header">
-                            <h3>Recent Broadcasts</h3>
-                        </div>
-                        <div class="sent-list" id="sent-notifications-list">
-                            <!-- Sent notifications will be populated here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Admin Trading Chart Section -->
-                <section class="admin-trading-chart-section">
-                  <div class="tradingview-widget-container">
-                    <div id="tradingview_admin"></div>
-                    <script src="https://s3.tradingview.com/tv.js"></script>
-                    <script type="text/javascript">
-                      new TradingView.widget({
-                        "width": "100%",
-                        "height": 400,
-                        "symbol": "BINANCE:BTCUSDT",
-                        "interval": "1",
-                        "timezone": "Etc/UTC",
-                        "theme": "dark",
-                        "style": "1",
-                        "locale": "en",
-                        "toolbar_bg": "#222",
-                        "enable_publishing": false,
-                        "allow_symbol_change": true,
-                        "container_id": "tradingview_admin"
-                      });
-                    </script>
-                  </div>
-                </section>
-            </main>
+  <div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="admin-sidebar">
+      <div class="sidebar-header">
+        <h2>Admin Panel</h2>
+      </div>
+      <nav class="sidebar-nav">
+        <div class="menu-item active" data-page="dashboard">
+          <i class="fas fa-tachometer-alt"></i>
+          <span>Dashboard</span>
         </div>
-    </div>
-
-    <!-- Admin Modals -->
-    <div class="modal" id="create-user-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Create New User</h3>
-                <button class="modal-close" onclick="closeModal('create-user-modal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form class="admin-form" id="create-user-form">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="new-user-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="new-user-email" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Role</label>
-                        <select id="new-user-role" required>
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Initial Password</label>
-                        <input type="password" id="new-user-password" placeholder="Will be set by user" disabled>
-                        <small>User will set password during email verification</small>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Create User</button>
-                </form>
-            </div>
+        <div class="menu-item" data-page="users">
+          <i class="fas fa-users"></i>
+          <span>User Management</span>
         </div>
-    </div>
-
-    <div class="modal" id="edit-user-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Edit User</h3>
-                <button class="modal-close" onclick="closeModal('edit-user-modal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form class="admin-form" id="edit-user-form">
-                    <input type="hidden" id="edit-user-id">
-                    <div class="form-group">
-                        <label>Full Name</label>
-                        <input type="text" id="edit-user-name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Email</label>
-                        <input type="email" id="edit-user-email" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Role</label>
-                        <select id="edit-user-role" required>
-                            <option value="user">User</option>
-                            <option value="admin">Admin</option>
-                        </select>
-                    </div>
-                    <div class="balance-adjustments">
-                        <h4>Balance Adjustments</h4>
-                        <div class="balance-row">
-                            <label>USD Balance</label>
-                            <input type="number" id="edit-user-usd" step="0.01">
-                            <button type="button" class="btn btn-small" onclick="adjustBalance('USD')">Adjust</button>
-                        </div>
-                        <div class="balance-row">
-                            <label>BTC Balance</label>
-                            <input type="number" id="edit-user-btc" step="0.00000001">
-                            <button type="button" class="btn btn-small" onclick="adjustBalance('BTC')">Adjust</button>
-                        </div>
-                        <div class="balance-row">
-                            <label>ETH Balance</label>
-                            <input type="number" id="edit-user-eth" step="0.000001">
-                            <button type="button" class="btn btn-small" onclick="adjustBalance('ETH')">Adjust</button>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-primary">Update User</button>
-                </form>
-            </div>
+        <div class="menu-item" data-page="transactions">
+          <i class="fas fa-exchange-alt"></i>
+          <span>Transactions</span>
         </div>
-    </div>
-
-    <div class="modal" id="withdrawal-modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Review Withdrawal</h3>
-                <button class="modal-close" onclick="closeModal('withdrawal-modal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="withdrawal-details" id="withdrawal-details">
-                    <!-- Withdrawal details will be populated here -->
-                </div>
-                <div class="admin-actions">
-                    <textarea id="admin-note" placeholder="Admin note (optional)" rows="3"></textarea>
-                    <div class="action-buttons">
-                        <button class="btn btn-success" onclick="processWithdrawal('approve')">
-                            <i class="fas fa-check"></i>
-                            Approve
-                        </button>
-                        <button class="btn btn-danger" onclick="processWithdrawal('deny')">
-                            <i class="fas fa-times"></i>
-                            Deny
-                        </button>
-                        <button class="btn btn-primary" onclick="processWithdrawal('paid')">
-                            <i class="fas fa-money-bill"></i>
-                            Mark as Paid
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="menu-item" data-page="withdrawals">
+          <i class="fas fa-money-check-alt"></i>
+          <span>Withdrawals</span>
         </div>
+        <div class="menu-item" data-page="trades">
+          <i class="fas fa-chart-line"></i>
+          <span>Trades</span>
+        </div>
+        <div class="menu-item" data-page="broadcast">
+          <i class="fas fa-bullhorn"></i>
+          <span>Broadcast</span>
+        </div>
+        <div class="menu-item" data-page="logs">
+          <i class="fas fa-history"></i>
+          <span>Activity Logs</span>
+        </div>
+      </nav>
+      <div class="sidebar-footer">
+        <button class="btn btn-danger" onclick="logoutAdmin()">Logout</button>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Dashboard Page -->
+      <div class="page active" id="dashboard-page">
+        <div class="admin-header">
+          <h1>Admin Dashboard</h1>
+          <div class="header-actions">
+            <button class="btn btn-primary" onclick="refreshData()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-stats">
+          <div class="stat-card">
+            <div class="stat-value" id="total-users">0</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="active-users">0</div>
+            <div class="stat-label">Active Users</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="total-deposits">$0</div>
+            <div class="stat-label">Total Deposits</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="pending-withdrawals">0</div>
+            <div class="stat-label">Pending Withdrawals</div>
+          </div>
+        </div>
+
+        <div class="activity-log">
+          <h3>Recent Activity</h3>
+          <div id="admin-activity-list">
+            <!-- Activity items will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Page -->
+      <div class="page" id="users-page">
+        <div class="admin-header">
+          <h1>User Management</h1>
+        </div>
+
+        <div class="search-filter">
+          <input type="text" id="user-search" class="search-input" placeholder="Search users...">
+          <select id="user-filter" class="filter-select">
+            <option value="all">All Users</option>
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+            <option value="unverified">Unverified</option>
+          </select>
+          <button class="btn btn-primary" onclick="exportUsers()">Export</button>
+        </div>
+
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Balance</th>
+              <th>Status</th>
+              <th>Joined</th>
+              <th>Last Login</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <!-- User rows will be populated by JavaScript -->
+          </tbody>
+        </table>
+
+        <div class="pagination" id="users-pagination">
+          <!-- Pagination buttons will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Other pages (transactions, withdrawals, trades, broadcast, logs) -->
+      <div class="page" id="transactions-page">
+        <div class="admin-header">
+          <h1>Transactions</h1>
+        </div>
+        <div id="transactions-content">
+          <!-- Transactions table will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="page" id="withdrawals-page">
+        <div class="admin-header">
+          <h1>Withdrawals</h1>
+        </div>
+        <div id="withdrawals-content">
+          <!-- Withdrawals table will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="page" id="trades-page">
+        <div class="admin-header">
+          <h1>Trades</h1>
+        </div>
+        <div id="trades-content">
+          <!-- Trades table will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="page" id="broadcast-page">
+        <div class="admin-header">
+          <h1>Broadcast Message</h1>
+        </div>
+        <form id="broadcast-form">
+          <div class="form-group">
+            <label for="broadcast-title">Title</label>
+            <input type="text" id="broadcast-title" class="form-control" required>
+          </div>
+          <div class="form-group">
+            <label for="broadcast-message">Message</label>
+            <textarea id="broadcast-message" class="form-control" rows="5" required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="broadcast-recipients">Recipients</label>
+            <select id="broadcast-recipients" class="form-control">
+              <option value="all">All Users</option>
+              <option value="active">Active Users</option>
+              <option value="select">Select Users</option>
+            </select>
+          </div>
+          <div id="user-selector" style="display: none;">
+            <div class="form-group">
+              <label>Select Users</label>
+              <div id="user-checkboxes">
+                <!-- User checkboxes will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">Send Broadcast</button>
+        </form>
+      </div>
+
+      <div class="page" id="logs-page">
+        <div class="admin-header">
+          <h1>Activity Logs</h1>
+        </div>
+        <div id="logs-content">
+          <!-- Logs will be populated by JavaScript -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modals -->
+  <div id="modal-overlay" class="modal">
+    <div id="edit-user-modal" class="modal-content">
+      <h2>Edit User</h2>
+      <form id="edit-user-form">
+        <div class="form-group">
+          <label for="edit-full-name">Full Name</label>
+          <input type="text" id="edit-full-name" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="edit-email">Email</label>
+          <input type="email" id="edit-email" class="form-control">
+        </div>
+        <div class="form-group">
+          <label for="edit-balance">Balance</label>
+          <input type="number" id="edit-balance" class="form-control" step="0.01">
+        </div>
+        <div class="form-group">
+          <label for="edit-status">Status</label>
+          <select id="edit-status" class="form-control">
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-danger" onclick="closeModal('edit-user-modal')">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+      </form>
     </div>
 
-    <!-- Modal Overlay -->
-    <div class="modal-overlay" id="modal-overlay"></div>
-
-    <!-- Toast Container -->
-    <div class="toast-container" id="toast-container"></div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="loading-spinner"></div>
+    <div id="withdrawal-modal" class="modal-content">
+      <h2>Review Withdrawal</h2>
+      <div id="withdrawal-details">
+        <!-- Withdrawal details will be populated by JavaScript -->
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-danger" onclick="processWithdrawal('reject')">Reject</button>
+        <button type="button" class="btn btn-primary" onclick="processWithdrawal('approve')">Approve</button>
+      </div>
     </div>
+  </div>
 
-    <script src="js/config.js"></script>
-    <script src="js/utils.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://s3.tradingview.com/tv.js"></script>
-    <script type="module" src="js/admin.js"></script>
-    <script type="text/javascript">
-      // Initialize TradingView widget for admin
-      document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-          try {
-            new TradingView.widget({
-              "width": "100%",
-              "height": 400,
-              "symbol": "BINANCE:BTCUSDT",
-              "interval": "15",
-              "timezone": "Etc/UTC",
-              "theme": document.documentElement.getAttribute('data-theme') || 'dark',
-              "style": "1",
-              "locale": "en",
-              "toolbar_bg": "transparent",
-              "enable_publishing": false,
-              "allow_symbol_change": true,
-              "container_id": "tradingview_admin",
-              "autosize": true
-            });
-          } catch (error) {
-            console.error('TradingView widget error:', error);
-          }
-        }, 1000);
-      });
-    </script>
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/admin.js"></script>
 </body>
 </html>

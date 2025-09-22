@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Deposit - MaxProfit Trading</title>
+
+  <!-- STYLES & FONTS -->
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <style>
+    /* === DEPOSIT PAGE SPECIFIC STYLES === */
+    .deposit-container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 1rem;
+    }
+
+    /* Balance Overview Card */
+    .balance-overview .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-6);
+      margin-bottom: var(--spacing-6);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .balance-amount {
+      font-size: var(--font-size-4xl);
+      font-weight: 700;
+      margin: var(--spacing-4) 0;
+      color: var(--text-primary);
+    }
+
+    .balance-breakdown {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: var(--spacing-4);
+      margin-top: var(--spacing-4);
+    }
+
+    .breakdown-item {
+      text-align: center;
+      padding: var(--spacing-3);
+      background: var(--bg-tertiary);
+      border-radius: var(--border-radius-md);
+    }
+
+    .breakdown-item span:first-child {
+      display: block;
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin-bottom: var(--spacing-1);
+    }
+
+    .breakdown-item span:last-child {
+      display: block;
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    /* Methods Selection */
+    .methods-selection .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-6);
+      margin-bottom: var(--spacing-6);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .methods-list {
+      display: flex;
+      flex-direction: column;
+      gap: var(--spacing-4);
+    }
+
+    .method-item {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-4);
+      padding: var(--spacing-4);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--border-radius-lg);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .method-item:hover {
+      background: var(--bg-hover);
+      border-color: var(--primary-500);
+      transform: translateY(-1px);
+    }
+
+    .method-item.active {
+      border-color: var(--primary-500);
+      background: rgba(33, 150, 243, 0.05);
+    }
+
+    .method-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: var(--font-size-xl);
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .method-info {
+      flex: 1;
+    }
+
+    .method-info h4 {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: var(--spacing-1);
+    }
+
+    .method-info p {
+      font-size: var(--font-size-sm);
+      color: var(--text-secondary);
+      margin: 0;
+    }
+
+    .method-status {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-2);
+      font-size: var(--font-size-sm);
+      color: var(--success-600);
+    }
+
+    .method-status i {
+      font-size: var(--font-size-base);
+    }
+
+    /* Form Sections */
+    .network-selection,
+    .crypto-address,
+    .deposit-amount,
+    .fee-summary {
+      margin-bottom: var(--spacing-6);
+    }
+
+    .network-selection .card,
+    .crypto-address .card,
+    .deposit-amount .card,
+    .fee-summary .card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--border-radius-lg);
+      padding: var(--spacing-6);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .form-group {
+      margin-bottom: var(--spacing-6);
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: var(--spacing-2);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .form-control {
+      width: 100%;
+      padding: var(--spacing-3) var(--spacing-4);
+      border: 1px solid var(--border-primary);
+      border-radius: var(--border-radius-md);
+      font-size: var(--font-size-base);
+      background-color: var(--bg-secondary);
+      color: var(--text-primary);
+      transition: all var(--transition-fast);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--border-focus);
+      box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+    }
+
+    /* Amount Input Group */
+    .amount-input-group {
+      display: flex;
+      align-items: center;
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-2) var(--spacing-3);
+      margin-top: var(--spacing-2);
+    }
+
+    .amount-input-group .currency-symbol {
+      font-size: var(--font-size-lg);
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-right: var(--spacing-2);
+    }
+
+    .amount-input-group input {
+      flex: 1;
+      background: transparent;
+      border: none;
+      color: var(--text-primary);
+      font-size: var(--font-size-base);
+      outline: none;
+    }
+
+    .amount-note {
+      font-size: var(--font-size-xs);
+      color: var(--text-tertiary);
+      margin-top: var(--spacing-2);
+    }
+
+    /* Quick Amounts */
+    .quick-amounts {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: var(--spacing-2);
+      margin-top: var(--spacing-3);
+    }
+
+    .quick-amount-btn {
+      padding: var(--spacing-3);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--border-radius-md);
+      color: var(--text-primary);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+    }
+
+    .quick-amount-btn:hover {
+      background: var(--bg-hover);
+      border-color: var(--primary-500);
+    }
+
+    /* Address Display */
+    .address-display {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: var(--spacing-3);
+      background: var(--bg-tertiary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-3);
+      margin-top: var(--spacing-3);
+      word-break: break-all;
+    }
+
+    .address {
+      flex: 1;
+      font-family: 'Roboto Mono', monospace;
+      font-size: var(--font-size-sm);
+      color: var(--text-primary);
+    }
+
+    .copy-btn {
+      background: var(--primary-500);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius-md);
+      padding: var(--spacing-2);
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      flex-shrink: 0;
+    }
+
+    .copy-btn:hover {
+      background: var(--primary-600);
+    }
+
+    /* QR Code */
+    .qr-code {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-2);
+      margin-top: var(--spacing-3);
+      padding: var(--spacing-4);
+      background: var(--bg-tertiary);
+      border-radius: var(--border-radius-md);
+    }
+
+    .qr-code canvas {
+      border-radius: var(--border-radius-sm);
+    }
+
+    /* Fee Summary */
+    .fee-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: var(--spacing-2) 0;
+      border-bottom: 1px solid var(--border-secondary);
+    }
+
+    .fee-item:last-child {
+      border-bottom: none;
+    }
+
+    .fee-item.total {
+      font-weight: 600;
+      font-size: var(--font-size-lg);
+      color: var(--text-primary);
+      margin-top: var(--spacing-2);
+      padding-top: var(--spacing-3);
+      border-top: 2px solid var(--border-secondary);
+      border-bottom: none;
+    }
+
+    /* Important Notes */
+    .deposit-note {
+      display: flex;
+      align-items: flex-start;
+      gap: var(--spacing-3);
+      padding: var(--spacing-4);
+      background: rgba(244, 67, 53, 0.05);
+      border: 1px solid rgba(244, 67, 53, 0.2);
+      border-radius: var(--border-radius-lg);
+      color: var(--error-600);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--spacing-6);
+    }
+
+    .deposit-note i {
+      font-size: var(--font-size-base);
+      margin-top: 1px;
+      flex-shrink: 0;
+    }
+
+    /* Action Button */
+    .deposit-btn {
+      width: 100%;
+      padding: var(--spacing-4) var(--spacing-6);
+      background: var(--primary-500);
+      color: white;
+      border: none;
+      border-radius: var(--border-radius-lg);
+      font-size: var(--font-size-base);
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--spacing-2);
+      margin-top: var(--spacing-6);
+    }
+
+    .deposit-btn:hover:not(:disabled) {
+      background: var(--primary-600);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .deposit-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    /* Toast Container */
+    .toast-container {
+      position: fixed;
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: var(--z-toast);
+    }
+
+    .toast {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-3);
+      padding: var(--spacing-3) var(--spacing-4);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-secondary);
+      border-radius: var(--border-radius-lg);
+      box-shadow: var(--shadow-lg);
+      color: var(--text-primary);
+      font-size: var(--font-size-sm);
+      margin-bottom: var(--spacing-2);
+      animation: toastSlideIn 0.3s ease-out;
+    }
+
+    .toast.success {
+      border-left: 4px solid var(--success-500);
+    }
+
+    .toast.error {
+      border-left: 4px solid var(--error-500);
+    }
+
+    .toast.warning {
+      border-left: 4px solid var(--warning-500);
+    }
+
+    @keyframes toastSlideIn {
+      from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      .deposit-container {
+        padding: var(--spacing-4);
+      }
+
+      .balance-breakdown {
+        grid-template-columns: 1fr;
+      }
+
+      .quick-amounts {
+        grid-template-columns: 1fr;
+      }
+
+      .method-item {
+        flex-direction: column;
+        text-align: center;
+        gap: var(--spacing-3);
+      }
+
+      .method-info {
+        text-align: center;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .deposit-container {
+        padding: var(--spacing-3);
+      }
+
+      .balance-amount {
+        font-size: var(--font-size-3xl);
+      }
+
+      .method-icon {
+        width: 40px;
+        height: 40px;
+        font-size: var(--font-size-lg);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container" id="app">
+    <!-- HEADER -->
+    <header class="app-header">
+      <div class="header-left">
+        <button class="back-btn" onclick="window.history.back()">
+          <i class="fas fa-arrow-left"></i>
+        </button>
+        <div class="user-info">
+          <span class="greeting">Crypto Deposit</span>
+          <span class="username">Fund Your Account</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <button class="header-btn" id="notificationBtn">
+          <i class="fas fa-bell"></i>
+          <span class="notification-badge" id="notification-count">0</span>
+        </button>
+        <button class="header-btn" id="profileBtn">
+          <i class="fas fa-user-circle"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="deposit-container">
+        <!-- Balance Overview -->
+        <section class="balance-overview">
+          <div class="card">
+            <h3>Current Balance</h3>
+            <p>Review your account balance before making a deposit.</p>
+            <div class="balance-amount" id="current-balance">$0.00</div>
+            <div class="balance-breakdown">
+              <div class="breakdown-item">
+                <span>Available</span>
+                <span id="available-balance">$0.00</span>
+              </div>
+              <div class="breakdown-item">
+                <span>Pending</span>
+                <span id="pending-balance">$0.00</span>
+              </div>
+              <div class="breakdown-item">
+                <span>Reserved</span>
+                <span id="reserved-balance">$0.00</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Crypto Methods -->
+        <section class="methods-selection">
+          <div class="card">
+            <h3>Select Cryptocurrency</h3>
+            <div class="methods-list">
+              <div class="method-item active" data-currency="BTC">
+                <div class="method-icon" style="background: linear-gradient(135deg, #f7931a 0%, #ff9500 100%);">
+                  <i class="fab fa-bitcoin"></i>
+                </div>
+                <div class="method-info">
+                  <h4>Bitcoin (BTC)</h4>
+                  <p>Network: Bitcoin • Min: 0.0001 BTC</p>
+                </div>
+                <div class="method-status">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Available</span>
+                </div>
+              </div>
+
+              <div class="method-item" data-currency="ETH">
+                <div class="method-icon" style="background: linear-gradient(135deg, #627EEA 0%, #2E4F99 100%);">
+                  <i class="fab fa-ethereum"></i>
+                </div>
+                <div class="method-info">
+                  <h4>Ethereum (ETH)</h4>
+                  <p>Network: ERC-20 • Min: 0.001 ETH</p>
+                </div>
+                <div class="method-status">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Available</span>
+                </div>
+              </div>
+
+              <div class="method-item" data-currency="USDT">
+                <div class="method-icon" style="background: linear-gradient(135deg, #26A17B 0%, #1E7A5F 100%);">
+                  <i class="fas fa-dollar-sign"></i>
+                </div>
+                <div class="method-info">
+                  <h4>Tether (USDT)</h4>
+                  <p>Network: TRC-20 • Min: 10 USDT</p>
+                </div>
+                <div class="method-status">
+                  <i class="fas fa-check-circle"></i>
+                  <span>Available</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Network Selection -->
+        <section class="network-selection">
+          <div class="card">
+            <div class="form-group">
+              <label for="network-select">Select Network</label>
+              <select class="form-control" id="network-select" required>
+                <option value="">Choose network...</option>
+                <option value="bitcoin">Bitcoin Network</option>
+                <option value="lightning">Lightning Network</option>
+              </select>
+            </div>
+          </div>
+        </section>
+
+        <!-- Deposit Address -->
+        <section class="crypto-address">
+          <div class="card">
+            <h3>Deposit Address</h3>
+            <p>Send your cryptocurrency to this address. Only send BTC to this address.</p>
+            <div class="address-display">
+              <span class="address" id="deposit-address">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</span>
+              <button class="copy-btn" onclick="copyAddress()">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+            <div class="qr-code" id="qr-code-container">
+              <div id="qrcode"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Amount Input -->
+        <section class="deposit-amount">
+          <div class="card">
+            <div class="form-group">
+              <label for="deposit-amount">Amount to Deposit</label>
+              <div class="amount-input-group">
+                <span class="currency-symbol" id="currency-symbol">₿</span>
+                <input type="number" id="deposit-amount" placeholder="0.005" min="0.0001" step="0.0001" required />
+              </div>
+              <div class="amount-note" id="amount-note">Minimum deposit: 0.0001 BTC • Maximum: 10 BTC</div>
+            </div>
+
+            <div class="quick-amounts" id="quick-amounts">
+              <button type="button" class="quick-amount-btn" data-amount="0.001">0.001 BTC</button>
+              <button type="button" class="quick-amount-btn" data-amount="0.01">0.01 BTC</button>
+              <button type="button" class="quick-amount-btn" data-amount="0.1">0.1 BTC</button>
+              <button type="button" class="quick-amount-btn" data-amount="1">1 BTC</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- Fee Summary -->
+        <section class="fee-summary">
+          <div class="card">
+            <h4>Transaction Details</h4>
+            <div class="fee-item">
+              <span>Network Fee</span>
+              <span id="network-fee">~0.00001 BTC</span>
+            </div>
+            <div class="fee-item">
+              <span>Platform Fee</span>
+              <span id="platform-fee">Free</span>
+            </div>
+            <div class="fee-item">
+              <span>Estimated Confirmation Time</span>
+              <span id="confirm-time">10-30 minutes</span>
+            </div>
+            <div class="fee-item total">
+              <span>You will receive</span>
+              <span id="receive-amount">0.005 BTC</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- Important Notes -->
+        <div class="deposit-note">
+          <i class="fas fa-info-circle"></i>
+          <div>
+            <strong>Important:</strong> Only send BTC to this address. Sending any other cryptocurrency may result in permanent loss.
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <button type="button" class="deposit-btn" id="confirmDepositBtn" onclick="confirmDeposit()">
+          <i class="fas fa-paper-plane"></i>
+          I've Sent the Payment
+        </button>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <a href="./dashboard.html" class="nav-item active"><i class="fas fa-home"></i><span>Home</span></a>
+      <a href="./trading.html" class="nav-item"><i class="fas fa-chart-line"></i><span>Trading</span></a>
+      <a href="./transfer.html" class="nav-item"><i class="fas fa-exchange-alt"></i><span>Transactions</span></a>
+      <a href="./settings.html" class="nav-item"><i class="fas fa-bell"></i><span>Notifications</span></a>
+      <a href="./withdraw.html" class="nav-item"><i class="fas fa-globe"></i><span>Withdraw</span></a>
+      <a href="./settings.html" class="nav-item"><i class="fas fa-user"></i><span>Profile</span></a>
+    </nav>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+  </div>
+
+  <!-- ✅ FIXED SCRIPT (NO NESTING ISSUE) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
+  <script>
+    // Currency data
+    const currencies = {
+      BTC: {
+        symbol: '₿',
+        addresses: {
+          bitcoin: 'bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh',
+          lightning: 'lnbc1pvjluezpp5qqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqqqsyqcyq5rqwzqfqypqdpl2pkx2ctnv5sxxmmwwd5kgetjypeh2ursdae8g6twvus8g6rfwvs8qun0dfjkxaq8rkx3yf5tcsyz3d73gafnh3cax9rn449d9p5uxz9ezhhypd0elx87sjle52x86fux2ypatgddc6k63n7erqz25le42c4u4ecky03ylcqca784w'
+        },
+        networks: ['bitcoin', 'lightning'],
+        min: 0.0001,
+        max: 10,
+        quickAmounts: [0.001, 0.01, 0.1, 1],
+        networkFee: 0.00001,
+        platformFee: 0,
+        confirmTime: '10-30 minutes'
+      },
+      ETH: {
+        symbol: 'Ξ',
+        addresses: {
+          'erc-20': '0x742d35Cc6634C0532925a3b844Bc454e4438f44e'
+        },
+        networks: ['erc-20'],
+        min: 0.001,
+        max: 100,
+        quickAmounts: [0.01, 0.1, 1, 10],
+        networkFee: 0.0001,
+        platformFee: 0,
+        confirmTime: '1-5 minutes'
+      },
+      USDT: {
+        symbol: '$',
+        addresses: {
+          'trc-20': 'TJzQ8vK4QVtLwH8B8q8q8q8q8q8q8q8q8q8q8q8q'
+        },
+        networks: ['trc-20'],
+        min: 10,
+        max: 10000,
+        quickAmounts: [50, 100, 500, 1000],
+        networkFee: 1,
+        platformFee: 0,
+        confirmTime: '1-3 minutes'
+      }
+    };
+
+    let selectedCurrency = 'BTC';
+    let selectedNetwork = 'bitcoin';
+
+    function updateCurrency(currency) {
+      selectedCurrency = currency;
+      const data = currencies[currency];
+
+      // Update active method
+      document.querySelectorAll('.method-item').forEach(item => {
+        item.classList.toggle('active', item.dataset.currency === currency);
+      });
+
+      // Update network options
+      const networkSelect = document.getElementById('network-select');
+      networkSelect.innerHTML = '<option value="">Choose network...</option>';
+      data.networks.forEach(network => {
+        const option = document.createElement('option');
+        option.value = network;
+        option.textContent = network.charAt(0).toUpperCase() + network.slice(1) + ' Network';
+        networkSelect.appendChild(option);
+      });
+      selectedNetwork = data.networks[0];
+      networkSelect.value = selectedNetwork;
+
+      // Update address
+      updateAddress();
+
+      // Update currency symbol
+      document.getElementById('currency-symbol').textContent = data.symbol;
+
+      // Update amount input
+      const amountInput = document.getElementById('deposit-amount');
+      amountInput.min = data.min;
+      amountInput.max = data.max;
+      amountInput.step = data.min / 10;
+      amountInput.placeholder = data.min.toString();
+
+      // Update quick amounts
+      const quickContainer = document.getElementById('quick-amounts');
+      quickContainer.innerHTML = '';
+      data.quickAmounts.forEach(amount => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'quick-amount-btn';
+        btn.dataset.amount = amount;
+        btn.textContent = amount + ' ' + currency;
+        btn.addEventListener('click', () => {
+          amountInput.value = amount;
+          updateFees();
+        });
+        quickContainer.appendChild(btn);
+      });
+
+      // Update note
+      document.getElementById('amount-note').textContent = `Minimum deposit: ${data.min} ${currency} • Maximum: ${data.max} ${currency}`;
+
+      // Update fees
+      updateFees();
+    }
+
+    function updateNetwork(network) {
+      selectedNetwork = network;
+      updateAddress();
+    }
+
+    function updateAddress() {
+      const address = currencies[selectedCurrency].addresses[selectedNetwork];
+      document.getElementById('deposit-address').textContent = address;
+      generateQRCode(address);
+    }
+
+    function generateQRCode(address) {
+      const qrContainer = document.getElementById('qrcode');
+      qrContainer.innerHTML = '';
+
+      try {
+        QRCode.toCanvas(qrContainer, address, {
+          width: 128,
+          height: 128,
+          color: {
+            dark: '#000000',
+            light: '#FFFFFF'
+          },
+          margin: 2
+        }, function (error) {
+          if (error) {
+            console.error('QR Code generation error:', error);
+            qrContainer.innerHTML = '<i class="fas fa-qrcode"></i><span>QR Code</span>';
+          }
+        });
+      } catch (error) {
+        console.error('QR Code library not loaded:', error);
+        qrContainer.innerHTML = '<i class="fas fa-qrcode"></i><span>QR Code</span>';
+      }
+    }
+
+    function updateFees() {
+      const amount = parseFloat(document.getElementById('deposit-amount').value) || 0;
+      const data = currencies[selectedCurrency];
+      const networkFee = data.networkFee;
+      const platformFee = data.platformFee;
+      const totalFee = networkFee + platformFee;
+      const receiveAmount = Math.max(0, amount - totalFee);
+
+      document.getElementById('network-fee').textContent = `~${networkFee} ${selectedCurrency}`;
+      document.getElementById('platform-fee').textContent = platformFee === 0 ? 'Free' : `${platformFee} ${selectedCurrency}`;
+      document.getElementById('confirm-time').textContent = data.confirmTime;
+      document.getElementById('receive-amount').textContent = `${receiveAmount.toFixed(6)} ${selectedCurrency}`;
+    }
+
+    function copyAddress() {
+      const address = document.getElementById('deposit-address').textContent;
+      navigator.clipboard.writeText(address).then(() => {
+        showToast('Address copied to clipboard', 'success');
+      }).catch(err => {
+        showToast('Failed to copy address', 'error');
+        console.error('Copy failed:', err);
+      });
+    }
+
+    function confirmDeposit() {
+      const amount = parseFloat(document.getElementById('deposit-amount').value);
+      const data = currencies[selectedCurrency];
+      if (!amount || amount < data.min || amount > data.max) {
+        showToast(`Please enter a valid amount between ${data.min} and ${data.max} ${selectedCurrency}`, 'error');
+        return;
+      }
+
+      // Show loading
+      const btn = document.getElementById('confirmDepositBtn');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+      // Simulate API call
+      setTimeout(() => {
+        showToast('Deposit submitted successfully! Tracking initiated.', 'success');
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+      }, 2000);
+    }
+
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+
+      const icon = {
+        success: 'fas fa-check-circle',
+        error: 'fas fa-exclamation-circle',
+        warning: 'fas fa-exclamation-triangle',
+        info: 'fas fa-info-circle'
+      }[type] || 'fas fa-info-circle';
+
+      toast.innerHTML = `
+        <i class="${icon}"></i>
+        <span>${message}</span>
+      `;
+
+      container.appendChild(toast);
+
+      // Auto remove after 5 seconds with fade out animation
+      setTimeout(() => {
+        if (toast.parentNode) {
+          toast.style.opacity = '0';
+          toast.style.transform = 'translateY(-10px)';
+          setTimeout(() => {
+            if (toast.parentNode) {
+              toast.parentNode.removeChild(toast);
+            }
+          }, 300);
+        }
+      }, 5000);
+    }
+
+    // Initialize
+    document.addEventListener('DOMContentLoaded', () => {
+      updateCurrency('BTC');
+
+      // Currency selection
+      document.querySelectorAll('.method-item').forEach(item => {
+        item.addEventListener('click', () => {
+          updateCurrency(item.dataset.currency);
+        });
+      });
+
+      // Network selection
+      document.getElementById('network-select').addEventListener('change', (e) => {
+        updateNetwork(e.target.value);
+      });
+
+      // Amount input
+      document.getElementById('deposit-amount').addEventListener('input', updateFees);
+
+      // Fetch balance (mock)
+      fetchBalance();
+    });
+
+    function fetchBalance() {
+      // Mock balance data
+      const balance = {
+        available: 0.05,
+        pending: 0.01,
+        reserved: 0.00
+      };
+
+      document.getElementById('current-balance').textContent = `$${balance.available.toFixed(2)}`;
+      document.getElementById('available-balance').textContent = `$${balance.available.toFixed(2)}`;
+      document.getElementById('pending-balance').textContent = `$${balance.pending.toFixed(2)}`;
+      document.getElementById('reserved-balance').textContent = `$${balance.reserved.toFixed(2)}`;
+    }
+
+    console.log("✅ Crypto Deposit Page Loaded");
+  </script>
+</body>
+</html>

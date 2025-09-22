@@ -1,0 +1,495 @@
+<!-- filename: transfer.html -->
+<!-- created from: dashboard.html, base.css, dashboard.css, trading.css -->
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Transfer Funds - MaxProfit Trading</title>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="stylesheet" href="css/trading.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app-container" id="app">
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <button class="back-btn" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i>
+          </button>
+          <div class="user-info">
+            <span class="greeting">Transfer Funds</span>
+            <span class="username">Between Accounts</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="header-btn" id="notificationBtn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-count">0</span>
+          </button>
+          <button class="header-btn" id="profileBtn">
+            <i class="fas fa-user-circle"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <div class="container">
+          <!-- Account Overview -->
+          <section class="balance-overview">
+            <div class="card">
+              <h2>Account Balances</h2>
+              <p>Transfer funds between your trading account and savings wallet.</p>
+              <div class="balance-breakdown">
+                <div class="breakdown-item">
+                  <span>Trading Account</span>
+                  <span>$0.00</span>
+                </div>
+                <div class="breakdown-item">
+                  <span>Savings Wallet</span>
+                  <span>$0.00</span>
+                </div>
+                <div class="breakdown-item">
+                  <span>Total Balance</span>
+                  <span>$0.00</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Transfer Direction -->
+          <section class="transfer-direction">
+            <div class="card">
+              <h3>Transfer Between Accounts</h3>
+              <div class="transfer-flow">
+                <div class="account-selector">
+                  <div class="account-card active" id="from-trading">
+                    <div class="account-icon">
+                      <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="account-info">
+                      <h4>Trading Account</h4>
+                      <p>$0.00 available</p>
+                    </div>
+                  </div>
+                  
+                  <div class="transfer-arrow">
+                    <button class="swap-btn" onclick="swapAccounts()">
+                      <i class="fas fa-exchange-alt"></i>
+                    </button>
+                  </div>
+                  
+                  <div class="account-card" id="to-savings">
+                    <div class="account-icon savings">
+                      <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <div class="account-info">
+                      <h4>Savings Wallet</h4>
+                      <p>$0.00 balance</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Transfer Amount -->
+          <section class="transfer-amount">
+            <div class="card">
+              <div class="form-group">
+                <label for="transfer-amount">Transfer Amount</label>
+                <div class="amount-input-group">
+                  <span class="currency-symbol">$</span>
+                  <input 
+                    type="number" 
+                    class="form-control" 
+                    id="transfer-amount" 
+                    placeholder="100.00"
+                    min="1"
+                    max="8450"
+                    step="0.01"
+                    required
+                  />
+                </div>
+                <div class="amount-note">
+                  Available: <span id="available-amount">$8,450.00</span>
+                </div>
+              </div>
+
+              <div class="quick-amounts">
+                <button type="button" class="quick-amount-btn" data-amount="100">$100</button>
+                <button type="button" class="quick-amount-btn" data-amount="500">$500</button>
+                <button type="button" class="quick-amount-btn" data-amount="1000">$1,000</button>
+                <button type="button" class="quick-amount-btn max-btn" onclick="setMaxAmount()">Max</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- Transfer Details -->
+          <section class="transfer-details">
+            <div class="card">
+              <h3>Transfer Details</h3>
+              <div class="form-group">
+                <label for="transfer-memo">Memo/Note (Optional)</label>
+                <textarea 
+                  class="form-control" 
+                  id="transfer-memo" 
+                  placeholder="Add a note for this transfer (optional)"
+                  rows="3"
+                  maxlength="255"
+                ></textarea>
+                <small class="form-text">Maximum 255 characters</small>
+              </div>
+
+              <div class="form-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" required aria-describedby="confirm-help" />
+                  <span class="checkmark"></span>
+                  I confirm this transfer is accurate and authorized
+                </label>
+                <small id="confirm-help" class="form-text">Please verify all details before confirming</small>
+              </div>
+            </div>
+          </section>
+
+          <!-- Transfer Summary -->
+          <section class="fee-summary">
+            <div class="card">
+              <h4>Transfer Summary</h4>
+              <div class="fee-item">
+                <span>From Account</span>
+                <span id="from-account-display">Trading Account</span>
+              </div>
+              <div class="fee-item">
+                <span>To Account</span>
+                <span id="to-account-display">Savings Wallet</span>
+              </div>
+              <div class="fee-item">
+                <span>Transfer Amount</span>
+                <span id="transfer-amount-display">$0.00</span>
+              </div>
+              <div class="fee-item">
+                <span>Transfer Fee</span>
+                <span>Free</span>
+              </div>
+              <div class="fee-item">
+                <span>Processing Time</span>
+                <span>Instant</span>
+              </div>
+              <div class="fee-item total">
+                <span>Total Transfer</span>
+                <span id="total-transfer">$0.00</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Recent Transfers -->
+          <section class="recent-transfers">
+            <div class="card">
+              <div class="section-header">
+                <h3>Recent Transfers</h3>
+                <button class="section-action">View All</button>
+              </div>
+              
+             
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Important Notes -->
+          <div class="deposit-note">
+            <i class="fas fa-info-circle"></i>
+            <div>
+              <strong>Transfer Info:</strong> All transfers between your accounts are instant and free of charge. Your trading account is used for active trading, while your savings wallet earns interest on idle funds.
+            </div>
+          </div>
+
+          <!-- Action Button -->
+          <button type="button" class="btn btn-primary btn-large" style="width: 100%; margin-top: 24px;" onclick="confirmTransfer()">
+            <i class="fas fa-paper-plane"></i>
+            Confirm Transfer
+          </button>
+        </div>
+      </main>
+
+      <!-- Bottom Navigation -->
+      <nav class="bottom-nav">
+        <button class="nav-item" data-page="home">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </button>
+        <button class="nav-item" data-page="trading">
+          <i class="fas fa-chart-line"></i>
+          <span>Trading</span>
+        </button>
+        <button class="nav-item active" data-page="transfer">
+          <i class="fas fa-exchange-alt"></i>
+          <span>Transfer</span>
+        </button>
+        <button class="nav-item" data-page="transactions">
+          <i class="fas fa-list"></i>
+          <span>Transactions</span>
+        </button>
+        <button class="nav-item" data-page="profile">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </button>
+      </nav>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- NOTE: added small scoped style because transfer-specific components need styling -->
+    <style>
+      .transfer-flow {
+        padding: var(--spacing-4) 0;
+      }
+
+      .account-selector {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--spacing-4);
+      }
+
+      .account-card {
+        flex: 1;
+        background: var(--bg-tertiary);
+        border: 2px solid var(--border-secondary);
+        border-radius: var(--border-radius-xl);
+        padding: var(--spacing-4);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-3);
+      }
+
+      .account-card.active {
+        border-color: var(--primary-500);
+        background: rgba(33, 150, 243, 0.1);
+      }
+
+      .account-icon {
+        width: 48px;
+        height: 48px;
+        background: var(--primary-500);
+        border-radius: var(--border-radius-xl);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: var(--font-size-lg);
+      }
+
+      .account-icon.savings {
+        background: var(--success-500);
+      }
+
+      .account-info h4 {
+        margin: 0 0 var(--spacing-1) 0;
+        font-size: var(--font-size-base);
+        font-weight: 600;
+      }
+
+      .account-info p {
+        margin: 0;
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .transfer-arrow {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        position: relative;
+      }
+
+      .swap-btn {
+        background: var(--surface);
+        border: 2px solid var(--primary-500);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--primary-500);
+        cursor: pointer;
+        transition: all var(--transition-fast);
+      }
+
+      .swap-btn:hover {
+        background: var(--primary-500);
+        color: white;
+        transform: rotate(180deg);
+      }
+
+      .transfers-list {
+        display: flex;
+        flex-direction: column;
+        gap: var(--spacing-3);
+      }
+
+      .transfer-item {
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-3);
+        padding: var(--spacing-3);
+        background: var(--bg-tertiary);
+        border-radius: var(--border-radius-lg);
+        border: 1px solid var(--border-secondary);
+      }
+
+      .transfer-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: var(--font-size-sm);
+        color: white;
+      }
+
+      .transfer-icon.from-trading {
+        background: var(--primary-500);
+      }
+
+      .transfer-icon.from-savings {
+        background: var(--success-500);
+      }
+
+      .transfer-info {
+        flex: 1;
+      }
+
+      .transfer-title {
+        font-weight: 600;
+        font-size: var(--font-size-sm);
+        margin-bottom: var(--spacing-1);
+      }
+
+      .transfer-time {
+        font-size: var(--font-size-xs);
+        color: var(--text-tertiary);
+      }
+
+      .transfer-amount {
+        font-weight: 700;
+        font-size: var(--font-size-base);
+      }
+
+      .transfer-amount.positive {
+        color: var(--success-600);
+      }
+
+      .transfer-amount.negative {
+        color: var(--primary-600);
+      }
+
+      @media (max-width: 768px) {
+        .account-selector {
+          flex-direction: column;
+          gap: var(--spacing-2);
+        }
+
+        .transfer-arrow {
+          transform: rotate(90deg);
+        }
+
+        .account-card {
+          width: 100%;
+        }
+      }
+    </style>
+
+    <script>
+      let isFromTrading = true; // Track current direction
+
+      function confirmTransfer() {
+        // TODO: server call to process transfer
+        showToast('Transfer completed successfully. Funds are now available in the destination account.', 'success');
+      }
+
+      function swapAccounts() {
+        isFromTrading = !isFromTrading;
+        updateTransferDirection();
+      }
+
+      function updateTransferDirection() {
+        const fromTrading = document.getElementById('from-trading');
+        const toSavings = document.getElementById('to-savings');
+        
+        if (isFromTrading) {
+          fromTrading.classList.add('active');
+          toSavings.classList.remove('active');
+          document.getElementById('available-amount').textContent = '$8,450.00';
+          document.getElementById('transfer-amount').max = '8450';
+          document.getElementById('from-account-display').textContent = 'Trading Account';
+          document.getElementById('to-account-display').textContent = 'Savings Wallet';
+        } else {
+          fromTrading.classList.remove('active');
+          toSavings.classList.add('active');
+          document.getElementById('available-amount').textContent = '$4,000.00';
+          document.getElementById('transfer-amount').max = '4000';
+          document.getElementById('from-account-display').textContent = 'Savings Wallet';
+          document.getElementById('to-account-display').textContent = 'Trading Account';
+        }
+        
+        // Clear current amount
+        document.getElementById('transfer-amount').value = '';
+        updateAmountDisplays();
+      }
+
+      function setMaxAmount() {
+        const maxAmount = isFromTrading ? 8450 : 4000;
+        document.getElementById('transfer-amount').value = maxAmount;
+        updateAmountDisplays();
+      }
+
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas fa-check"></i>${message}`;
+        container.appendChild(toast);
+        
+        setTimeout(() => {
+          toast.remove();
+        }, 5000);
+      }
+
+      // Quick amount selection
+      document.querySelectorAll('.quick-amount-btn:not(.max-btn)').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('transfer-amount').value = btn.dataset.amount;
+          updateAmountDisplays();
+        });
+      });
+
+      // Amount calculation
+      document.getElementById('transfer-amount').addEventListener('input', updateAmountDisplays);
+
+      function updateAmountDisplays() {
+        const amount = parseFloat(document.getElementById('transfer-amount').value) || 0;
+        document.getElementById('transfer-amount-display').textContent = '$' + amount.toFixed(2);
+        document.getElementById('total-transfer').textContent = '$' + amount.toFixed(2);
+      }
+    </script>
+  </body>
+</html>

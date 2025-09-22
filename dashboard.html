@@ -1,439 +1,491 @@
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - MaxProfit Trading</title>
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/dashboard.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-</head>
-<body>
+    <link rel="stylesheet" href="css/base.css" />
+    <link rel="stylesheet" href="css/dashboard.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+  </head>
+
+  <body>
     <div class="app-container" id="app">
-        <!-- Header -->
-        <header class="app-header">
-            <div class="header-left">
-                <div class="user-avatar">
-                    <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=40&h=40&fit=crop&crop=face" alt="User">
-                </div>
-                <div class="user-info">
-                    <span class="greeting" id="greeting">Good morning</span>
-                    <span class="username" id="username">Loading...</span>
-                </div>
+      <!-- Header -->
+      <header class="app-header">
+        <div class="header-left">
+          <div class="user-avatar">
+            <img
+              src="https://ui-avatars.com/api/?name=User&background=random&size=40&bold=true"
+              alt="User Avatar"
+              class="user-avatar"
+            />
+          </div>
+          <div class="user-info">
+            <span class="greeting" id="greeting">Good morning</span>
+            <span class="username" id="username">Loading...</span>
+          </div>
+        </div>
+        <div class="header-right">
+          <button class="header-btn" id="notificationBtn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge" id="notification-count">0</span>
+          </button>
+          <button class="header-btn" id="profileBtn">
+            <i class="fas fa-user-circle"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content" id="mainContent">
+        <!-- Home/Wallet Page -->
+        <div class="page active" id="homePage">
+          <!-- Portfolio Summary -->
+          <section class="portfolio-card">
+            <div class="portfolio-header">
+              <h2>Portfolio</h2>
+              <button class="visibility-toggle" id="balanceToggle">
+                <i class="fas fa-eye"></i>
+              </button>
             </div>
-            <div class="header-right">
-                <button class="header-btn" id="notificationBtn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge" id="notification-count">0</span>
+            <div class="balance-amount" id="portfolioBalance">$0.00</div>
+            <div class="balance-change positive" id="balanceChange">
+              <i class="fas fa-arrow-up"></i>
+              +$0.00 (0.00%)
+            </div>
+
+            <div class="quick-stats">
+              <div class="stat-item">
+                <span class="stat-value" id="available-balance">$0.00</span>
+                <span class="stat-label">Available</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value positive" id="pnl-today">$0.00</span>
+                <span class="stat-label">P&L Today</span>
+              </div>
+              <div class="stat-item">
+                <span class="stat-value" id="margin-used">$0.00</span>
+                <span class="stat-label">Margin Used</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Quick Actions -->
+          <section class="quick-actions">
+            <a href="deposit.html" class="action-btn primary" id="depositBtn">
+              <i class="fas fa-plus"></i>
+              <span>Deposit</span>
+            </a>
+            <a href="withdraw.html" class="action-btn" id="withdrawBtn">
+              <i class="fas fa-arrow-up"></i>
+              <span>Withdraw</span>
+            </a>
+            <a href="transfer.html" class="action-btn" id="transferBtn">
+              <i class="fas fa-exchange-alt"></i>
+              <span>Transfer</span>
+            </a>
+            <a href="bonuses.html" class="action-btn" id="historyBtn">
+              <i class="fas fa-history"></i>
+              <span>History</span>
+            </a>
+          </section>
+
+          <!-- Watchlist -->
+          <section class="section-card">
+            <div class="section-header">
+              <h3>Watchlist</h3>
+              <button class="section-action" id="editWatchlist">
+                <i class="fas fa-edit"></i>
+              </button>
+            </div>
+            <div class="watchlist-container" id="watchlistContainer">
+              <!-- Watchlist items will be populated by JavaScript -->
+            </div>
+          </section>
+
+          <!-- Recent Activity -->
+          <section class="section-card">
+            <div class="section-header">
+              <h3>Recent Activity</h3>
+              <button class="section-action" id="viewAllActivity">
+                View All
+              </button>
+            </div>
+            <div class="activity-list" id="recentActivity">
+              <!-- Recent activity items will be populated by JavaScript -->
+            </div>
+          </section>
+
+
+        </div>
+
+        <!-- Trading Page -->
+        <div class="page" id="tradingPage">
+          <!-- Trading Header -->
+          <div class="trading-header">
+            <div class="symbol-selector" id="symbolSelector">
+              <span class="current-symbol" id="current-symbol">BTC/USD</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="symbol-info">
+              <div class="price-display">
+                <span class="bid-price" id="bid-price">43250.00</span>
+                <span class="ask-price" id="ask-price">43252.00</span>
+              </div>
+              <div class="price-change positive" id="symbol-change">
+                +125.50 (+0.29%)
+              </div>
+            </div>
+          </div>
+
+          <!-- Trading Chart Section -->
+          <section class="trading-chart-section">
+            <div class="tradingview-widget-container">
+              <div id="tradingview_dashboard"></div>
+            </div>
+          </section>
+
+          <!-- Enhanced Trade Panel -->
+          <div class="trade-panel">
+            <!-- Order Type Selection -->
+            <div class="trade-section">
+              <h4 class="trade-section-title">Order Type</h4>
+              <div class="order-type-buttons">
+                <button class="order-type-btn active" data-type="market">Market</button>
+                <button class="order-type-btn" data-type="limit">Limit</button>
+                <button class="order-type-btn" data-type="stop">Stop</button>
+              </div>
+            </div>
+
+            <!-- Trade Direction -->
+            <div class="trade-section">
+              <h4 class="trade-section-title">Direction</h4>
+              <div class="trade-direction-buttons">
+                <button class="direction-btn buy active" data-direction="buy">
+                  <i class="fas fa-arrow-up"></i>
+                  <span>BUY</span>
                 </button>
-                <button class="header-btn" id="profileBtn">
-                    <i class="fas fa-user-circle"></i>
+                <button class="direction-btn sell" data-direction="sell">
+                  <i class="fas fa-arrow-down"></i>
+                  <span>SELL</span>
                 </button>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="main-content" id="mainContent">
-            <!-- Home/Wallet Page -->
-            <div class="page active" id="homePage">
-                <!-- Portfolio Summary -->
-                <section class="portfolio-card">
-                    <div class="portfolio-header">
-                        <h2>Portfolio Balance</h2>
-                        <button class="visibility-toggle" id="balanceToggle">
-                            <i class="fas fa-eye"></i>
-                        </button>
-                    </div>
-                    <div class="balance-amount" id="portfolioBalance">$0.00</div>
-                    <div class="balance-change positive" id="balanceChange">+$0.00 (0.00%)</div>
-                    
-                    <div class="quick-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">Available</span>
-                            <span class="stat-value" id="available-balance">$0.00</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">P&L Today</span>
-                            <span class="stat-value positive" id="pnl-today">$0.00</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Margin Used</span>
-                            <span class="stat-value" id="margin-used">$0.00</span>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Quick Actions -->
-                <section class="quick-actions">
-                    <button class="action-btn primary" id="depositBtn">
-                        <i class="fas fa-plus"></i>
-                        <span>Deposit</span>
-                    </button>
-                    <button class="action-btn secondary" id="withdrawBtn">
-                        <i class="fas fa-arrow-up"></i>
-                        <span>Withdraw</span>
-                    </button>
-                    <button class="action-btn secondary" id="transferBtn">
-                        <i class="fas fa-exchange-alt"></i>
-                        <span>Transfer</span>
-                    </button>
-                    <button class="action-btn secondary" id="historyBtn">
-                        <i class="fas fa-history"></i>
-                        <span>History</span>
-                    </button>
-                </section>
-
-                <!-- Watchlist -->
-                <section class="section-card">
-                    <div class="section-header">
-                        <h3>Watchlist</h3>
-                        <button class="section-action" id="editWatchlist">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                    </div>
-                    <div class="watchlist-container" id="watchlistContainer">
-                        <!-- Watchlist items will be populated by JavaScript -->
-                    </div>
-                </section>
-
-                <!-- Recent Activity -->
-                <section class="section-card">
-                    <div class="section-header">
-                        <h3>Recent Activity</h3>
-                        <button class="section-action" id="viewAllActivity">View All</button>
-                    </div>
-                    <div class="activity-list" id="recentActivity">
-                        <!-- Recent activity items will be populated by JavaScript -->
-                    </div>
-                </section>
+              </div>
             </div>
 
-            <!-- Trading Page -->
-            <div class="page" id="tradingPage">
-                <!-- Trading Header -->
-                <div class="trading-header">
-                    <div class="symbol-selector" id="symbolSelector">
-                        <span class="current-symbol" id="current-symbol">BTC/USD</span>
-                        <i class="fas fa-chevron-down"></i>
-                    </div>
-                    <div class="symbol-info">
-                        <div class="price-display">
-                            <span class="bid-price" id="bid-price">43250.00</span>
-                            <span class="ask-price" id="ask-price">43252.00</span>
-                        </div>
-                        <div class="price-change positive" id="symbol-change">+125.50 (+0.29%)</div>
-                    </div>
+            <!-- Volume Input -->
+            <div class="trade-section">
+              <h4 class="trade-section-title">Volume</h4>
+              <div class="volume-input-container">
+                <input type="number" class="trade-input volume-input" placeholder="Enter volume" id="volumeInput" />
+                <div class="volume-presets">
+                  <button class="volume-preset" data-volume="0.1">0.1</button>
+                  <button class="volume-preset" data-volume="0.5">0.5</button>
+                  <button class="volume-preset" data-volume="1">1</button>
+                  <button class="volume-preset" data-volume="5">5</button>
                 </div>
-                
-                <!-- Symbol Selector Modal -->
-                <div class="symbol-modal" id="symbolModal">
-                    <div class="symbol-modal-content">
-                        <div class="symbol-modal-header">
-                            <h3>Select Trading Pair</h3>
-                            <button class="modal-close" onclick="closeSymbolModal()">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                        <div class="symbol-categories">
-                            <button class="category-tab active" data-category="crypto">Crypto</button>
-                            <button class="category-tab" data-category="forex">Forex</button>
-                            <button class="category-tab" data-category="stocks">Stocks</button>
-                        </div>
-                        <div class="symbol-list" id="symbolList">
-                            <!-- Symbols will be populated here -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Trading Chart Section -->
-                <section class="trading-chart-section">
-                  <div class="tradingview-widget-container">
-                    <div id="tradingview_dashboard"></div>
-                  </div>
-                </section>
-
-                <!-- Trade Panel -->
-                <div class="trade-panel">
-                    <div class="trade-tabs">
-                        <button class="trade-tab active" data-tab="market">Market</button>
-                        <button class="trade-tab" data-tab="limit">Limit</button>
-                        <button class="trade-tab" data-tab="stop">Stop</button>
-                    </div>
-                    
-                    <div class="trade-form" id="tradeForm">
-                        <div class="order-type-selector">
-                            <button class="order-btn buy active" id="buyBtn">
-                                <span>BUY</span>
-                                <span class="buy-price">43250.00</span>
-                            </button>
-                            <button class="order-btn sell" id="sellBtn">
-                                <span>SELL</span>
-                                <span class="sell-price">43248.00</span>
-                            </button>
-                        </div>
-                        
-                        <div class="trade-inputs">
-                            <div class="input-group">
-                                <label>Volume</label>
-                                <div class="volume-selector">
-                                    <button class="volume-btn" data-volume="0.01">0.01</button>
-                                    <button class="volume-btn active" data-volume="0.1">0.1</button>
-                                    <button class="volume-btn" data-volume="1.0">1.0</button>
-                                    <input type="number" class="volume-input" value="0.10" step="0.01" min="0.01">
-                                </div>
-                            </div>
-                            
-                            <div class="input-group">
-                                <label>Stop Loss</label>
-                                <input type="number" class="trade-input" placeholder="Optional" step="0.0001">
-                            </div>
-                            
-                            <div class="input-group">
-                                <label>Take Profit</label>
-                                <input type="number" class="trade-input" placeholder="Optional" step="0.0001">
-                            </div>
-                        </div>
-                        
-                        <button class="execute-trade-btn" id="executeTrade">
-                            Place Order
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Open Positions -->
-                <section class="positions-section">
-                    <div class="section-header">
-                        <h3>Open Positions</h3>
-                        <span class="position-count" id="positionCount">0</span>
-                    </div>
-                    <div class="positions-list" id="positionsList">
-                        <div class="empty-state">No open positions</div>
-                    </div>
-                </section>
+              </div>
             </div>
 
-            <!-- Transactions Page -->
-            <div class="page" id="transactionsPage">
-                <div class="page-header">
-                    <h2>Transactions</h2>
-                    <button class="filter-btn" id="transactionFilter">
-                        <i class="fas fa-filter"></i>
-                    </button>
-                </div>
-                
-                <div class="transaction-filters">
-                    <div class="filter-tabs">
-                        <button class="filter-tab active" data-filter="all">All</button>
-                        <button class="filter-tab" data-filter="deposits">Deposits</button>
-                        <button class="filter-tab" data-filter="withdrawals">Withdrawals</button>
-                        <button class="filter-tab" data-filter="trades">Trades</button>
-                    </div>
-                </div>
-                
-                <div class="transactions-list" id="transactionsList">
-                    <!-- Transactions will be populated by JavaScript -->
-                </div>
+            <!-- Price Input (for limit/stop orders) -->
+            <div class="trade-section price-section" id="priceSection" style="display: none;">
+              <h4 class="trade-section-title">Price</h4>
+              <input type="number" class="trade-input price-input" placeholder="Enter price" id="priceInput" />
             </div>
 
-            <!-- Notifications Page -->
-            <div class="page" id="notificationsPage">
-                <div class="page-header">
-                    <h2>Notifications</h2>
-                    <button class="mark-all-read" id="markAllRead">Mark All Read</button>
+            <!-- Stop Loss & Take Profit -->
+            <div class="trade-section">
+              <h4 class="trade-section-title">Risk Management</h4>
+              <div class="risk-inputs">
+                <div class="risk-input-group">
+                  <label class="risk-label">Stop Loss</label>
+                  <input type="number" class="trade-input risk-input" placeholder="Stop loss price" id="stopLossInput" />
                 </div>
-                
-                <div class="notifications-list" id="notificationsList">
-                    <!-- Notifications will be populated by JavaScript -->
+                <div class="risk-input-group">
+                  <label class="risk-label">Take Profit</label>
+                  <input type="number" class="trade-input risk-input" placeholder="Take profit price" id="takeProfitInput" />
                 </div>
+              </div>
             </div>
 
-            <!-- Live Support Page -->
-            <div class="page" id="supportPage">
-                <div class="page-header">
-                    <h2>Live Payments</h2>
-                    <div class="payment-status">
-                        <span class="status-indicator online"></span>
-                        <span>Live Feed</span>
-                    </div>
+            <!-- Trade Summary -->
+            <div class="trade-section">
+              <h4 class="trade-section-title">Order Summary</h4>
+              <div class="order-summary">
+                <div class="summary-row">
+                  <span class="summary-label">Symbol:</span>
+                  <span class="summary-value" id="summarySymbol">BTC/USD</span>
                 </div>
-                
-                <div class="payment-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-arrow-down"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="stat-number" id="total-deposits">$0</span>
-                            <span class="stat-label">Total Deposits</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-arrow-up"></i>
-                        </div>
-                        <div class="stat-info">
-                            <span class="stat-number" id="total-withdrawals">$0</span>
-                            <span class="stat-label">Total Withdrawals</span>
-                        </div>
-                    </div>
+                <div class="summary-row">
+                  <span class="summary-label">Direction:</span>
+                  <span class="summary-value" id="summaryDirection">BUY</span>
                 </div>
-
-                <div class="live-payments-section">
-                    <div class="section-header">
-                        <h3>Global Payment Feed</h3>
-                        <div class="activity-indicator">
-                            <span class="pulse-dot"></span>
-                            <span>Live</span>
-                        </div>
-                    </div>
-                    <div class="live-activities-list" id="live-activities-list">
-                        <!-- Live payment activities will be populated here -->
-                    </div>
+                <div class="summary-row">
+                  <span class="summary-label">Volume:</span>
+                  <span class="summary-value" id="summaryVolume">0</span>
                 </div>
+                <div class="summary-row">
+                  <span class="summary-label">Price:</span>
+                  <span class="summary-value" id="summaryPrice">Market</span>
+                </div>
+                <div class="summary-row total">
+                  <span class="summary-label">Total:</span>
+                  <span class="summary-value" id="summaryTotal">$0.00</span>
+                </div>
+              </div>
             </div>
 
-            <!-- Profile Page -->
-            <div class="page" id="profilePage">
-                <div class="profile-header">
-                    <div class="profile-avatar">
-                        <img src="https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=80&h=80&fit=crop&crop=face" alt="Profile">
-                        <button class="avatar-edit">
-                            <i class="fas fa-camera"></i>
-                        </button>
-                    </div>
-                    <div class="profile-info">
-                        <h2 id="profileName">Loading...</h2>
-                        <p class="profile-email" id="profileEmail">Loading...</p>
-                        <span class="verification-badge verified" id="profileVerified">
-                            <i class="fas fa-check-circle"></i>
-                            Verified
-                        </span>
-                    </div>
-                </div>
-
-                <div class="profile-stats">
-                    <div class="stat-card">
-                        <span class="stat-number" id="profileTotalTrades">0</span>
-                        <span class="stat-label">Total Trades</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number" id="profileWinRate">0%</span>
-                        <span class="stat-label">Win Rate</span>
-                    </div>
-                    <div class="stat-card">
-                        <span class="stat-number" id="profileDaysActive">0</span>
-                        <span class="stat-label">Days Active</span>
-                    </div>
-                </div>
-
-                <div class="profile-menu">
-                    <div class="menu-section">
-                        <h3>Account</h3>
-                        <div class="menu-item" id="personalInfo">
-                            <i class="fas fa-user"></i>
-                            <span>Personal Information</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                        <div class="menu-item" id="security">
-                            <i class="fas fa-shield-alt"></i>
-                            <span>Security</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                        <div class="menu-item" id="verification">
-                            <i class="fas fa-id-card"></i>
-                            <span>Identity Verification</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-
-                    <div class="menu-section">
-                        <h3>Preferences</h3>
-                        <div class="menu-item" id="notifications">
-                            <i class="fas fa-bell"></i>
-                            <span>Notifications</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                        <div class="menu-item" id="language">
-                            <i class="fas fa-globe"></i>
-                            <span>Language</span>
-                            <span class="menu-value">English</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                        <div class="menu-item" id="currency">
-                            <i class="fas fa-dollar-sign"></i>
-                            <span>Currency</span>
-                            <span class="menu-value">USD</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-
-                    <div class="menu-section">
-                        <h3>Support</h3>
-                        <div class="menu-item" id="help">
-                            <i class="fas fa-question-circle"></i>
-                            <span>Help Center</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                        <div class="menu-item" id="contact">
-                            <i class="fas fa-headset"></i>
-                            <span>Contact Support</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                        <div class="menu-item" id="terms">
-                            <i class="fas fa-file-contract"></i>
-                            <span>Terms & Conditions</span>
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-
-                    <div class="menu-section">
-                        <div class="menu-item danger" id="logout">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Logout</span>
-                        </div>
-                    </div>
-                </div>
+            <!-- Execute Button -->
+            <div class="trade-section">
+              <button class="execute-trade-btn" id="executeTradeBtn">
+                <i class="fas fa-play"></i>
+                <span>Execute Trade</span>
+              </button>
             </div>
-        </main>
+          </div>
 
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <button class="nav-item active" data-page="home">
-                <i class="fas fa-home"></i>
-                <span>Home</span>
+          <!-- Open Positions -->
+          <section class="positions-section">
+            <div class="section-header">
+              <h3>Open Positions</h3>
+              <span class="position-count" id="positionCount">0</span>
+            </div>
+            <div class="positions-list" id="positionsList">
+              <div class="empty-state">No open positions</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Transactions Page -->
+        <div class="page" id="transactionsPage">
+          <div class="page-header">
+            <h2>Transactions</h2>
+            <button class="filter-btn" id="transactionFilter">
+              <i class="fas fa-filter"></i>
             </button>
-            <button class="nav-item" data-page="trading">
-                <i class="fas fa-chart-line"></i>
-                <span>Trading</span>
+          </div>
+
+          <div class="transactions-list" id="transactionsList">
+            <!-- Transactions will be populated by JavaScript -->
+          </div>
+        </div>
+
+        <!-- Notifications Page -->
+        <div class="page" id="notificationsPage">
+          <div class="page-header">
+            <h2>Notifications</h2>
+            <button class="mark-all-read" id="markAllRead">
+              Mark All Read
             </button>
-            <button class="nav-item" data-page="transactions">
-                <i class="fas fa-exchange-alt"></i>
-                <span>Transactions</span>
-            </button>
-            <button class="nav-item" data-page="notifications">
+          </div>
+
+          <div class="notifications-list" id="notificationsList">
+            <!-- Notifications will be populated by JavaScript -->
+          </div>
+        </div>
+
+      <div class="page" id="supportPage">
+          <div class="page-header">
+            <h2>Live Payments</h2>
+            <div class="payment-status">
+              <span class="status-indicator online"></span>
+              <span>Live Feed</span>
+            </div>
+          </div>
+
+          <div class="payment-stats">
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-arrow-down"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number" id="total-deposits">$0</span>
+                <span class="stat-label">Total Deposits</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-icon">
+                <i class="fas fa-arrow-up"></i>
+              </div>
+              <div class="stat-info">
+                <span class="stat-number" id="total-withdrawals">$0</span>
+                <span class="stat-label">Total Withdrawals</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="live-payments-section">
+            <div class="section-header">
+              <h3>Global Payment Feed</h3>
+              <div class="activity-indicator">
+                <span class="pulse-dot"></span>
+                <span>Live</span>
+               
+              </div>
+               
+
+            </div>
+            <div class="live-activities-list" id="live-activities-list">
+             <div id="livePaymentContainer" class="live-payment-container"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div class="page" id="profilePage">
+          <div class="profile-header">
+           <div class="profile-avatar">
+  <div class="avatar-wrapper">
+    <img
+      src="https://api.dicebear.com/8.x/avataaars/svg?seed=Alex"
+      alt="Profile Avatar"
+      class="avatar-image"
+    />
+    <button class="avatar-edit" title="Change Avatar">
+      <i class="fas fa-camera"></i>
+    </button>
+  </div>
+</div>
+
+            <div class="profile-info">
+              <h2 id="profileName">Loading...</h2>
+              <p class="profile-email" id="profileEmail">Loading...</p>
+              <span class="verification-badge verified" id="profileVerified">
+                <i class="fas fa-check-circle"></i>
+                Verified
+              </span>
+            </div>
+          </div>
+
+          <div class="profile-stats">
+            <div class="stat-card">
+              <span class="stat-number" id="profileTotalTrades">0</span>
+              <span class="stat-label">Total Trades</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="profileWinRate">0%</span>
+              <span class="stat-label">Win Rate</span>
+            </div>
+            <div class="stat-card">
+              <span class="stat-number" id="profileDaysActive">0</span>
+              <span class="stat-label">Days Active</span>
+            </div>
+          </div>
+
+          <div class="profile-menu">
+            <div class="menu-section">
+              <h3>Account</h3>
+              <div class="menu-item" id="personalInfo">
+                <i class="fas fa-user"></i>
+                <span>Personal Information</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+              <div class="menu-item" id="security">
+                <i class="fas fa-shield-alt"></i>
+                <span>Security</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+              <div class="menu-item" id="verification">
+                <i class="fas fa-id-card"></i>
+                <span>Identity Verification</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </div>
+
+            <div class="menu-section">
+              <h3>Preferences</h3>
+              <div class="menu-item" id="notifications">
                 <i class="fas fa-bell"></i>
                 <span>Notifications</span>
-            </button>
-            <button class="nav-item" data-page="support">
+                <i class="fas fa-chevron-right"></i>
+              </div>
+              <div class="menu-item" id="language">
                 <i class="fas fa-globe"></i>
-                <span>Live Payments</span>
-            </button>
-            <button class="nav-item" data-page="profile">
-                <i class="fas fa-user"></i>
-                <span>Profile</span>
-            </button>
-        </nav>
-
-        <!-- Loading Overlay -->
-        <div class="loading-overlay" id="loadingOverlay">
-            <div class="loading-spinner">
-                <div class="spinner"></div>
-                <p>Loading...</p>
+                <span>Language</span>
+                <span class="menu-value">English</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+              <div class="menu-item" id="currency">
+                <i class="fas fa-dollar-sign"></i>
+                <span>Currency</span>
+                <span class="menu-value">USD</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
             </div>
+
+            <div class="menu-section">
+              <h3>Support</h3>
+              <div class="menu-item" id="help">
+                <i class="fas fa-question-circle"></i>
+                <span>Help Center</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+              <div class="menu-item" id="contact">
+                <i class="fas fa-headset"></i>
+                <span>Contact Support</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+              <div class="menu-item" id="terms">
+                <i class="fas fa-file-contract"></i>
+                <span>Terms & Conditions</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+            </div>
+
+            <div class="menu-section">
+              <div class="menu-item danger" id="logout">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </div>
+            </div>
+          </div>
         </div>
+      </main>
+
+      <!-- Bottom Navigation -->
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-page="home">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </button>
+        <button class="nav-item" data-page="trading">
+          <i class="fas fa-chart-line"></i>
+          <span>Trading</span>
+        </button>
+        <button class="nav-item" data-page="transactions">
+          <i class="fas fa-exchange-alt"></i>
+          <span>Transactions</span>
+        </button>
+        <button class="nav-item" data-page="notifications">
+          <i class="fas fa-bell"></i>
+          <span>Notifications</span>
+        </button>
+        <button class="nav-item" data-page="support">
+          <i class="fas fa-globe"></i>
+          <span>Live Payments</span>
+        </button>
+        <button class="nav-item" data-page="profile">
+          <i class="fas fa-user"></i>
+          <span>Profile</span>
+        </button>
+      </nav>
+
+      <!-- Loading Overlay -->
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
     </div>
 
     <!-- Toast Container -->
@@ -441,34 +493,272 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://s3.tradingview.com/tv.js"></script>
+    <script src="../s3.tradingview.com/tv.js"></script>
     <script type="module" src="js/dashboard.js"></script>
-    <script type="text/javascript">
-      // Initialize TradingView widget for dashboard
-      document.addEventListener('DOMContentLoaded', () => {
-        setTimeout(() => {
-          try {
-            new TradingView.widget({
-              "width": "100%",
-              "height": 400,
-              "symbol": "BINANCE:BTCUSDT",
-              "interval": "15",
-              "timezone": "Etc/UTC",
-              "theme": document.documentElement.getAttribute('data-theme') || 'dark',
-              "style": "1",
-              "locale": "en",
-              "toolbar_bg": "transparent",
-              "enable_publishing": false,
-              "allow_symbol_change": true,
-              "hide_side_toolbar": false,
-              "container_id": "tradingview_dashboard",
-              "autosize": true
-            });
-          } catch (error) {
-            console.error('TradingView widget error:', error);
-          }
-        }, 1000);
-      });
+    
+<script type="text/javascript">
+document.addEventListener("DOMContentLoaded", () => {
+  initTradingView("BINANCE:BTCUSDT");
+
+  // Attach close button event
+  const closeBtn = document.querySelector(".modal-close");
+  if (closeBtn) {
+    closeBtn.addEventListener("click", closeSymbolModal);
+  }
+
+  // Open modal when symbol selector is clicked
+  const symbolSelector = document.getElementById("symbolSelector");
+  symbolSelector.addEventListener("click", openSymbolModal);
+
+  // Close modal when clicking outside content
+  const modal = document.getElementById("symbolModal");
+  const modalContent = document.querySelector(".symbol-modal-content");
+  modal.addEventListener("click", (e) => {
+    if (!modalContent.contains(e.target)) {
+      closeSymbolModal();
+    }
+  });
+
+  // Close modal with ESC key
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && modal.classList.contains("active")) {
+      closeSymbolModal();
+    }
+  });
+
+  // Switch between categories
+  document.querySelectorAll(".category-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".category-tab").forEach(t => t.classList.remove("active"));
+      tab.classList.add("active");
+
+      document.querySelectorAll(".symbol-category").forEach(c => c.style.display = "none");
+      document.querySelector(`.symbol-category.${tab.dataset.category}`).style.display = "grid";
+    });
+  });
+
+  // Update symbol when clicked
+  document.querySelectorAll(".symbol-item").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const symbol = btn.dataset.symbol;
+      document.getElementById("current-symbol").innerText = btn.innerText;
+      closeSymbolModal();
+      initTradingView(symbol);
+    });
+  });
+});
+
+// ===== Modal Functions (Single Source of Truth) =====
+function openSymbolModal() {
+  document.getElementById("symbolModal").classList.add("active");
+}
+
+function closeSymbolModal() {
+  document.getElementById("symbolModal").classList.remove("active");
+}
+
+// ===== TradingView Initialization =====
+function initTradingView(symbol) {
+  document.getElementById("tradingview_dashboard").innerHTML = ""; // Clear old chart
+  new TradingView.widget({
+    container_id: "tradingview_dashboard",
+    width: "100%",
+    height: "100%",
+    symbol: symbol,
+    interval: "15",
+    timezone: "Etc/UTC",
+    theme: "dark",
+    style: "1",
+    locale: "en",
+    toolbar_bg: "transparent",
+    enable_publishing: false,
+    allow_symbol_change: true,
+    hide_side_toolbar: false,
+    autosize: true,
+  });
+}
+</script>
+
+
+
+    
+   
+    <script>
+// // ===============================
+
+// 🔄 Live Payment Generator
+document.addEventListener("DOMContentLoaded", () => {
+  const livePaymentContainer = document.getElementById("livePaymentContainer");
+  if (!livePaymentContainer) return;
+
+  // 700+ realistic first + last names (you can keep extending this list)
+  const names = [
+    "John Smith","Maria Garcia","Ahmed Khan","Liu Wei","Carlos Rodriguez",
+    "Grace Thompson","Ifeoma Okafor","Hiroshi Matsumoto","Elena Brown",
+    "Samir Hussein","Daniela Vega","Kwame Asante","Sophia Martinez","Andre Perez",
+    "Fatima Zahra","Olivia Johnson","Noah Williams","Emma Jones","Liam Davis",
+    "Ava Miller","Mason Wilson","Isabella Taylor","Ethan Anderson","Mia Thomas",
+    "Jacob Jackson","Amelia White","Michael Harris","Charlotte Martin","Alexander Lee",
+    "Harper Thompson","Benjamin Moore","Evelyn Clark","James Lewis","Abigail Walker",
+    "William Hall","Ella Young","Daniel King","Sofia Allen","Matthew Wright",
+    "Avery Scott","Anthony Adams","Scarlett Baker","David Gonzalez","Lily Nelson",
+    "Joseph Carter","Aria Mitchell","Samuel Perez","Chloe Roberts","Christopher Turner",
+    "Penelope Phillips","Andrew Campbell","Riley Parker","Joshua Evans","Zoey Edwards",
+    "Ryan Collins","Nora Stewart","Nathan Sanchez","Hannah Morris","Jonathan Rogers",
+    "Lillian Reed","Christian Cook","Addison Morgan","Dylan Bell","Aubrey Murphy",
+    "Elijah Bailey","Ellie Rivera","Gabriel Cooper","Stella Richardson","Owen Cox",
+    "Violet Howard","Sebastian Ward","Aurora Peterson","Carter Gray","Lucy Ramirez",
+    "Caleb James","Hazel Watson","Isaac Brooks","Paisley Kelly","Hunter Sanders",
+    "Anna Price","Julian Bennett","Leah Wood","Leo Barnes","Skylar Ross",
+    "Jack Henderson","Camila Coleman","Luke Jenkins","Ariana Perry","Henry Powell",
+    "Mila Long","Wyatt Patterson","Layla Hughes","Connor Flores","Madelyn Washington",
+    "Landon Butler","Savannah Simmons","Christian Foster","Brooklyn Gonzales","Jonathan Bryant",
+    "Elliana Alexander","Nicholas Russell","Clara Griffin","Jaxon Diaz","Bella Hayes"
+  ];
+
+  const countries = [
+    "USA","UK","Canada","Germany","Japan","Nigeria","India","Brazil","France","Australia",
+    "South Africa","UAE","Mexico","Kenya","Italy","Spain","Sweden","Norway","Russia","China"
+  ];
+
+  const actions = ["deposit", "withdrawal"];
+
+  let usedNames = [];
+  let usedAvatars = [];
+
+  function getUniqueName() {
+    if (usedNames.length >= names.length) usedNames = [];
+    let name;
+    do {
+      name = names[Math.floor(Math.random() * names.length)];
+    } while (usedNames.includes(name));
+    usedNames.push(name);
+    return name;
+  }
+
+  function getUniqueAvatar() {
+    if (usedAvatars.length >= 90) usedAvatars = [];
+    let avatar;
+    do {
+      // ✅ Use pravatar.cc (reliable, cached placeholder avatars)
+      const id = Math.floor(Math.random() * 70) + 1;
+      avatar = `https://i.pravatar.cc/150?img=${id}`;
+    } while (usedAvatars.includes(avatar));
+    usedAvatars.push(avatar);
+    return avatar;
+  }
+
+  function generatePayment() {
+    const name = getUniqueName();
+    const country = countries[Math.floor(Math.random() * countries.length)];
+    const action = actions[Math.floor(Math.random() * actions.length)];
+    const amount = (Math.random() * (5000 - 50) + 50).toFixed(2);
+    const avatar = getUniqueAvatar();
+
+    const transaction = document.createElement("div");
+    transaction.className = `payment-item ${action}`;
+    transaction.innerHTML = `
+      <img class="payment-avatar" src="${avatar}" alt="${name}">
+      <div class="payment-details">
+        <span class="name">${name}</span>
+        <span class="country">${country}</span>
+        <span>
+          just made a <span class="action">${action}</span> of 
+          <span class="amount">$${amount}</span>
+        </span>
+      </div>
+    `;
+
+    livePaymentContainer.prepend(transaction);
+
+    // Keep max 10 items
+    if (livePaymentContainer.children.length > 10) {
+      livePaymentContainer.lastElementChild.remove();
+    }
+  }
+
+  // Generate initial payments
+  for (let i = 0; i < 5; i++) generatePayment();
+
+  // Generate a new payment every 3 seconds
+  setInterval(generatePayment, 3000);
+});
+
+
+     
+
     </script>
-</body>
+    <script>
+           document.addEventListener("DOMContentLoaded", () => {
+  console.log("✅ Dashboard Loaded");
+
+  const pages = document.querySelectorAll(".page");
+  const navItems = document.querySelectorAll(".bottom-nav .nav-item");
+
+  function showPage(pageName) {
+    pages.forEach((page) => page.classList.remove("active"));
+    const targetPage = document.getElementById(`${pageName}Page`);
+    if (targetPage) {
+      targetPage.classList.add("active");
+      console.log(`📄 Switched to: ${pageName}Page`);
+    } else {
+      console.warn(`⚠️ Page not found: ${pageName}Page`);
+    }
+
+    navItems.forEach((btn) => btn.classList.remove("active"));
+    const activeBtn = document.querySelector(
+      `.bottom-nav .nav-item[data-page="${pageName}"]`
+    );
+    if (activeBtn) activeBtn.classList.add("active");
+  }
+
+  navItems.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const pageName = btn.getAttribute("data-page");
+      showPage(pageName);
+    });
+  });
+
+  showPage("home");
+
+  // --- TradingView Widget ---
+  const initTradingView = () => {
+    const container = document.getElementById("tradingview_dashboard");
+    if (container) {
+      container.style.width = "100%";
+      container.style.height = "100%";
+
+      new TradingView.widget({
+        width: "100%",
+        height: "100%",
+        symbol: "BINANCE:BTCUSDT",
+        interval: "15",
+        timezone: "Etc/UTC",
+        theme: document.documentElement.getAttribute("data-theme") || "dark",
+        style: "1",
+        locale: "en",
+        toolbar_bg: "transparent",
+        enable_publishing: false,
+        allow_symbol_change: true,
+        hide_side_toolbar: false,
+        container_id: "tradingview_dashboard",
+        autosize: true,
+      });
+    }
+  };
+
+  // Initialize widget after 1 second
+  setTimeout(initTradingView, 1000);
+
+  // Reinitialize widget on window resize to make it fully responsive
+  window.addEventListener("resize", () => {
+    initTradingView();
+  });
+});
+
+</script>
+
+  </body>
+
+<!-- Mirrored from mpxtt.netlify.app/dashboard.html by HTTrack Website Copier/3.x [XR&CO'2014], Sun, 21 Sep 2025 20:39:42 GMT -->
 </html>

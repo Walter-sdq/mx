@@ -17,6 +17,8 @@ class TradingDashboard {
         this.transactionSearch = '';
         this.notificationFilter = 'all';
         this.notificationSearch = '';
+        this.isAdminMode = false;
+        this.editableContent = {};
         this.init();
     }
 
@@ -52,7 +54,52 @@ class TradingDashboard {
 
         setInterval(() => this.updateTime(), 60000);
     }
-    
+
+    // Start real-time updates for prices and user data
+    async startRealTimeUpdates() {
+        try {
+            // Start real-time price updates
+            realTimePrices.start();
+
+            // Setup user data synchronization
+            await this.setupUserSync();
+
+            // Subscribe to price updates for current symbol
+            realTimePrices.subscribe(this.currentSymbol, (priceData) => {
+                this.handlePriceUpdate(priceData);
+            });
+
+            // Subscribe to watchlist symbols
+            this.watchlist.forEach(item => {
+                realTimePrices.subscribe(item.symbol, (priceData) => {
+                    this.handleWatchlistPriceUpdate(priceData);
+                });
+            });
+
+            console.log('Real-time updates started successfully');
+        } catch (error) {
+            console.error('Failed to start real-time updates:', error);
+            showToast('Real-time updates failed to start', 'warning');
+        }
+    }
+
+    // Handle price updates for current trading symbol
+    handlePriceUpdate(priceData) {
+        if (priceData.symbol === this.currentSymbol) {
+            this.updateTradingPrices();
+            this.updatePortfolioFromUser(); // Update portfolio value with new prices
+        }
+    }
+
+    // Handle price updates for watchlist symbols
+    handleWatchlistPriceUpdate(priceData) {
+        // Update watchlist display
+        this.updateWatchlist();
+
+        // Update positions P&L if affected
+        this.updatePositions();
+    }
+
     async loadUserData() {
         try {
             // Load user transactions
@@ -97,7 +144,7 @@ class TradingDashboard {
             else if (hour >= 18) timeGreeting = 'Good evening';
 
             const userName = this.currentProfile.full_name ? this.currentProfile.full_name.split(' ')[0] : 'there';
-            greetingEl.textContent = `${timeGreeting}, ${userName}!`;
+            greetingEl.textContent = `${timeGreeting} ${userName}!`;
         }
 
         // Update profile modal data
@@ -179,18 +226,28 @@ class TradingDashboard {
             availableEl.textContent = formatCurrency(balances.USD);
         }
         
+        // Calculate total P&L from all trades
+        const allTrades = this.transactions.filter(t => t.type === 'trade');
+        const totalPnL = allTrades.reduce((sum, trade) => sum + (trade.amount || 0), 0);
+
+        const pnlEl = document.getElementById('totalPnL');
+        if (pnlEl) {
+            pnlEl.textContent = formatCurrency(totalPnL);
+            pnlEl.className = `stat-value ${totalPnL >= 0 ? 'positive' : 'negative'}`;
+        }
+
         // Calculate today's P&L from trades
         const todayStart = new Date().setHours(0, 0, 0, 0);
-        const todayTrades = this.transactions.filter(t => 
-            t.type === 'trade' && 
+        const todayTrades = this.transactions.filter(t =>
+            t.type === 'trade' &&
             new Date(t.created_at).getTime() >= todayStart
         );
         const todayPnL = todayTrades.reduce((sum, trade) => sum + (trade.amount || 0), 0);
-        
-        const pnlEl = document.getElementById('pnl-today');
-        if (pnlEl) {
-            pnlEl.textContent = formatCurrency(todayPnL);
-            pnlEl.className = `stat-value ${todayPnL >= 0 ? 'positive' : 'negative'}`;
+
+        const todayPnlEl = document.getElementById('pnl-today');
+        if (todayPnlEl) {
+            todayPnlEl.textContent = formatCurrency(todayPnL);
+            todayPnlEl.className = `stat-value ${todayPnL >= 0 ? 'positive' : 'negative'}`;
         }
         
         // Calculate margin used from open trades
@@ -235,6 +292,12 @@ class TradingDashboard {
         
         // Notification handlers
         this.setupNotificationHandlers();
+
+        // Admin mode toggle
+        const adminModeBtn = document.getElementById('adminModeBtn');
+        if (adminModeBtn) {
+            adminModeBtn.addEventListener('click', () => this.toggleAdminMode());
+        }
     }
     
     setupNotificationHandlers() {
@@ -1521,26 +1584,443 @@ class TradingDashboard {
         }
     }
 
-    startRealTimeUpdates() {
-        // Start price engine
-        realTimePrices.start();
-        
-        // Subscribe to price updates
-        realTimePrices.subscribe('all', () => {
-            this.updateUI();
-            this.updateTradingPrices();
+
+
+    // Setup real-time synchronization for user data
+    async setupUserSync() {
+        try {
+            // Setup real-time listeners for user-specific data
+            await Promise.all([
+                this.setupUserProfileSync(),
+                this.setupUserTransactionSync(),
+                this.setupUserTradeSync(),
+                this.setupUserNotificationSync(),
+                this.setupUserBalanceSync()
+            ]);
+
+            console.log('User real-time sync activated');
+        } catch (error) {
+            console.error('Error setting up user sync:', error);
+        }
+    }
+
+    // Setup user profile synchronization
+    async setupUserProfileSync() {
+        const profileSubscription = supabase
+            .channel(`user-profile-${this.currentUser.id}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'profiles',
+                filter: `id=eq.${this.currentUser.id}`
+            }, (payload) => {
+                this.handleProfileChange(payload);
+            })
+            .subscribe();
+
+        this.realTimeListeners = this.realTimeListeners || {};
+        this.realTimeListeners.profile = profileSubscription;
+    }
+
+    // Setup user transaction synchronization
+    async setupUserTransactionSync() {
+        const transactionSubscription = supabase
+            .channel(`user-transactions-${this.currentUser.id}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'transactions',
+                filter: `user_id=eq.${this.currentUser.id}`
+            }, (payload) => {
+                this.handleTransactionChange(payload);
+            })
+            .subscribe();
+
+        this.realTimeListeners.transactions = transactionSubscription;
+    }
+
+    // Setup user trade synchronization
+    async setupUserTradeSync() {
+        const tradeSubscription = supabase
+            .channel(`user-trades-${this.currentUser.id}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'trades',
+                filter: `user_id=eq.${this.currentUser.id}`
+            }, (payload) => {
+                this.handleTradeChange(payload);
+            })
+            .subscribe();
+
+        this.realTimeListeners.trades = tradeSubscription;
+    }
+
+    // Setup user notification synchronization
+    async setupUserNotificationSync() {
+        const notificationSubscription = supabase
+            .channel(`user-notifications-${this.currentUser.id}`)
+            .on('postgres_changes', {
+                event: '*',
+                schema: 'public',
+                table: 'notifications',
+                filter: `user_id=eq.${this.currentUser.id}`
+            }, (payload) => {
+                this.handleNotificationChange(payload);
+            })
+            .subscribe();
+
+        this.realTimeListeners.notifications = notificationSubscription;
+    }
+
+    // Setup user balance synchronization
+    async setupUserBalanceSync() {
+        const balanceSubscription = supabase
+            .channel(`user-balance-${this.currentUser.id}`)
+            .on('postgres_changes', {
+                event: 'UPDATE',
+                schema: 'public',
+                table: 'profiles',
+                filter: `id=eq.${this.currentUser.id}`
+            }, (payload) => {
+                this.handleBalanceChange(payload);
+            })
+            .subscribe();
+
+        this.realTimeListeners.balance = balanceSubscription;
+    }
+
+    // Handle profile changes
+    async handleProfileChange(payload) {
+        const { eventType, new: newRecord } = payload;
+
+        if (eventType === 'UPDATE') {
+            this.currentProfile = { ...this.currentProfile, ...newRecord };
+            this.updateUserInterface();
+
+            // Show notification for important changes
+            if (newRecord.balance !== this.currentProfile.balance) {
+                showToast('Balance updated', 'info');
+            }
+
+            console.log('Profile updated:', newRecord);
+        }
+    }
+
+    // Handle transaction changes
+    async handleTransactionChange(payload) {
+        const { eventType, new: newRecord, old: oldRecord } = payload;
+
+        switch (eventType) {
+            case 'INSERT':
+                this.transactions.unshift(newRecord);
+                this.updateUserInterface();
+                showToast('New transaction added', 'info');
+                break;
+            case 'UPDATE':
+                const index = this.transactions.findIndex(t => t.id === newRecord.id);
+                if (index !== -1) {
+                    this.transactions[index] = newRecord;
+                    this.updateUserInterface();
+                }
+                break;
+            case 'DELETE':
+                this.transactions = this.transactions.filter(t => t.id !== oldRecord.id);
+                this.updateUserInterface();
+                break;
+        }
+
+        // Update transaction page if currently viewing
+        if (this.currentPage === 'transactions') {
+            this.loadTransactions();
+        }
+
+        console.log('Transaction updated:', newRecord);
+    }
+
+    // Handle trade changes
+    async handleTradeChange(payload) {
+        const { eventType, new: newRecord, old: oldRecord } = payload;
+
+        switch (eventType) {
+            case 'INSERT':
+                if (newRecord.status === 'open') {
+                    this.positions.unshift(newRecord);
+                }
+                this.updateUserInterface();
+                showToast('New trade added', 'info');
+                break;
+            case 'UPDATE':
+                const index = this.positions.findIndex(t => t.id === newRecord.id);
+                if (newRecord.status === 'open') {
+                    if (index !== -1) {
+                        this.positions[index] = newRecord;
+                    } else {
+                        this.positions.unshift(newRecord);
+                    }
+                } else if (newRecord.status === 'closed' && index !== -1) {
+                    this.positions.splice(index, 1);
+                }
+                this.updateUserInterface();
+                break;
+            case 'DELETE':
+                this.positions = this.positions.filter(t => t.id !== oldRecord.id);
+                this.updateUserInterface();
+                break;
+        }
+
+        // Update trading page if currently viewing
+        if (this.currentPage === 'trading') {
+            this.updatePositions();
+        }
+
+        console.log('Trade updated:', newRecord);
+    }
+
+    // Handle notification changes
+    async handleNotificationChange(payload) {
+        const { eventType, new: newRecord, old: oldRecord } = payload;
+
+        switch (eventType) {
+            case 'INSERT':
+                this.notifications.unshift(newRecord);
+                this.updateUserInterface();
+                showToast('New notification received', 'info');
+                break;
+            case 'UPDATE':
+                const index = this.notifications.findIndex(n => n.id === newRecord.id);
+                if (index !== -1) {
+                    this.notifications[index] = newRecord;
+                    this.updateUserInterface();
+                }
+                break;
+            case 'DELETE':
+                this.notifications = this.notifications.filter(n => n.id !== oldRecord.id);
+                this.updateUserInterface();
+                break;
+        }
+
+        // Update notification page if currently viewing
+        if (this.currentPage === 'notifications') {
+            this.loadNotifications();
+        }
+
+        console.log('Notification updated:', newRecord);
+    }
+
+    // Handle balance changes
+    async handleBalanceChange(payload) {
+        const { new: newRecord } = payload;
+
+        if (newRecord.balance !== this.currentProfile.balance) {
+            this.currentProfile.balance = newRecord.balance;
+            this.updateUserInterface();
+            this.updatePortfolioFromUser();
+
+            // Show balance change notification
+            const change = newRecord.balance - this.currentProfile.balance;
+            showToast(`Balance ${change >= 0 ? 'increased' : 'decreased'} by $${Math.abs(change).toFixed(2)}`, change >= 0 ? 'success' : 'warning');
+
+            console.log('Balance updated:', newRecord.balance);
+        }
+    }
+
+    // Sync methods for manual refresh
+    async syncUserData() {
+        try {
+            showToast('Syncing data...', 'info');
+            await this.loadUserData();
+            showToast('Data synchronized successfully', 'success');
+        } catch (error) {
+            console.error('Sync error:', error);
+            showToast('Failed to sync data', 'error');
+        }
+    }
+
+    // Cleanup real-time listeners
+    cleanupListeners() {
+        if (this.realTimeListeners) {
+            Object.values(this.realTimeListeners).forEach(listener => {
+                if (listener) {
+                    supabase.removeChannel(listener);
+                }
+            });
+            this.realTimeListeners = {};
+        }
+    }
+
+    // Enhanced logout with cleanup
+    async logout() {
+        if (confirm('Are you sure you want to logout?')) {
+            try {
+                // Cleanup listeners before logout
+                this.cleanupListeners();
+
+                await authManager.logout();
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Logout error:', error);
+                showToast('Failed to logout', 'error');
+            }
+        }
+    }
+
+    // Admin Mode Methods
+    toggleAdminMode() {
+        this.isAdminMode = !this.isAdminMode;
+        const btn = document.getElementById('adminModeBtn');
+        if (btn) {
+            btn.classList.toggle('active', this.isAdminMode);
+            btn.innerHTML = this.isAdminMode ? '<i class="fas fa-times"></i>' : '<i class="fas fa-cog"></i>';
+        }
+        if (this.isAdminMode) {
+            this.enterAdminMode();
+        } else {
+            this.exitAdminMode();
+        }
+    }
+
+    enterAdminMode() {
+        // Load saved content
+        this.loadEditableContent();
+        // Add edit buttons to sections
+        this.addEditButtons();
+        // Add admin panel
+        this.showAdminPanel();
+        showToast('Admin mode activated', 'info');
+    }
+
+    exitAdminMode() {
+        this.removeEditButtons();
+        this.hideAdminPanel();
+        showToast('Admin mode deactivated', 'info');
+    }
+
+    addEditButtons() {
+        // For each page, add edit buttons to editable elements
+        const editableSelectors = {
+            'homePage': ['.portfolio-card h2', '.section-card h3', '.quick-actions .action-btn span'],
+            'tradingPage': ['.trading-header h4', '.positions-section h3'],
+            'transactionsPage': ['.page-header h2'],
+            'notificationsPage': ['.page-header h2'],
+            'supportPage': ['.support-hero h2', '.support-hero p', '.support-card h3', '.support-card p']
+        };
+
+        Object.keys(editableSelectors).forEach(pageId => {
+            const page = document.getElementById(pageId);
+            if (!page) return;
+            editableSelectors[pageId].forEach(selector => {
+                const elements = page.querySelectorAll(selector);
+                elements.forEach(el => {
+                    if (el.querySelector('.edit-btn')) return; // Already has edit btn
+                    const editBtn = document.createElement('button');
+                    editBtn.className = 'edit-btn';
+                    editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+                    editBtn.onclick = () => this.startEditing(el);
+                    el.style.position = 'relative';
+                    el.appendChild(editBtn);
+                });
+            });
         });
-        
-        // Update UI periodically
-        setInterval(() => {
-            this.updateUI();
-        }, 10000);
+    }
+
+    removeEditButtons() {
+        document.querySelectorAll('.edit-btn').forEach(btn => btn.remove());
+    }
+
+    startEditing(element) {
+        const originalText = element.textContent.replace(/Edit$/, '').trim();
+        element.contentEditable = true;
+        element.classList.add('editing');
+        element.focus();
+
+        // Add save/cancel buttons
+        const controls = document.createElement('div');
+        controls.className = 'edit-controls';
+        controls.innerHTML = `
+            <button class="save-btn"><i class="fas fa-check"></i></button>
+            <button class="cancel-btn"><i class="fas fa-times"></i></button>
+        `;
+        element.appendChild(controls);
+
+        controls.querySelector('.save-btn').onclick = () => this.saveEdit(element, originalText);
+        controls.querySelector('.cancel-btn').onclick = () => this.cancelEdit(element, originalText);
+    }
+
+    saveEdit(element, originalText) {
+        const newText = element.textContent.replace(/SaveCancel$/, '').trim();
+        element.contentEditable = false;
+        element.classList.remove('editing');
+        element.querySelector('.edit-controls').remove();
+
+        // Save to storage
+        const key = this.getContentKey(element);
+        this.editableContent[key] = newText;
+        localStorage.setItem('dashboardContent', JSON.stringify(this.editableContent));
+
+        showToast('Content saved', 'success');
+    }
+
+    cancelEdit(element, originalText) {
+        element.textContent = originalText;
+        element.contentEditable = false;
+        element.classList.remove('editing');
+        element.querySelector('.edit-controls').remove();
+    }
+
+    getContentKey(element) {
+        // Generate unique key based on page and element
+        const page = element.closest('.page');
+        const pageId = page ? page.id : 'unknown';
+        const index = Array.from(page.querySelectorAll('*')).indexOf(element);
+        return `${pageId}_${index}`;
+    }
+
+    loadEditableContent() {
+        const saved = localStorage.getItem('dashboardContent');
+        if (saved) {
+            this.editableContent = JSON.parse(saved);
+            // Apply saved content
+            Object.keys(this.editableContent).forEach(key => {
+                const [pageId, index] = key.split('_');
+                const page = document.getElementById(pageId);
+                if (page) {
+                    const elements = page.querySelectorAll('*');
+                    if (elements[index]) {
+                        elements[index].textContent = this.editableContent[key];
+                    }
+                }
+            });
+        }
+    }
+
+    showAdminPanel() {
+        // Add a floating admin panel
+        const panel = document.createElement('div');
+        panel.id = 'adminPanel';
+        panel.className = 'admin-panel';
+        panel.innerHTML = `
+            <h4>Admin Quick Access</h4>
+            <button onclick="window.location.href='admin.html'">Admin Dashboard</button>
+            <button onclick="window.location.href='admin-users.html'">Manage Users</button>
+            <button onclick="window.location.href='admin-transactions.html'">Transactions</button>
+            <button onclick="window.location.href='admin-withdrawals.html'">Withdrawals</button>
+            <button onclick="window.location.href='admin-trades.html'">Trades</button>
+            <button onclick="window.location.href='admin-logs.html'">Logs</button>
+            <button onclick="window.location.href='admin-broadcast.html'">Broadcast</button>
+        `;
+        document.body.appendChild(panel);
+    }
+
+    hideAdminPanel() {
+        const panel = document.getElementById('adminPanel');
+        if (panel) panel.remove();
     }
 
     getTransactionIcon(type) {
         const icons = {
             'deposit': 'arrow-down',
-            'withdrawal': 'arrow-up', 
+            'withdrawal': 'arrow-up',
             'trade': 'chart-line',
             'transfer': 'exchange-alt'
         };

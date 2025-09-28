@@ -167,6 +167,11 @@ class AuthManager {
       console.log('Refreshing dashboard UI with user data');
       window.tradingDashboard.updateUserInterface();
     }
+
+    // Update username display across pages
+    if (window.updateUsernameDisplay) {
+      window.updateUsernameDisplay();
+    }
   }
 }
 

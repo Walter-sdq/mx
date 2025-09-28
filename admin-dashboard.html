@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Dashboard - Top-Margin  Trading</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --admin-primary: #6366f1;
+      --admin-secondary: #8b5cf6;
+      --admin-success: #10b981;
+      --admin-warning: #f59e0b;
+      --admin-danger: #ef4444;
+      --admin-surface: rgba(255, 255, 255, 0.05);
+      --admin-border: rgba(255, 255, 255, 0.1);
+      --admin-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .admin-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: var(--admin-surface);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--admin-border);
+    }
+
+    .admin-header h1 {
+      margin: 0;
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--admin-surface);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--admin-border);
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px);
+      box-shadow: var(--admin-shadow);
+      border-color: var(--admin-primary);
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stat-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+    }
+
+    .activity-log {
+      max-height: 400px;
+      overflow-y: auto;
+      background: var(--admin-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--admin-border);
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--admin-border);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      color: white;
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      padding: 0.75rem 1.5rem;
+      background: var(--admin-surface);
+      border: 1px solid var(--admin-border);
+      border-radius: 12px;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-link:hover {
+      transform: translateY(-2px);
+      border-color: var(--admin-primary);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      border-color: var(--admin-primary);
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Navigation -->
+    <nav class="admin-nav">
+      <a href="admin-dashboard.html" class="nav-link active">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a href="admin-users.html" class="nav-link">
+        <i class="fas fa-users"></i> Users
+      </a>
+      <a href="admin-transactions.html" class="nav-link">
+        <i class="fas fa-exchange-alt"></i> Transactions
+      </a>
+      <a href="admin-withdrawals.html" class="nav-link">
+        <i class="fas fa-money-check-alt"></i> Withdrawals
+      </a>
+      <a href="admin-trades.html" class="nav-link">
+        <i class="fas fa-chart-line"></i> Trades
+      </a>
+      <a href="admin-broadcast.html" class="nav-link">
+        <i class="fas fa-bullhorn"></i> Broadcast
+      </a>
+      <a href="admin-logs.html" class="nav-link">
+        <i class="fas fa-history"></i> Logs
+      </a>
+      <a href="login.html" class="nav-link" onclick="logoutAdmin()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+      <div class="admin-header">
+        <h1><i class="fas fa-tachometer-alt"></i> Admin Dashboard</h1>
+        <div class="header-actions">
+          <button class="btn btn-primary" onclick="refreshData()">
+            <i class="fas fa-sync-alt"></i> Refresh Data
+          </button>
+        </div>
+      </div>
+
+      <div class="admin-stats">
+        <div class="stat-card">
+          <i class="fas fa-users stat-icon"></i>
+          <div class="stat-value" id="total-users">0</div>
+          <div class="stat-label">Total Users</div>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-user-check stat-icon"></i>
+          <div class="stat-value" id="active-users">0</div>
+          <div class="stat-label">Active Users</div>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-dollar-sign stat-icon"></i>
+          <div class="stat-value" id="total-deposits">$0</div>
+          <div class="stat-label">Total Deposits</div>
+        </div>
+        <div class="stat-card">
+          <i class="fas fa-clock stat-icon"></i>
+          <div class="stat-value" id="pending-withdrawals">0</div>
+          <div class="stat-label">Pending Withdrawals</div>
+        </div>
+      </div>
+
+      <div class="activity-log">
+        <h3><i class="fas fa-history"></i> Recent Activity</h3>
+        <div id="admin-activity-list">
+          <!-- Activity items will be populated by JavaScript -->
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+
+  <script>
+    // Initialize dashboard when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.admin) {
+        admin.loadDashboardData();
+      }
+    });
+
+    // Logout admin function
+    async function logoutAdmin() {
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        window.location.href = 'login.html';
+      } catch (error) {
+        console.error('Logout error:', error);
+        alert('Error logging out');
+      }
+    }
+
+    // Refresh data function
+    function refreshData() {
+      if (window.admin) {
+        admin.loadDashboardData();
+        showToast('Data refreshed successfully', 'success');
+      }
+    }
+
+    // Toast notification system
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        <span>${message}</span>
+      `;
+
+      document.body.appendChild(toast);
+
+      setTimeout(() => toast.classList.add('show'), 100);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Add toast styles
+    const toastStyles = document.createElement('style');
+    toastStyles.textContent = `
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--admin-surface);
+        border: 1px solid var(--admin-border);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: white;
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        backdrop-filter: blur(10px);
+        max-width: 400px;
+      }
+
+      .toast.show {
+        transform: translateX(0);
+      }
+
+      .toast-success {
+        border-color: var(--admin-success);
+        background: rgba(16, 185, 129, 0.1);
+      }
+
+      .toast-error {
+        border-color: var(--admin-danger);
+        background: rgba(239, 68, 68, 0.1);
+      }
+    `;
+    document.head.appendChild(toastStyles);
+  </script>
+</body>
+</html>

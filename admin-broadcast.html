@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Broadcast - Admin Panel</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    :root {
+      --admin-primary: #6366f1;
+      --admin-secondary: #8b5cf6;
+      --admin-success: #10b981;
+      --admin-warning: #f59e0b;
+      --admin-danger: #ef4444;
+      --admin-surface: rgba(255, 255, 255, 0.05);
+      --admin-border: rgba(255, 255, 255, 0.1);
+      --admin-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    }
+
+    .admin-container {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: var(--admin-surface);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--admin-border);
+    }
+
+    .admin-header h1 {
+      margin: 0;
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .search-filter {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: center;
+      padding: 1rem;
+      background: var(--admin-surface);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--admin-border);
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--admin-border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--admin-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.9rem;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .admin-nav {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 2rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-link {
+      padding: 0.75rem 1.5rem;
+      background: var(--admin-surface);
+      border: 1px solid var(--admin-border);
+      border-radius: 12px;
+      color: white;
+      text-decoration: none;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .nav-link:hover {
+      transform: translateY(-2px);
+      border-color: var(--admin-primary);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.2);
+    }
+
+    .nav-link.active {
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      border-color: var(--admin-primary);
+    }
+
+    .user-selector {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 8px;
+      border: 1px solid var(--admin-border);
+    }
+
+    .user-checkboxes {
+      max-height: 200px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .checkbox-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 6px;
+    }
+
+    .checkbox-item input[type="checkbox"] {
+      margin: 0;
+    }
+
+    .checkbox-item label {
+      margin: 0;
+      font-size: 0.9rem;
+      cursor: pointer;
+    }
+
+    @media (max-width: 768px) {
+      .search-filter {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .admin-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+
+      .user-checkboxes {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Navigation -->
+    <nav class="admin-nav">
+      <a href="admin-dashboard.html" class="nav-link">
+        <i class="fas fa-tachometer-alt"></i> Dashboard
+      </a>
+      <a href="admin-users.html" class="nav-link">
+        <i class="fas fa-users"></i> Users
+      </a>
+      <a href="admin-transactions.html" class="nav-link">
+        <i class="fas fa-exchange-alt"></i> Transactions
+      </a>
+      <a href="admin-withdrawals.html" class="nav-link">
+        <i class="fas fa-money-check-alt"></i> Withdrawals
+      </a>
+      <a href="admin-trades.html" class="nav-link">
+        <i class="fas fa-chart-line"></i> Trades
+      </a>
+      <a href="admin-broadcast.html" class="nav-link active">
+        <i class="fas fa-bullhorn"></i> Broadcast
+      </a>
+      <a href="admin-logs.html" class="nav-link">
+        <i class="fas fa-history"></i> Logs
+      </a>
+      <a href="login.html" class="nav-link" onclick="logoutAdmin()">
+        <i class="fas fa-sign-out-alt"></i> Logout
+      </a>
+    </nav>
+
+    <!-- Main Content -->
+    <main>
+      <div class="admin-header">
+        <h1><i class="fas fa-bullhorn"></i> Broadcast Message</h1>
+      </div>
+
+      <div class="search-filter">
+        <div class="form-group" style="flex: 1;">
+          <label for="broadcast-title"><i class="fas fa-heading"></i> Title</label>
+          <input type="text" id="broadcast-title" class="form-control" placeholder="Enter broadcast title..." required>
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label for="broadcast-message"><i class="fas fa-comment"></i> Message</label>
+          <textarea id="broadcast-message" class="form-control" rows="5" placeholder="Enter your broadcast message..." required></textarea>
+        </div>
+        <div class="form-group" style="flex: 1;">
+          <label for="broadcast-recipients"><i class="fas fa-users"></i> Recipients</label>
+          <select id="broadcast-recipients" class="form-control">
+            <option value="all">All Users</option>
+            <option value="active">Active Users</option>
+            <option value="select">Select Users</option>
+          </select>
+        </div>
+        <div id="user-selector" style="display: none; flex: 1;">
+          <div class="form-group">
+            <label><i class="fas fa-check-square"></i> Select Users</label>
+            <div id="user-checkboxes">
+              <!-- User checkboxes will be populated by JavaScript -->
+            </div>
+          </div>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1rem; align-self: flex-end;">
+          <button type="button" class="btn btn-primary" onclick="sendBroadcast(event)">
+            <i class="fas fa-paper-plane"></i> Send Broadcast
+          </button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/admin.js"></script>
+
+  <script>
+    // Initialize broadcast page when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      if (window.admin) {
+        admin.loadUsersForBroadcast();
+      }
+
+      // Handle recipient selection change
+      document.getElementById('broadcast-recipients').addEventListener('change', function(e) {
+        const userSelector = document.getElementById('user-selector');
+        if (e.target.value === 'select') {
+          userSelector.style.display = 'block';
+        } else {
+          userSelector.style.display = 'none';
+        }
+      });
+    });
+
+    // Logout admin function
+    async function logoutAdmin() {
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        window.location.href = 'login.html';
+      } catch (error) {
+        console.error('Logout error:', error);
+        alert('Error logging out');
+      }
+    }
+
+    // Send broadcast function
+    async function sendBroadcast(event) {
+      event.preventDefault();
+
+      const title = document.getElementById('broadcast-title').value;
+      const message = document.getElementById('broadcast-message').value;
+      const recipients = document.getElementById('broadcast-recipients').value;
+
+      if (!title || !message) {
+        showToast('Please fill in all required fields', 'error');
+        return;
+      }
+
+      try {
+        let recipientList = [];
+
+        if (recipients === 'all') {
+          // Get all users
+          const { data: users, error } = await supabase
+            .from('profiles')
+            .select('id');
+
+          if (error) throw error;
+          recipientList = users.map(user => user.id);
+        } else if (recipients === 'active') {
+          // Get active users
+          const { data: users, error } = await supabase
+            .from('profiles')
+            .select('id')
+            .eq('status', 'active');
+
+          if (error) throw error;
+          recipientList = users.map(user => user.id);
+        } else {
+          // Get selected users
+          const checkboxes = document.querySelectorAll('#user-checkboxes input[type="checkbox"]:checked');
+          recipientList = Array.from(checkboxes).map(cb => cb.value);
+        }
+
+        if (recipientList.length === 0) {
+          showToast('No recipients selected', 'warning');
+          return;
+        }
+
+        // Send broadcast to each user
+        for (const userId of recipientList) {
+          const { error } = await supabase
+            .from('notifications')
+            .insert({
+              user_id: userId,
+              title: title,
+              message: message,
+              type: 'broadcast',
+              read: false
+            });
+
+          if (error) throw error;
+        }
+
+        // Log the broadcast
+        await supabase
+          .from('admin_logs')
+          .insert({
+            admin_id: (await supabase.auth.getUser()).data.user.id,
+            action: 'broadcast_sent',
+            details: `Broadcast sent to ${recipientList.length} users: ${title}`,
+            timestamp: new Date().toISOString()
+          });
+
+        showToast(`Broadcast sent successfully to ${recipientList.length} users`, 'success');
+
+        // Clear form
+        document.getElementById('broadcast-title').value = '';
+        document.getElementById('broadcast-message').value = '';
+        document.getElementById('broadcast-recipients').value = 'all';
+
+      } catch (error) {
+        console.error('Broadcast error:', error);
+        showToast('Error sending broadcast', 'error');
+      }
+    }
+
+    // Toast notification system
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `toast toast-${type}`;
+      toast.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+        <span>${message}</span>
+      `;
+
+      document.body.appendChild(toast);
+
+      setTimeout(() => toast.classList.add('show'), 100);
+
+      setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // Add toast styles
+    const toastStyles = document.createElement('style');
+    toastStyles.textContent = `
+      .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: var(--admin-surface);
+        border: 1px solid var(--admin-border);
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        color: white;
+        z-index: 10000;
+        transform: translateX(100%);
+        transition: transform 0.3s ease;
+        backdrop-filter: blur(10px);
+        max-width: 400px;
+      }
+
+      .toast.show {
+        transform: translateX(0);
+      }
+
+      .toast-success {
+        border-color: var(--admin-success);
+        background: rgba(16, 185, 129, 0.1);
+      }
+
+      .toast-error {
+        border-color: var(--admin-danger);
+        background: rgba(239, 68, 68, 0.1);
+      }
+    `;
+    document.head.appendChild(toastStyles);
+  </script>
+</body>
+</html>

@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Dashboard - MaxProfit Trading</title>
+    <title>Dashboard - Top-Margin  Trading</title>
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/dashboard.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -19,6 +19,7 @@
   </head>
 
   <body>
+    <a href="#mainContent" class="skip-link">Skip to main content</a>
     <div class="app-container" id="app">
       <!-- Header -->
       <header class="app-header">
@@ -40,6 +41,9 @@
             <i class="fas fa-bell"></i>
             <span class="notification-badge" id="notification-count">0</span>
           </button>
+          <button class="header-btn admin-mode-btn" id="adminModeBtn" style="display: none;" title="Admin Mode">
+            <i class="fas fa-cog"></i>
+          </button>
           <button class="header-btn" id="profileBtn" onclick="openProfileModal()">
             <i class="fas fa-user-circle"></i>
           </button>
@@ -51,57 +55,57 @@
         <!-- Home/Wallet Page -->
         <div class="page active" id="homePage">
           <!-- Portfolio Summary -->
-          <section class="portfolio-card">
+          <section class="portfolio-card bounce-in">
             <div class="portfolio-header">
-              <h2>Portfolio</h2>
+              <h2 class="gradient-text">Portfolio</h2>
               <button class="visibility-toggle" id="balanceToggle">
                 <i class="fas fa-eye"></i>
               </button>
             </div>
-            <div class="balance-amount" id="portfolioBalance">$0.00</div>
-            <div class="balance-change positive" id="balanceChange">
+            <div class="balance-amount loading-shimmer" id="portfolioBalance">$0.00</div>
+            <div class="balance-change positive loading-shimmer" id="balanceChange">
               <i class="fas fa-arrow-up"></i>
               +$0.00 (0.00%)
             </div>
 
             <div class="quick-stats">
               <div class="stat-item">
-                <span class="stat-value" id="available-balance">$0.00</span>
+                <span class="stat-value loading-shimmer" id="available-balance">$0.00</span>
                 <span class="stat-label">Available</span>
               </div>
               <div class="stat-item">
-                <span class="stat-value positive" id="pnl-today">$0.00</span>
+                <span class="stat-value positive loading-shimmer" id="pnl-today">$0.00</span>
                 <span class="stat-label">P&L Today</span>
               </div>
               <div class="stat-item">
-                <span class="stat-value" id="margin-used">$0.00</span>
+                <span class="stat-value loading-shimmer" id="margin-used">$0.00</span>
                 <span class="stat-label">Margin Used</span>
               </div>
             </div>
           </section>
 
           <!-- Quick Actions -->
-          <section class="quick-actions">
-            <a href="deposit-crypto.html" class="action-btn primary" id="depositBtn">
+          <section class="quick-actions scale-in">
+            <a href="deposit-crypto.html" class="action-btn primary tooltip" id="depositBtn" data-tooltip="Add funds to your account">
               <i class="fas fa-plus"></i>
               <span>Deposit</span>
             </a>
-            <a href="withdraw copy.html" class="action-btn" id="withdrawBtn">
+            <a href="withdraw copy.html" class="action-btn tooltip" id="withdrawBtn" data-tooltip="Withdraw funds from your account">
               <i class="fas fa-arrow-up"></i>
               <span>Withdraw</span>
             </a>
-            <a href="transfer.html" class="action-btn" id="transferBtn">
+            <a href="transfer.html" class="action-btn tooltip" id="transferBtn" data-tooltip="Transfer funds between accounts">
               <i class="fas fa-exchange-alt"></i>
               <span>Transfer</span>
             </a>
-            <a href="bonuses.html" class="action-btn" id="historyBtn">
+            <a href="bonuses.html" class="action-btn tooltip" id="historyBtn" data-tooltip="View your bonus history">
               <i class="fas fa-history"></i>
               <span>Bonuses</span>
             </a>
           </section>
 
           <!-- Watchlist -->
-          <section class="section-card">
+          <section class="section-card fade-in">
             <div class="section-header">
               <h3>Watchlist</h3>
               <button class="section-action" id="editWatchlist">
@@ -114,7 +118,7 @@
           </section>
 
           <!-- Recent Activity -->
-          <section class="section-card">
+          <section class="section-card fade-in">
             <div class="section-header">
               <h3>Recent Activity</h3>
               <button class="section-action" id="viewAllActivity">
@@ -132,7 +136,7 @@
         <!-- Trading Page -->
         <div class="page" id="tradingPage">
           <!-- Trading Header -->
-          <div class="trading-header">
+          <div class="trading-header slide-up">
             <div class="symbol-selector" id="symbolSelector">
               <span class="current-symbol" id="current-symbol">BTC/USD</span>
               <i class="fas fa-chevron-down"></i>
@@ -149,14 +153,14 @@
           </div>
 
           <!-- Trading Chart Section -->
-          <section class="trading-chart-section">
+          <section class="trading-chart-section fade-in">
             <div class="tradingview-widget-container">
               <div id="tradingview_dashboard"></div>
             </div>
           </section>
 
           <!-- Enhanced Trade Panel -->
-          <div class="trade-panel">
+          <div class="trade-panel scale-in">
             <!-- Order Type Selection -->
             <div class="trade-section">
               <h4 class="trade-section-title">Order Type</h4>
@@ -267,14 +271,14 @@
 
         <!-- Transactions Page -->
         <div class="page" id="transactionsPage">
-          <div class="page-header">
-            <h2>Transactions</h2>
+          <div class="page-header slide-up">
+            <h2 class="gradient-text">Transactions</h2>
             <div class="page-actions">
               <div class="search-container">
                 <i class="fas fa-search"></i>
                 <input type="text" placeholder="Search transactions..." id="transactionSearch" class="search-input">
               </div>
-              <button class="filter-btn" id="transactionFilter">
+              <button class="filter-btn tooltip" id="transactionFilter" data-tooltip="Filter transactions by type">
                 <i class="fas fa-filter"></i>
                 <span>Filter</span>
               </button>
@@ -507,7 +511,7 @@
                 <i class="fas fa-envelope"></i>
                 <div>
                   <span class="contact-label">Email</span>
-                  <span class="contact-value">support@maxprofit.com</span>
+                  <span class="contact-value">support@Top-Margin .com</span>
                 </div>
               </div>
               <div class="contact-item">

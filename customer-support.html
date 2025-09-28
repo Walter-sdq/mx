@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Customer Support - MaxProfit Trading</title>
+    <title>Customer Support - Top-Margin  Trading</title>
     <link rel="stylesheet" href="css/base.css" />
     <link rel="stylesheet" href="css/dashboard.css" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -141,7 +141,7 @@
               </div>
               <div class="contact-details">
                 <h4>Email Support</h4>
-                <p>support@maxprofittrading.com</p>
+                <p>support@Top-Margin trading.com</p>
                 <span class="response-time">Response within 24 hours</span>
               </div>
             </div>
@@ -297,6 +297,16 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
+    <script src="js/auth.js"></script>
+    <script>
+      // Check authentication on page load
+      document.addEventListener('DOMContentLoaded', async () => {
+        if (!authManager.isAuthenticated()) {
+          window.location.href = 'login.html';
+          return;
+        }
+      });
+    </script>
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="js/customer-support.js"></script>

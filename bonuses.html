@@ -1,267 +1,521 @@
-<!-- filename: bonuses.html -->
 <!DOCTYPE html>
 <html lang="en" data-theme="dark">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Bonuses & Promotions - MaxProfit Trading</title>
-    <link rel="stylesheet" href="css/base.css" />
-    <link rel="stylesheet" href="css/dashboard.css" />
-    <link rel="stylesheet" href="css/trading.css" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bonuses - Top-Margin Trading</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/dashboard.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <header class="app-header">
+            <div class="header-left">
+                <div class="user-avatar">
+                    <img src="https://ui-avatars.com/api/?name=User&background=random&size=40&bold=true" alt="User Avatar">
+                </div>
+                <div class="user-info">
+                    <span class="greeting">Bonuses</span>
+                    <span class="username">Available Rewards</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <section class="section-card">
+                <div class="section-header">
+                    <h3>Available Bonuses</h3>
+                </div>
+                <div class="bonus-list">
+                    <div class="bonus-item">
+                        <div class="bonus-icon">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                        <div class="bonus-details">
+                            <h4>Welcome Bonus</h4>
+                            <p>Get 10% bonus on your first deposit</p>
+                            <span class="bonus-amount">$50 max</span>
+                        </div>
+                        <button class="btn btn-primary">Claim</button>
+                    </div>
+                    <div class="bonus-item">
+                        <div class="bonus-icon">
+                            <i class="fas fa-trophy"></i>
+                        </div>
+                        <div class="bonus-details">
+                            <h4>Trading Bonus</h4>
+                            <p>Earn bonus for every 10 trades</p>
+                            <span class="bonus-amount">$5 per milestone</span>
+                        </div>
+                        <button class="btn btn-outline">View Progress</button>
+                    </div>
+                </div>
+            </section>
+
+            <section class="section-card">
+                <div class="section-header">
+                    <h3>Bonus History</h3>
+                </div>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon success">
+                            <i class="fas fa-check"></i>
+                        </div>
+                        <div class="activity-details">
+                            <div class="activity-title">Welcome Bonus Claimed</div>
+                            <div class="activity-subtitle">2 days ago</div>
+                        </div>
+                        <div class="activity-amount positive">+$50.00</div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <nav class="bottom-nav">
+            <button class="nav-item" data-page="home">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </button>
+            <button class="nav-item" data-page="trading">
+                <i class="fas fa-chart-line"></i>
+                <span>Trading</span>
+            </button>
+            <button class="nav-item" data-page="transactions">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transactions</span>
+            </button>
+            <button class="nav-item" data-page="notifications">
+                <i class="fas fa-bell"></i>
+                <span>Notifications</span>
+            </button>
+            <button class="nav-item" data-page="support">
+                <i class="fas fa-headset"></i>
+                <span>Support</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="js/dashboard.js"></script>
+
     <style>
-      /* ✅ GLOBAL RESPONSIVENESS + NO OVERFLOW */
-      html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        overflow-x: hidden;
+      /* Enhanced Responsive Design for Bonuses Page */
+      @media (max-width: 1024px) {
+        .main-content {
+          padding: 1rem;
+        }
+
+        .section-card {
+          margin-bottom: 1.5rem;
+        }
+
+        .bonus-list {
+          gap: 1rem;
+        }
+
+        .bonus-item {
+          padding: 1.25rem;
+        }
+
+        .bonus-details h4 {
+          font-size: 1.1rem;
+        }
+
+        .bonus-details p {
+          font-size: 0.9rem;
+        }
+
+        .activity-list {
+          gap: 0.75rem;
+        }
+
+        .activity-item {
+          padding: 0.875rem;
+        }
       }
 
-      .app-container {
-        display: flex;
-        flex-direction: column;
-        min-height: 100vh;
-        box-sizing: border-box;
-      }
-
-      .main-content {
-        flex: 1;
-        padding: 16px;
-        box-sizing: border-box;
-        padding-bottom: 90px; /* space for bottom nav */
-      }
-
-      /* ✅ PROMO INPUT GROUP */
-      .promo-input-group {
-        display: flex;
-        gap: var(--spacing-2);
-        align-items: center;
-        flex-wrap: wrap;
-      }
-
-      .promo-input-group input {
-        flex: 1;
-        min-width: 180px;
-      }
-
-      /* ✅ RESPONSIVE GRID FOR PROMOTIONS */
-      .promotions-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: var(--spacing-5);
-        margin-top: var(--spacing-4);
-        width: 100%;
-      }
-
-      /* ✅ FEATURE CARDS */
-      .feature-card {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-4);
-        width: 100%;
-        max-width: 100%;
-      }
-
-      /* ✅ BOTTOM NAVIGATION FIXED */
-      
-
-      /* ✅ BONUS LIST ADJUSTMENTS */
-      .bonuses-list {
-        display: flex;
-        flex-direction: column;
-        gap: var(--spacing-4);
-        width: 100%;
-      }
-
-      .bonus-item {
-        display: flex;
-        align-items: center;
-        gap: var(--spacing-4);
-        padding: var(--spacing-4);
-        background: var(--bg-tertiary);
-        border-radius: var(--border-radius-lg);
-        border: 1px solid var(--border-secondary);
-        flex-wrap: wrap;
-      }
-
-      .bonus-info {
-        flex: 1;
-        min-width: 160px;
-      }
-
-      .bonus-amount {
-        text-align: right;
-        min-width: 100px;
-      }
-
-      /* ✅ MOBILE STYLING */
       @media (max-width: 768px) {
-        .promo-input-group {
-          flex-direction: column;
-          align-items: stretch;
+        .app-container {
+          padding-bottom: 80px; /* Space for bottom nav */
+        }
+
+        .app-header {
+          padding: 0.75rem 1rem;
+        }
+
+        .user-info {
+          gap: 0.5rem;
+        }
+
+        .greeting {
+          font-size: 1.25rem;
+        }
+
+        .username {
+          font-size: 0.875rem;
+        }
+
+        .main-content {
+          padding: 0.75rem;
+        }
+
+        .section-card {
+          padding: 1rem;
+          margin-bottom: 1.25rem;
+        }
+
+        .section-header h3 {
+          font-size: 1.25rem;
+        }
+
+        .bonus-list {
+          gap: 0.75rem;
         }
 
         .bonus-item {
           flex-direction: column;
-          text-align: center;
+          align-items: flex-start;
+          gap: 0.75rem;
+          padding: 1rem;
+        }
+
+        .bonus-details {
+          width: 100%;
+        }
+
+        .bonus-details h4 {
+          font-size: 1rem;
+        }
+
+        .bonus-details p {
+          font-size: 0.875rem;
         }
 
         .bonus-amount {
-          text-align: center;
+          font-size: 0.875rem;
+        }
+
+        .btn {
+          width: 100%;
+          padding: 0.75rem;
+          font-size: 0.9rem;
+        }
+
+        .activity-list {
+          gap: 0.5rem;
+        }
+
+        .activity-item {
+          padding: 0.75rem;
+        }
+
+        .activity-title {
+          font-size: 0.9rem;
+        }
+
+        .activity-subtitle {
+          font-size: 0.8rem;
+        }
+
+        .activity-amount {
+          font-size: 0.9rem;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .app-container {
+          padding-bottom: 70px;
+        }
+
+        .app-header {
+          padding: 0.5rem 0.75rem;
+        }
+
+        .user-avatar img {
+          width: 32px;
+          height: 32px;
+        }
+
+        .greeting {
+          font-size: 1.125rem;
+        }
+
+        .username {
+          font-size: 0.8125rem;
+        }
+
+        .header-right {
+          gap: 0.5rem;
+        }
+
+        .header-btn {
+          padding: 0.5rem;
+          width: 36px;
+          height: 36px;
+          font-size: 0.875rem;
+        }
+
+        .main-content {
+          padding: 0.5rem;
+        }
+
+        .section-card {
+          padding: 0.875rem;
+          margin-bottom: 1rem;
+        }
+
+        .section-header {
+          margin-bottom: 1rem;
+        }
+
+        .section-header h3 {
+          font-size: 1.125rem;
+        }
+
+        .bonus-list {
+          gap: 0.5rem;
+        }
+
+        .bonus-item {
+          padding: 0.875rem;
+          gap: 0.5rem;
+        }
+
+        .bonus-icon {
+          width: 40px;
+          height: 40px;
+          font-size: 1rem;
+        }
+
+        .bonus-details h4 {
+          font-size: 0.9375rem;
+        }
+
+        .bonus-details p {
+          font-size: 0.8125rem;
+        }
+
+        .bonus-amount {
+          font-size: 0.8125rem;
+        }
+
+        .btn {
+          padding: 0.625rem;
+          font-size: 0.875rem;
+        }
+
+        .activity-list {
+          gap: 0.375rem;
+        }
+
+        .activity-item {
+          padding: 0.625rem;
+          gap: 0.5rem;
+        }
+
+        .activity-icon {
+          width: 32px;
+          height: 32px;
+          font-size: 0.875rem;
+        }
+
+        .activity-details {
+          gap: 0.125rem;
+        }
+
+        .activity-title {
+          font-size: 0.875rem;
+        }
+
+        .activity-subtitle {
+          font-size: 0.75rem;
+        }
+
+        .activity-amount {
+          font-size: 0.875rem;
+        }
+      }
+
+      @media (max-width: 320px) {
+        .app-container {
+          padding-bottom: 60px;
+        }
+
+        .app-header {
+          padding: 0.375rem 0.5rem;
+        }
+
+        .user-avatar img {
+          width: 28px;
+          height: 28px;
+        }
+
+        .greeting {
+          font-size: 1rem;
+        }
+
+        .username {
+          font-size: 0.75rem;
+        }
+
+        .header-btn {
+          padding: 0.375rem;
+          width: 32px;
+          height: 32px;
+          font-size: 0.8125rem;
+        }
+
+        .main-content {
+          padding: 0.375rem;
+        }
+
+        .section-card {
+          padding: 0.75rem;
+          margin-bottom: 0.875rem;
+        }
+
+        .section-header h3 {
+          font-size: 1rem;
+        }
+
+        .bonus-item {
+          padding: 0.75rem;
+        }
+
+        .bonus-icon {
+          width: 36px;
+          height: 36px;
+          font-size: 0.9375rem;
+        }
+
+        .bonus-details h4 {
+          font-size: 0.875rem;
+        }
+
+        .bonus-details p {
+          font-size: 0.75rem;
+        }
+
+        .bonus-amount {
+          font-size: 0.75rem;
+        }
+
+        .btn {
+          padding: 0.5rem;
+          font-size: 0.8125rem;
+        }
+
+        .activity-item {
+          padding: 0.5rem;
+        }
+
+        .activity-icon {
+          width: 28px;
+          height: 28px;
+          font-size: 0.8125rem;
+        }
+
+        .activity-title {
+          font-size: 0.8125rem;
+        }
+
+        .activity-subtitle {
+          font-size: 0.6875rem;
+        }
+
+        .activity-amount {
+          font-size: 0.8125rem;
+        }
+      }
+
+      /* Bottom Navigation Enhancements */
+      .bottom-nav {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--bg-primary, #1a1a1a);
+        border-top: 1px solid var(--border-primary, #333);
+        padding: 0.5rem;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        z-index: 1000;
+      }
+
+      .nav-item {
+        background: none;
+        border: none;
+        color: var(--text-secondary, #888);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.25rem;
+        padding: 0.5rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        font-size: 0.75rem;
+        min-width: 60px;
+      }
+
+      .nav-item:hover {
+        background: var(--bg-hover, #333);
+        color: var(--text-primary, #fff);
+      }
+
+      .nav-item.active {
+        color: var(--primary-color, #2196f3);
+        background: rgba(33, 150, 243, 0.1);
+      }
+
+      .nav-item i {
+        font-size: 1.25rem;
+      }
+
+      .nav-item span {
+        font-size: 0.6875rem;
+        font-weight: 500;
+      }
+
+      @media (max-width: 480px) {
+        .bottom-nav {
+          padding: 0.375rem 0.25rem;
+        }
+
+        .nav-item {
+          padding: 0.375rem 0.25rem;
+          gap: 0.1875rem;
+          min-width: 50px;
+        }
+
+        .nav-item i {
+          font-size: 1.125rem;
+        }
+
+        .nav-item span {
+          font-size: 0.625rem;
+        }
+      }
+
+      @media (max-width: 320px) {
+        .bottom-nav {
+          padding: 0.25rem;
+        }
+
+        .nav-item {
+          padding: 0.25rem;
+          min-width: 45px;
+        }
+
+        .nav-item i {
+          font-size: 1rem;
+        }
+
+        .nav-item span {
+          font-size: 0.5625rem;
         }
       }
     </style>
-  </head>
-  <body>
-    <div class="app-container" id="app">
-      <!-- Header -->
-      <header class="app-header">
-        <div class="header-left">
-          <button class="back-btn" onclick="window.history.back()">
-            <i class="fas fa-arrow-left"></i>
-          </button>
-          <div class="user-info">
-            <span class="greeting">Bonuses & Promotions</span>
-            <span class="username">Boost Your Trading</span>
-          </div>
-        </div>
-        <div class="header-right">
-          <button class="header-btn" id="notificationBtn">
-            <i class="fas fa-bell"></i>
-            <span class="notification-badge" id="notification-count">0</span>
-          </button>
-          <button class="header-btn" id="profileBtn">
-            <i class="fas fa-user-circle"></i>
-          </button>
-        </div>
-      </header>
-
-      <!-- Main Content -->
-      <main class="main-content">
-        <div class="container">
-          <!-- Bonus Balance -->
-          <section class="balance-overview">
-            <div class="card">
-              <h2>Bonus Balance</h2>
-              <p>Track your active bonuses and promotional credits here.</p>
-              <div class="balance-amount">$0.00</div>
-              <div class="balance-breakdown">
-                <div class="breakdown-item">
-                  <span>Active Bonuses</span><span>$0.00</span>
-                </div>
-                <div class="breakdown-item">
-                  <span>Pending Rewards</span><span>$0.00</span>
-                </div>
-                <div class="breakdown-item">
-                  <span>Lifetime Earned</span><span>$0.00</span>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- Promo Code Entry -->
-          <section class="promo-code-section">
-            <div class="card">
-              <h3>Have a Promo Code?</h3>
-              <p>Enter your promotional code to claim exclusive bonuses.</p>
-              <div class="form-group">
-                <div class="promo-input-group">
-                  <input type="text" class="form-control" id="promo-code" placeholder="Enter promo code" style="text-transform: uppercase;" maxlength="20"/>
-                  <button type="button" class="btn btn-primary" onclick="applyPromoCode()">
-                    <i class="fas fa-gift"></i> Apply
-                  </button>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <!-- Current Promotions -->
-          <section class="promotions-section">
-            <div class="section-header">
-              <h3>Current Promotions</h3><span class="promo-count">4 Active</span>
-            </div>
-            <div class="promotions-grid">
-              <!-- Promotion Cards (same as before) -->
-              <!-- ... keep your promo cards here ... -->
-            </div>
-          </section>
-
-          <!-- Active Bonuses -->
-          <section class="active-bonuses">
-            <div class="card">
-              <div class="section-header">
-                <h3>Your Active Bonuses</h3>
-                <button class="section-action">View History</button>
-              </div>
-              <div class="bonuses-list">
-                <!-- Bonus items same as before -->
-              </div>
-            </div>
-          </section>
-
-          <!-- Bonus Terms & VIP -->
-          <section class="bonus-terms">
-            <div class="card">
-              <h3>Bonus Terms & Conditions</h3>
-              <div class="terms-list">
-                <!-- term items same as before -->
-              </div>
-              <button class="btn btn-outline" style="width: 100%; margin-top: 16px;">
-                <i class="fas fa-file-alt"></i> Read Full Terms
-              </button>
-            </div>
-          </section>
-
-          <div class="deposit-note">
-            <i class="fas fa-diamond"></i>
-            <div><strong>VIP Program:</strong> Unlock exclusive bonuses and higher rewards as you trade more. Contact support to learn about VIP benefits and how to qualify.</div>
-          </div>
-        </div>
-      </main>
-
-      <!-- ✅ Bottom Navigation -->
-      <nav class="bottom-nav">
-        <button class="nav-item active"><i class="fas fa-home"></i><span>Home</span></button>
-        <button class="nav-item"><i class="fas fa-chart-line"></i><span>Trading</span></button>
-        <button class="nav-item"><i class="fas fa-exchange-alt"></i><span>Transactions</span></button>
-        <button class="nav-item"><i class="fas fa-bell"></i><span>Notifications</span></button>
-        <button class="nav-item"><i class="fas fa-globe"></i><span>Live Payments</span></button>
-        <button class="nav-item"><i class="fas fa-user"></i><span>Profile</span></button>
-      </nav>
-
-      <div class="toast-container" id="toast-container"></div>
-    </div>
-
-    <script>
-      function applyPromoCode() {
-        const promoCode = document.getElementById('promo-code').value.trim().toUpperCase();
-        if (!promoCode) return showToast('Please enter a promo code', 'warning');
-        if (promoCode === 'BONUS50') {
-          showToast('Promo code applied successfully! $50 bonus added.', 'success');
-          document.getElementById('promo-code').value = '';
-        } else {
-          showToast('Invalid promo code.', 'error');
-        }
-      }
-
-      function showToast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.innerHTML = `<i class="fas fa-info-circle"></i>${message}`;
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 5000);
-      }
-    </script>
-  </body>
+</body>
 </html>

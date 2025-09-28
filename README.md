@@ -1,4 +1,4 @@
-# MaxProfit Trading Platform
+# Top-Margin  Trading Platform
 
 A comprehensive, production-ready trading platform built with modern web technologies. Features real-time price simulation, secure authentication, role-based access control, and both user and admin dashboards.
 
@@ -121,16 +121,16 @@ A comprehensive, production-ready trading platform built with modern web technol
 The application comes with pre-seeded accounts for testing:
 
 ### Admin Account
-- **Email**: `admin@maxprofit.dev`
+- **Email**: `admin@Top-Margin .dev`
 - **Password**: `Admin@1234`
 - **Role**: Administrator
 
 ### User Accounts
-- **Email**: `sarah@maxprofit.dev`
+- **Email**: `sarah@Top-Margin .dev`
 - **Password**: `User@1234`
 - **Role**: User
 
-- **Email**: `marcus@maxprofit.dev`
+- **Email**: `marcus@Top-Margin .dev`
 - **Password**: `User@1234`
 - **Role**: User
 

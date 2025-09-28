@@ -1,0 +1,779 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - Top-Margin  Trading</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/admin-bottom-nav.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+  <style>
+    /* Majestic 3D Admin Panel Styles */
+    :root {
+      --admin-primary: #6366f1;
+      --admin-secondary: #8b5cf6;
+      --admin-tertiary: #ec4899;
+      --admin-success: #10b981;
+      --admin-warning: #f59e0b;
+      --admin-danger: #ef4444;
+      --admin-info: #06b6d4;
+      --admin-surface: rgba(255, 255, 255, 0.08);
+      --admin-surface-hover: rgba(255, 255, 255, 0.12);
+      --admin-border: rgba(255, 255, 255, 0.15);
+      --admin-border-hover: rgba(255, 255, 255, 0.25);
+      --admin-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+      --admin-shadow-hover: 0 16px 64px rgba(0, 0, 0, 0.5);
+      --admin-glow: 0 0 20px rgba(99, 102, 241, 0.3);
+      --admin-glow-hover: 0 0 30px rgba(99, 102, 241, 0.5);
+      --admin-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      --admin-gradient-hover: linear-gradient(135deg, #764ba2 0%, #f093fb 50%, #f5576c 100%);
+    }
+
+    .admin-container {
+      display: flex;
+      min-height: 100vh;
+      perspective: 1000px;
+    }
+
+    .admin-main {
+      flex: 1;
+      padding: 2rem;
+      transform-style: preserve-3d;
+      margin-bottom: 80px; /* Space for bottom navigation */
+    }
+
+    .admin-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: var(--admin-surface);
+      border-radius: 16px;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--admin-border);
+      animation: header-fade 0.8s ease-out 0.2s both;
+    }
+
+    @keyframes header-fade {
+      0% {
+        opacity: 0;
+        transform: translateY(-20px) translateZ(-10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0);
+      }
+    }
+
+    .admin-header h1 {
+      margin: 0;
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-size: 2rem;
+      font-weight: 700;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .admin-stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .stat-card {
+      background: var(--admin-surface);
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--admin-border);
+      padding: 2rem;
+      border-radius: 16px;
+      text-align: center;
+      transition: all 0.3s ease;
+      transform-style: preserve-3d;
+      position: relative;
+      overflow: hidden;
+      animation: stat-card 0.8s ease-out both;
+    }
+
+    .stat-card:nth-child(1) { animation-delay: 0.1s; }
+    .stat-card:nth-child(2) { animation-delay: 0.2s; }
+    .stat-card:nth-child(3) { animation-delay: 0.3s; }
+    .stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes stat-card {
+      0% {
+        opacity: 0;
+        transform: translateY(30px) translateZ(-20px) rotateX(-5deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0) rotateX(0deg);
+      }
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, transparent 0%, rgba(255, 255, 255, 0.05) 50%, transparent 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-5px) translateZ(15px) rotateX(2deg);
+      box-shadow: var(--admin-shadow-hover);
+      border-color: var(--admin-primary);
+    }
+
+    .stat-value {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: value-glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes value-glow {
+      0% { filter: brightness(1); }
+      100% { filter: brightness(1.1); }
+    }
+
+    .stat-label {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .stat-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.3;
+      animation: icon-float 3s ease-in-out infinite;
+    }
+
+    @keyframes icon-float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-5px); }
+    }
+
+    .user-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: var(--admin-surface);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      overflow: hidden;
+      border: 1px solid var(--admin-border);
+      animation: table-fade 0.8s ease-out 0.6s both;
+    }
+
+    @keyframes table-fade {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) translateZ(-10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0);
+      }
+    }
+
+    .user-table th, .user-table td {
+      padding: 1rem;
+      text-align: left;
+      border-bottom: 1px solid var(--admin-border);
+    }
+
+    .user-table th {
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      color: white;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .user-table tr:hover {
+      background: rgba(255, 255, 255, 0.05);
+      transform: translateX(5px);
+      transition: all 0.2s ease;
+    }
+
+    .user-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-small {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.3s ease;
+      transform-style: preserve-3d;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px) translateZ(5px);
+      box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    }
+
+    .btn-danger {
+      background: linear-gradient(135deg, var(--admin-danger), #dc2626);
+      color: white;
+      box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      transform: translateY(-2px) translateZ(5px);
+      box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
+    }
+
+    .btn-warning {
+      background: linear-gradient(135deg, var(--admin-warning), #d97706);
+      color: white;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+    }
+
+    .btn-warning:hover {
+      transform: translateY(-2px) translateZ(5px);
+      box-shadow: 0 6px 20px rgba(245, 158, 11, 0.4);
+    }
+
+    .search-filter {
+      display: flex;
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+      align-items: center;
+      padding: 1rem;
+      background: var(--admin-surface);
+      border-radius: 12px;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--admin-border);
+      animation: filter-fade 0.8s ease-out 0.4s both;
+    }
+
+    @keyframes filter-fade {
+      0% {
+        opacity: 0;
+        transform: translateY(-10px) translateZ(-5px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0);
+      }
+    }
+
+    .search-input {
+      padding: 0.75rem;
+      border: 1px solid var(--admin-border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      flex: 1;
+      transition: all 0.3s ease;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--admin-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .filter-select {
+      padding: 0.75rem;
+      border: 1px solid var(--admin-border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .filter-select:focus {
+      outline: none;
+      border-color: var(--admin-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .activity-log {
+      max-height: 400px;
+      overflow-y: auto;
+      background: var(--admin-surface);
+      border-radius: 16px;
+      padding: 1.5rem;
+      backdrop-filter: blur(10px);
+      border: 1px solid var(--admin-border);
+      animation: activity-fade 0.8s ease-out 0.8s both;
+    }
+
+    @keyframes activity-fade {
+      0% {
+        opacity: 0;
+        transform: translateY(20px) translateZ(-10px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0);
+      }
+    }
+
+    .activity-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--admin-border);
+      transition: all 0.2s ease;
+    }
+
+    .activity-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      transform: translateX(5px);
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      color: white;
+      animation: icon-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes icon-pulse {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
+      50% { box-shadow: 0 0 0 8px rgba(99, 102, 241, 0); }
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 1000;
+      backdrop-filter: blur(10px);
+      animation: modal-fade 0.3s ease-out;
+    }
+
+    @keyframes modal-fade {
+      0% {
+        opacity: 0;
+        backdrop-filter: blur(0px);
+      }
+      100% {
+        opacity: 1;
+        backdrop-filter: blur(10px);
+      }
+    }
+
+    .modal-content {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+      backdrop-filter: blur(20px);
+      margin: 5% auto;
+      padding: 2rem;
+      border-radius: 20px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid var(--admin-border);
+      transform-style: preserve-3d;
+      animation: modal-slide 0.4s ease-out;
+    }
+
+    @keyframes modal-slide {
+      0% {
+        opacity: 0;
+        transform: translateY(-50px) translateZ(-30px) rotateX(-5deg);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) translateZ(0) rotateX(0deg);
+      }
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+      color: white;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--admin-border);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--admin-primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+      transform: translateY(-1px);
+    }
+
+    .pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1.5rem;
+    }
+
+    .page-btn {
+      padding: 0.75rem 1rem;
+      border: 1px solid var(--admin-border);
+      background: rgba(255, 255, 255, 0.05);
+      color: white;
+      cursor: pointer;
+      border-radius: 8px;
+      transition: all 0.3s ease;
+      transform-style: preserve-3d;
+    }
+
+    .page-btn:hover {
+      transform: translateY(-2px) translateZ(5px);
+      background: var(--admin-primary);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    .page-btn.active {
+      background: linear-gradient(135deg, var(--admin-primary), var(--admin-secondary));
+      color: white;
+      transform: translateY(-2px) translateZ(5px);
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+    }
+
+    @media (max-width: 768px) {
+      .search-filter {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .user-table {
+        font-size: 0.85rem;
+      }
+
+      .admin-stats {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      }
+
+      .admin-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-container">
+    <!-- Main Content -->
+    <main class="admin-main">
+      <!-- Dashboard Page -->
+      <div class="page active" id="dashboard-page">
+        <div class="admin-header">
+          <h1>Admin Dashboard</h1>
+          <div class="header-actions">
+            <button class="btn btn-primary" onclick="refreshData()">
+              <i class="fas fa-sync-alt"></i> Refresh Data
+            </button>
+          </div>
+        </div>
+
+        <div class="admin-stats">
+          <div class="stat-card">
+            <i class="fas fa-users stat-icon"></i>
+            <div class="stat-value" id="total-users">0</div>
+            <div class="stat-label">Total Users</div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-user-check stat-icon"></i>
+            <div class="stat-value" id="active-users">0</div>
+            <div class="stat-label">Active Users</div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-dollar-sign stat-icon"></i>
+            <div class="stat-value" id="total-deposits">$0</div>
+            <div class="stat-label">Total Deposits</div>
+          </div>
+          <div class="stat-card">
+            <i class="fas fa-clock stat-icon"></i>
+            <div class="stat-value" id="pending-withdrawals">0</div>
+            <div class="stat-label">Pending Withdrawals</div>
+          </div>
+        </div>
+
+        <div class="activity-log">
+          <h3><i class="fas fa-history"></i> Recent Activity</h3>
+          <div id="admin-activity-list">
+            <!-- Activity items will be populated by JavaScript -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Users Page -->
+      <div class="page" id="users-page">
+        <div class="admin-header">
+          <h1>User Management</h1>
+        </div>
+
+        <div class="search-filter">
+          <i class="fas fa-search"></i>
+          <input type="text" id="user-search" class="search-input" placeholder="Search users...">
+          <i class="fas fa-filter"></i>
+          <select id="user-filter" class="filter-select">
+            <option value="all">All Users</option>
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+            <option value="unverified">Unverified</option>
+          </select>
+          <button class="btn btn-primary" onclick="exportUsers()">
+            <i class="fas fa-download"></i> Export
+          </button>
+        </div>
+
+        <table class="user-table">
+          <thead>
+            <tr>
+              <th><i class="fas fa-user"></i> Name</th>
+              <th><i class="fas fa-envelope"></i> Email</th>
+              <th><i class="fas fa-wallet"></i> Balance</th>
+              <th><i class="fas fa-info-circle"></i> Status</th>
+              <th><i class="fas fa-calendar-plus"></i> Joined</th>
+              <th><i class="fas fa-clock"></i> Last Login</th>
+              <th><i class="fas fa-cogs"></i> Actions</th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody">
+            <!-- User rows will be populated by JavaScript -->
+          </tbody>
+        </table>
+
+        <div class="pagination" id="users-pagination">
+          <!-- Pagination buttons will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- Other pages (transactions, withdrawals, trades, broadcast, logs) -->
+      <div class="page" id="transactions-page">
+        <div class="admin-header">
+          <h1>Transactions</h1>
+        </div>
+        <div id="transactions-content">
+          <!-- Transactions table will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="page" id="withdrawals-page">
+        <div class="admin-header">
+          <h1>Withdrawals</h1>
+        </div>
+        <div id="withdrawals-content">
+          <!-- Withdrawals table will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="page" id="trades-page">
+        <div class="admin-header">
+          <h1>Trades</h1>
+        </div>
+        <div id="trades-content">
+          <!-- Trades table will be populated by JavaScript -->
+        </div>
+      </div>
+
+      <div class="page" id="broadcast-page">
+        <div class="admin-header">
+          <h1>Broadcast Message</h1>
+        </div>
+        <form id="broadcast-form">
+          <div class="form-group">
+            <label for="broadcast-title"><i class="fas fa-heading"></i> Title</label>
+            <input type="text" id="broadcast-title" class="form-control" placeholder="Enter broadcast title..." required>
+          </div>
+          <div class="form-group">
+            <label for="broadcast-message"><i class="fas fa-comment"></i> Message</label>
+            <textarea id="broadcast-message" class="form-control" rows="5" placeholder="Enter your broadcast message..." required></textarea>
+          </div>
+          <div class="form-group">
+            <label for="broadcast-recipients"><i class="fas fa-users"></i> Recipients</label>
+            <select id="broadcast-recipients" class="form-control">
+              <option value="all">All Users</option>
+              <option value="active">Active Users</option>
+              <option value="select">Select Users</option>
+            </select>
+          </div>
+          <div id="user-selector" style="display: none;">
+            <div class="form-group">
+              <label><i class="fas fa-check-square"></i> Select Users</label>
+              <div id="user-checkboxes">
+                <!-- User checkboxes will be populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-paper-plane"></i> Send Broadcast
+          </button>
+        </form>
+      </div>
+
+      <div class="page" id="logs-page">
+        <div class="admin-header">
+          <h1><i class="fas fa-history"></i> Activity Logs</h1>
+        </div>
+        <div id="logs-content">
+          <!-- Logs will be populated by JavaScript -->
+        </div>
+      </div>
+    </main>
+
+    <!-- Bottom Navigation -->
+    <nav class="admin-bottom-nav">
+      <div class="nav-item active" data-page="dashboard">
+        <i class="fas fa-tachometer-alt"></i>
+        <span>Dashboard</span>
+      </div>
+      <div class="nav-item" data-page="users">
+        <i class="fas fa-users"></i>
+        <span>Users</span>
+      </div>
+      <div class="nav-item" data-page="transactions">
+        <i class="fas fa-exchange-alt"></i>
+        <span>Transactions</span>
+      </div>
+      <div class="nav-item" data-page="withdrawals">
+        <i class="fas fa-money-check-alt"></i>
+        <span>Withdrawals</span>
+      </div>
+      <div class="nav-item" data-page="trades">
+        <i class="fas fa-chart-line"></i>
+        <span>Trades</span>
+      </div>
+      <div class="nav-item" data-page="broadcast">
+        <i class="fas fa-bullhorn"></i>
+        <span>Broadcast</span>
+      </div>
+      <div class="nav-item" data-page="logs">
+        <i class="fas fa-history"></i>
+        <span>Logs</span>
+      </div>
+      <div class="nav-item nav-logout" onclick="logoutAdmin()">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </div>
+    </nav>
+  </div>
+
+  <!-- Edit User Modal -->
+  <div id="edit-user-modal" class="modal">
+    <div class="modal-content">
+      <h2><i class="fas fa-user-edit"></i> Edit User</h2>
+      <form id="edit-user-form">
+        <div class="form-group">
+          <label for="edit-full-name"><i class="fas fa-user"></i> Full Name</label>
+          <input type="text" id="edit-full-name" class="form-control" placeholder="Enter full name...">
+        </div>
+        <div class="form-group">
+          <label for="edit-email"><i class="fas fa-envelope"></i> Email</label>
+          <input type="email" id="edit-email" class="form-control" placeholder="Enter email address...">
+        </div>
+        <div class="form-group">
+          <label for="edit-balance"><i class="fas fa-wallet"></i> Balance</label>
+          <input type="number" id="edit-balance" class="form-control" step="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="edit-status"><i class="fas fa-info-circle"></i> Status</label>
+          <select id="edit-status" class="form-control">
+            <option value="active">Active</option>
+            <option value="suspended">Suspended</option>
+          </select>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn btn-danger" onclick="closeModal('edit-user-modal')">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save"></i> Save Changes
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Withdrawal Modal -->
+  <div id="withdrawal-modal" class="modal">
+    <div class="modal-content">
+      <h2><i class="fas fa-money-check-alt"></i> Review Withdrawal</h2>
+      <div id="withdrawal-details">
+        <!-- Withdrawal details will be populated by JavaScript -->
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn btn-danger" onclick="processWithdrawal('reject')">
+          <i class="fas fa-times"></i> Reject
+        </button>
+        <button type="button" class="btn btn-primary" onclick="processWithdrawal('approve')">
+          <i class="fas fa-check"></i> Approve
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/admin-bottom-nav.js"></script>
+</body>
+</html>

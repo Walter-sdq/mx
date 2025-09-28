@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trading - MaxProfit</title>
+    <title>Trading - Top-Margin </title>
     <link rel="stylesheet" href="css/base.css">
     <link rel="stylesheet" href="css/trading.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -20,8 +20,43 @@
             </section>
         </main>
     </div>
+
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <button class="nav-item" data-page="home">
+        <i class="fas fa-home"></i>
+        <span>Home</span>
+      </button>
+      <button class="nav-item active" data-page="trading">
+        <i class="fas fa-chart-line"></i>
+        <span>Trading</span>
+      </button>
+      <button class="nav-item" data-page="transactions">
+        <i class="fas fa-exchange-alt"></i>
+        <span>Transactions</span>
+      </button>
+      <button class="nav-item" data-page="notifications">
+        <i class="fas fa-bell"></i>
+        <span>Notifications</span>
+      </button>
+      <button class="nav-item" data-page="support">
+        <i class="fas fa-headset"></i>
+        <span>Support</span>
+      </button>
+    </nav>
+
+    <script src="js/auth.js"></script>
     <script src="js/charts.js"></script>
     <script src="js/prices.js"></script>
+    <script>
+      // Check authentication on page load
+      document.addEventListener('DOMContentLoaded', async () => {
+        if (!authManager.isAuthenticated()) {
+          window.location.href = 'login.html';
+          return;
+        }
+      });
+    </script>
     <script>
         // Example: Render live BTC/USD chart
         const priceEngine = new window.PriceEngine();
@@ -48,6 +83,51 @@
         renderTradingChart();
         // Optionally, update chart every minute
         setInterval(renderTradingChart, 60000);
+
+        // Bottom Navigation Functionality
+        function initializePageNavigation() {
+          const navItems = document.querySelectorAll(".bottom-nav .nav-item");
+
+          function showPage(pageName) {
+            // Update active states
+            navItems.forEach((btn) => btn.classList.remove("active"));
+            const activeBtn = document.querySelector(
+              `.bottom-nav .nav-item[data-page="${pageName}"]`
+            );
+            if (activeBtn) activeBtn.classList.add("active");
+
+            // Navigate to the page
+            switch(pageName) {
+              case 'home':
+                window.location.href = './dashboard.html';
+                break;
+              case 'trading':
+                // Already on trading page
+                break;
+              case 'transactions':
+                window.location.href = './transfer.html';
+                break;
+              case 'notifications':
+                window.location.href = './settings.html';
+                break;
+              case 'support':
+                window.location.href = './customer-support.html';
+                break;
+            }
+          }
+
+          navItems.forEach((btn) => {
+            btn.addEventListener("click", () => {
+              const pageName = btn.getAttribute("data-page");
+              showPage(pageName);
+            });
+          });
+        }
+
+        // Initialize navigation
+        document.addEventListener('DOMContentLoaded', () => {
+          initializePageNavigation();
+        });
     </script>
 </body>
 </html>

@@ -1,6 +1,7 @@
-// Dashboard JavaScript - Production Ready
-// Remove ES module imports for browser compatibility
-// Use global objects from window
+import { authManager } from './auth.js';
+import { apiClient } from './api.js';
+import { realTimePrices } from './realtime.js';
+import { formatCurrency, formatPercent, formatDateTime, showToast, showLoading } from './utils.js';
 
 class TradingDashboard {
     constructor() {
@@ -1548,44 +1549,434 @@ class TradingDashboard {
             this.currentProfile.balances = newBalances;
 
             showToast(`${direction.toUpperCase()} ${orderType} order executed successfully!`, 'success');
-
-            // Reset form
-            if (volumeInput) volumeInput.value = '';
-            if (priceInput) priceInput.value = '';
-            if (stopLossInput) stopLossInput.value = '';
+    this.user = null;
+    this.profile = null;
+    this.portfolio = null;
+    this.transactions = [];
+    this.trades = [];
+    this.notifications = [];
+    this.isLoading = false;
             if (takeProfitInput) takeProfitInput.value = '';
 
-            // Reload data
+  async init() {
+    if (this.isLoading) return;
+    this.isLoading = true;
+    
+    try {
+      showLoading(true);
+      
+      // Get current user and profile
+      this.user = authManager.getUser();
+      this.profile = authManager.getProfile();
+      
+      if (!this.user || !this.profile) {
+        window.location.href = 'login.html';
+        return;
+      }
+      
+      // Load all dashboard data from Supabase
+      await this.loadDashboardData();
+      
+      // Update UI with real data
+      this.updateUserInterface();
+      
+      // Setup real-time subscriptions
+      this.setupRealtimeSubscriptions();
+      
+      // Start price updates
+      realTimePrices.start();
+      
+      console.log('Dashboard initialized with real data');
+    } catch (error) {
+      console.error('Dashboard initialization error:', error);
+      showToast('Failed to load dashboard data', 'error');
+    } finally {
+      showLoading(false);
+      this.isLoading = false;
+    }
+  }
+  
+  async loadDashboardData() {
+    const userId = this.user.id;
+    
+    try {
+      // Load user transactions
+      const { data: transactions, error: transError } = await apiClient.getTransactions(userId);
+      if (transError) throw transError;
+      this.transactions = transactions || [];
+      
+      // Load user trades
+      const { data: trades, error: tradesError } = await apiClient.getTrades(userId);
+      if (tradesError) throw tradesError;
+      this.trades = trades || [];
+      
+      // Load notifications
+      const { data: notifications, error: notifError } = await apiClient.getNotifications(userId);
+      if (notifError) throw notifError;
+      this.notifications = notifications || [];
+      
+      // Calculate portfolio from real data
+      this.calculatePortfolio();
+      
+    } catch (error) {
+      console.error('Error loading dashboard data:', error);
+      throw error;
+    }
+  }
+  
+  calculatePortfolio() {
+    const balances = this.profile.balances || { USD: 0, BTC: 0, ETH: 0 };
+    
+    // Calculate total value in USD
+    let totalValue = balances.USD || 0;
+    
+    // Add crypto values (using current prices)
+    if (balances.BTC) {
+      const btcPrice = realTimePrices.getCurrentPrice('BTC/USD') || 43250;
+      totalValue += balances.BTC * btcPrice;
+    }
+    
+    if (balances.ETH) {
+      const ethPrice = realTimePrices.getCurrentPrice('ETH/USD') || 2580;
+      totalValue += balances.ETH * ethPrice;
+    }
+    
+    // Calculate P&L from trades
+    const openTrades = this.trades.filter(trade => trade.status === 'open');
+    const closedTrades = this.trades.filter(trade => trade.status === 'closed');
+    
+    let totalPnL = 0;
+    let todayPnL = 0;
+    const today = new Date().toDateString();
+    
+    closedTrades.forEach(trade => {
+      const pnl = trade.pnl || 0;
+      totalPnL += pnl;
+      
+      if (new Date(trade.closed_at).toDateString() === today) {
+        todayPnL += pnl;
+      }
+    });
+    
+    this.portfolio = {
+      totalValue,
+      balances,
+      totalPnL,
+      todayPnL,
+      openTrades: openTrades.length,
+      totalTrades: this.trades.length,
+      winRate: this.calculateWinRate(closedTrades)
+    };
+  }
+  
+  calculateWinRate(closedTrades) {
+    if (closedTrades.length === 0) return 0;
+    const winningTrades = closedTrades.filter(trade => (trade.pnl || 0) > 0);
+    return (winningTrades.length / closedTrades.length) * 100;
+  }
+  
+  setupRealtimeSubscriptions() {
+    // Subscribe to real-time changes for user data
+    if (window.supabase) {
+      // Subscribe to profile changes
+      supabase
+        .channel('profile-changes')
+        .on('postgres_changes', 
+          { event: 'UPDATE', schema: 'public', table: 'users', filter: `id=eq.${this.user.id}` },
+          (payload) => {
+            this.profile = { ...this.profile, ...payload.new };
+            this.calculatePortfolio();
+            this.updateUserInterface();
+          }
+        )
+        .subscribe();
+        
+      // Subscribe to new transactions
+      supabase
+        .channel('user-transactions')
+        .on('postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'transactions', filter: `user_id=eq.${this.user.id}` },
+          (payload) => {
+            this.transactions.unshift(payload.new);
+            this.updateTransactionsList();
+            showToast('New transaction recorded', 'info');
+          }
+        )
+        .subscribe();
+        
+      // Subscribe to new notifications
+      supabase
+        .channel('user-notifications')
+        .on('postgres_changes',
+          { event: 'INSERT', schema: 'public', table: 'notifications', filter: `user_id=eq.${this.user.id}` },
+          (payload) => {
+            this.notifications.unshift(payload.new);
+            this.updateNotificationsList();
+            this.updateNotificationBadge();
+            showToast(payload.new.title, 'info');
+          }
+        )
+        .subscribe();
+    }
+  }
             await this.loadUserData();
             this.updateUI();
-            this.updateOrderSummary();
-
-        } catch (error) {
-            console.error('Enhanced trade execution error:', error);
-            showToast('Failed to execute trade', 'error');
+    if (!this.profile) return;
+    
+    try {
+      this.updateUserInfo();
+      this.updatePortfolioSummary();
+      this.updateRecentTransactions();
+      this.updateNotifications();
+      this.updatePriceWidgets();
+      this.updateNotificationBadge();
+    } catch (error) {
+      console.error('Error updating UI:', error);
+    }
         } finally {
             showLoading(false);
         }
-    }
-
-    showTransferModal() {
-        showToast('Transfer feature coming soon', 'info');
-    }
+    if (!this.profile) return;
+    
+    const displayName = this.profile.full_name || this.profile.email || 'User';
+    
+    // Update username displays
+    const usernameElements = document.querySelectorAll('.username');
+    usernameElements.forEach(el => {
+      el.textContent = displayName;
+    });
+    
+    // Update greeting
+    const greetingElements = document.querySelectorAll('.greeting');
+    greetingElements.forEach(el => {
+      const hour = new Date().getHours();
+      let greeting = 'Good Evening';
+      if (hour < 12) greeting = 'Good Morning';
+      else if (hour < 18) greeting = 'Good Afternoon';
+      el.textContent = `${greeting}, ${displayName.split(' ')[0]}`;
+    });
+    
+    // Update user avatar
+    const avatarElements = document.querySelectorAll('.user-avatar img');
+    avatarElements.forEach(el => {
+      if (this.profile.profile_pic) {
+        el.src = this.profile.profile_pic;
+      } else {
+        el.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=random&size=40&bold=true`;
+      }
+    });
 
     async logout() {
         if (confirm('Are you sure you want to logout?')) {
-            try {
-                await authManager.logout();
-                window.location.href = 'login.html';
-            } catch (error) {
+    if (!this.portfolio) return;
+    
+    // Update portfolio values with real data
+    const portfolioValueEl = document.getElementById('portfolio-value');
+    const todayPnLEl = document.getElementById('today-pnl');
+    const totalPnLEl = document.getElementById('total-pnl');
+    const availableBalanceEl = document.getElementById('available-balance');
+    const openTradesEl = document.getElementById('open-trades-count');
+    const winRateEl = document.getElementById('win-rate');
                 console.error('Logout error:', error);
-                showToast('Failed to logout', 'error');
-            }
-        }
+    if (portfolioValueEl) {
+      portfolioValueEl.textContent = formatCurrency(this.portfolio.totalValue);
+    }
+    
+    if (todayPnLEl) {
+      const isPositive = this.portfolio.todayPnL >= 0;
+      todayPnLEl.textContent = `${isPositive ? '+' : ''}${formatCurrency(this.portfolio.todayPnL)}`;
+      todayPnLEl.className = `pnl ${isPositive ? 'positive' : 'negative'}`;
+    }
+    
+    if (totalPnLEl) {
+      const isPositive = this.portfolio.totalPnL >= 0;
+      totalPnLEl.textContent = `${isPositive ? '+' : ''}${formatCurrency(this.portfolio.totalPnL)}`;
+      totalPnLEl.className = `pnl ${isPositive ? 'positive' : 'negative'}`;
+    }
+    
+    if (availableBalanceEl) {
+      availableBalanceEl.textContent = formatCurrency(this.portfolio.balances.USD || 0);
+    }
+    
+    if (openTradesEl) {
+      openTradesEl.textContent = this.portfolio.openTrades.toString();
+    }
+    
+    if (winRateEl) {
+      winRateEl.textContent = `${this.portfolio.winRate.toFixed(1)}%`;
+    }
+    
+    // Update balance breakdown
+    this.updateBalanceBreakdown();
+  }
+  
+  updateBalanceBreakdown() {
+    const balances = this.portfolio.balances;
+    
+    // Update USD balance
+    const usdElements = document.querySelectorAll('#usd-balance, .usd-balance');
+    usdElements.forEach(el => {
+      el.textContent = formatCurrency(balances.USD || 0);
+    });
+    
+    // Update BTC balance
+    const btcElements = document.querySelectorAll('#btc-balance, .btc-balance');
+    btcElements.forEach(el => {
+      el.textContent = `${(balances.BTC || 0).toFixed(8)} BTC`;
+    });
+    
+    // Update ETH balance
+    const ethElements = document.querySelectorAll('#eth-balance, .eth-balance');
+    ethElements.forEach(el => {
+      el.textContent = `${(balances.ETH || 0).toFixed(6)} ETH`;
+    });
+  }
+
+  updateRecentTransactions() {
+    const transactionsList = document.getElementById('recent-transactions-list');
+    if (!transactionsList) return;
+
+    if (this.transactions.length === 0) {
+      transactionsList.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-receipt"></i>
+          <p>No transactions yet</p>
+        </div>
+      `;
+      return;
     }
 
+    // Show last 5 transactions
+    const recentTransactions = this.transactions.slice(0, 5);
+    
+    transactionsList.innerHTML = recentTransactions.map(transaction => `
+      <div class="transaction-item">
+        <div class="transaction-icon ${transaction.type}">
+          <i class="fas fa-${this.getTransactionIcon(transaction.type)}"></i>
+        </div>
+        <div class="transaction-details">
+          <div class="transaction-title">${this.getTransactionTitle(transaction)}</div>
+          <div class="transaction-time">${formatDateTime(transaction.created_at)}</div>
+        </div>
+        <div class="transaction-amount ${transaction.type === 'deposit' ? 'positive' : 'negative'}">
+          ${transaction.type === 'deposit' ? '+' : '-'}${formatCurrency(Math.abs(transaction.amount))}
+        </div>
+      </div>
+    `).join('');
+  }
+  
+  getTransactionIcon(type) {
+    const icons = {
+      deposit: 'arrow-down',
+      withdrawal: 'arrow-up',
+      trade: 'exchange-alt',
+      fee: 'percentage',
+      bonus: 'gift'
+    };
+    return icons[type] || 'circle';
+  }
+  
+  getTransactionTitle(transaction) {
+    const titles = {
+      deposit: 'Deposit',
+      withdrawal: 'Withdrawal',
+      trade: 'Trade Settlement',
+      fee: 'Trading Fee',
+      bonus: 'Bonus Credit'
+    };
+    return titles[transaction.type] || 'Transaction';
+  }
 
+  updateNotifications() {
+    this.updateNotificationsList();
+    this.updateNotificationBadge();
+  }
+  
+  updateNotificationsList() {
+    const notificationsList = document.getElementById('notifications-list');
+    if (!notificationsList) return;
 
+    if (this.notifications.length === 0) {
+      notificationsList.innerHTML = `
+        <div class="empty-state">
+          <i class="fas fa-bell"></i>
+          <p>No notifications</p>
+        </div>
+      `;
+      return;
+    }
+
+    // Show last 5 notifications
+    const recentNotifications = this.notifications.slice(0, 5);
+    
+    notificationsList.innerHTML = recentNotifications.map(notification => `
+      <div class="notification-item ${notification.read ? 'read' : 'unread'}" data-id="${notification.id}">
+        <div class="notification-icon ${notification.type}">
+          <i class="fas fa-${this.getNotificationIcon(notification.type)}"></i>
+        </div>
+        <div class="notification-content">
+          <div class="notification-title">${notification.title}</div>
+          <div class="notification-message">${notification.body}</div>
+          <div class="notification-time">${formatDateTime(notification.created_at)}</div>
+        </div>
+        ${!notification.read ? '<div class="unread-indicator"></div>' : ''}
+      </div>
+    `).join('');
+    
+    // Add click handlers for notifications
+    notificationsList.querySelectorAll('.notification-item').forEach(item => {
+      item.addEventListener('click', () => {
+        this.markNotificationAsRead(item.dataset.id);
+      });
+    });
+  }
+  
+  updateNotificationBadge() {
+    const unreadCount = this.notifications.filter(n => !n.read).length;
+    const badges = document.querySelectorAll('.notification-badge, #notification-count');
+    
+    badges.forEach(badge => {
+      badge.textContent = unreadCount.toString();
+      badge.style.display = unreadCount > 0 ? 'flex' : 'none';
+    });
+  }
+  
+  getNotificationIcon(type) {
+    const icons = {
+      trade: 'chart-line',
+      deposit: 'arrow-down',
+      withdrawal: 'arrow-up',
+      system: 'cog',
+      security: 'shield-alt',
+      welcome: 'hand-wave'
+    };
+    return icons[type] || 'bell';
+  }
+  
+  async markNotificationAsRead(notificationId) {
+    try {
+      const { error } = await apiClient.markNotificationRead(notificationId);
+      if (error) throw error;
+      
+      // Update local state
+      const notification = this.notifications.find(n => n.id === notificationId);
+      if (notification) {
+        notification.read = true;
+        this.updateNotificationBadge();
+        
+        // Update UI
+        const notificationEl = document.querySelector(`[data-id="${notificationId}"]`);
+        if (notificationEl) {
+          notificationEl.classList.remove('unread');
+          notificationEl.classList.add('read');
+          const indicator = notificationEl.querySelector('.unread-indicator');
+          if (indicator) indicator.remove();
+        }
+      }
+    } catch (error) {
+      console.error('Error marking notification as read:', error);
+    }
+  }
     // Setup real-time synchronization for user data
     async setupUserSync() {
         try {
@@ -2029,12 +2420,124 @@ class TradingDashboard {
 
     getNotificationIcon(type) {
         const icons = {
-            'info': 'info-circle',
-            'success': 'check-circle',
-            'warning': 'exclamation-triangle',
+    // Update price displays with real-time data from price engine
+    this.updatePriceWidget('BTC/USD', 'btc-price', 'btc-change');
+    this.updatePriceWidget('ETH/USD', 'eth-price', 'eth-change');
+    this.updatePriceWidget('EUR/USD', 'eur-price', 'eur-change');
+  }
+  
+  updatePriceWidget(symbol, priceElementId, changeElementId) {
+    const priceData = realTimePrices.getPriceData(symbol);
+    if (!priceData) return;
+    
+    const priceEl = document.getElementById(priceElementId);
+    const changeEl = document.getElementById(changeElementId);
+    
+    if (priceEl) {
+      priceEl.textContent = formatCurrency(priceData.price);
+    }
+    
+    if (changeEl) {
+      const isPositive = priceData.changePercent >= 0;
+      changeEl.textContent = `${isPositive ? '+' : ''}${priceData.changePercent.toFixed(2)}%`;
+      changeEl.className = `price-change ${isPositive ? 'positive' : 'negative'}`;
+    }
+  }
+  
+  async refreshDashboard() {
+    try {
+      showLoading(true);
+      await this.loadDashboardData();
+      this.updateUserInterface();
+      showToast('Dashboard refreshed', 'success');
+    } catch (error) {
+      console.error('Error refreshing dashboard:', error);
+      showToast('Failed to refresh dashboard', 'error');
+    } finally {
+      showLoading(false);
+    }
+  }
+  
+  // Quick action methods
+  async quickDeposit(amount) {
+    try {
+      const transaction = {
+        user_id: this.user.id,
+        type: 'deposit',
+        amount: amount,
+        currency: 'USD',
+        status: 'completed',
+        note: 'Quick deposit from dashboard'
+      };
+      
+      const { data, error } = await apiClient.createTransaction(transaction);
+      if (error) throw error;
+      
+      // Update user balance
+      const newBalances = { ...this.profile.balances };
+      newBalances.USD = (newBalances.USD || 0) + amount;
+      
+      await apiClient.updateUser(this.user.id, { balances: newBalances });
+      
+      // Refresh dashboard
+      await this.refreshDashboard();
+      
+      showToast(`Successfully deposited ${formatCurrency(amount)}`, 'success');
+    } catch (error) {
+      console.error('Quick deposit error:', error);
+      showToast('Deposit failed', 'error');
+    }
+  }
+  
+  async quickTrade(symbol, type, amount) {
+    try {
+      const priceData = realTimePrices.getPriceData(symbol);
+      if (!priceData) {
+        throw new Error('Price data not available');
+      }
+      
+      const trade = {
+        user_id: this.user.id,
+        symbol: symbol,
+        type: type,
+        amount: amount,
+        entry_price: priceData.price,
+        status: 'open',
+        opened_at: new Date().toISOString()
+      };
+      
+      const { data, error } = await apiClient.createTrade(trade);
+      if (error) throw error;
+      
+      // Add to local trades
+      this.trades.unshift(data);
+      
+      // Refresh dashboard
+      this.calculatePortfolio();
+      this.updateUserInterface();
+      
+      showToast(`${type.toUpperCase()} order placed for ${symbol}`, 'success');
+    } catch (error) {
+      console.error('Quick trade error:', error);
+      showToast('Trade failed', 'error');
+    }
+  }
             'danger': 'exclamation-circle'
-        };
-        return icons[type] || 'bell';
+  // Navigation methods
+  navigateToPage(page) {
+    const routes = {
+      trading: 'trading.html',
+      deposit: 'deposit.html',
+      withdraw: 'withdraw.html',
+      transfer: 'transfer.html',
+      settings: 'settings.html',
+      support: 'customer-support.html',
+      bonuses: 'bonuses.html'
+    };
+    
+    if (routes[page]) {
+      window.location.href = routes[page];
+    }
     }
 }
 

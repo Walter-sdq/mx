@@ -1,16 +1,48 @@
 // API client for Supabase operations
 // Use global supabase from CDN
-const supabase = window.supabaseClient || window.supabase;
+let supabase = null;
+
+// Wait for supabase to be available
+function waitForSupabase() {
+  return new Promise((resolve) => {
+    if (window.supabase) {
+      supabase = window.supabase;
+      resolve();
+      return;
+    }
+    
+    const checkSupabase = setInterval(() => {
+      if (window.supabase) {
+        clearInterval(checkSupabase);
+        supabase = window.supabase;
+        resolve();
+      }
+    }, 100);
+  });
+}
+
+// Initialize when DOM loads
+document.addEventListener('DOMContentLoaded', async () => {
+  await waitForSupabase();
+});
 
 class ApiClient {
   constructor() {
+    this.supabase = null;
+    this.init();
+  }
+  
+  async init() {
+    await waitForSupabase();
     this.supabase = supabase;
   }
   
   // Users
   async getUsers() {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
     
@@ -18,8 +50,10 @@ class ApiClient {
   }
   
   async getUserById(id) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', id)
       .single();
@@ -28,8 +62,10 @@ class ApiClient {
   }
   
   async updateUser(id, updates) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
-      .from('users')
+      .from('profiles')
       .update(updates)
       .eq('id', id)
       .select()
@@ -39,8 +75,10 @@ class ApiClient {
   }
   
   async deleteUser(id) {
+    if (!this.supabase) await this.init();
+    
     const { error } = await this.supabase
-      .from('users')
+      .from('profiles')
       .delete()
       .eq('id', id);
     
@@ -49,9 +87,14 @@ class ApiClient {
   
   // Transactions
   async getTransactions(userId = null) {
+    if (!this.supabase) await this.init();
+    
     let query = this.supabase
       .from('transactions')
-      .select('*')
+      .select(`
+        *,
+        profiles!inner(email, full_name)
+      `)
       .order('created_at', { ascending: false });
     
     if (userId) {
@@ -59,10 +102,20 @@ class ApiClient {
     }
     
     const { data, error } = await query;
+    
+    // Flatten the data structure
+    const transactions = (data || []).map(transaction => ({
+      ...transaction,
+      user_email: transaction.profiles?.email,
+      user_name: transaction.profiles?.full_name
+    }));
+    
     return { data: data || [], error };
   }
   
   async createTransaction(transaction) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
       .from('transactions')
       .insert(transaction)
@@ -74,9 +127,14 @@ class ApiClient {
   
   // Trades
   async getTrades(userId = null) {
+    if (!this.supabase) await this.init();
+    
     let query = this.supabase
       .from('trades')
-      .select('*')
+      .select(`
+        *,
+        profiles!inner(email, full_name)
+      `)
       .order('opened_at', { ascending: false });
     
     if (userId) {
@@ -84,10 +142,20 @@ class ApiClient {
     }
     
     const { data, error } = await query;
+    
+    // Flatten the data structure
+    const trades = (data || []).map(trade => ({
+      ...trade,
+      user_email: trade.profiles?.email,
+      user_name: trade.profiles?.full_name
+    }));
+    
     return { data: data || [], error };
   }
   
   async createTrade(trade) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
       .from('trades')
       .insert(trade)
@@ -98,6 +166,8 @@ class ApiClient {
   }
   
   async updateTrade(id, updates) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
       .from('trades')
       .update(updates)
@@ -109,6 +179,8 @@ class ApiClient {
   }
   
   async deleteTrade(id) {
+    if (!this.supabase) await this.init();
+    
     const { error } = await this.supabase
       .from('trades')
       .delete()
@@ -119,9 +191,14 @@ class ApiClient {
   
   // Withdrawals
   async getWithdrawals(userId = null) {
+    if (!this.supabase) await this.init();
+    
     let query = this.supabase
       .from('withdrawals')
-      .select('*')
+      .select(`
+        *,
+        profiles!inner(email, full_name)
+      `)
       .order('created_at', { ascending: false });
     
     if (userId) {
@@ -129,10 +206,20 @@ class ApiClient {
     }
     
     const { data, error } = await query;
+    
+    // Flatten the data structure
+    const withdrawals = (data || []).map(withdrawal => ({
+      ...withdrawal,
+      user_email: withdrawal.profiles?.email,
+      user_name: withdrawal.profiles?.full_name
+    }));
+    
     return { data: data || [], error };
   }
   
   async createWithdrawal(withdrawal) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
       .from('withdrawals')
       .insert(withdrawal)
@@ -143,6 +230,8 @@ class ApiClient {
   }
   
   async updateWithdrawal(id, updates) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
       .from('withdrawals')
       .update(updates)
@@ -155,6 +244,8 @@ class ApiClient {
   
   // Notifications
   async getNotifications(userId = null) {
+    if (!this.supabase) await this.init();
+    
     let query = this.supabase
       .from('notifications')
       .select('*')
@@ -169,6 +260,8 @@ class ApiClient {
   }
   
   async createNotification(notification) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
       .from('notifications')
       .insert(notification)
@@ -179,6 +272,8 @@ class ApiClient {
   }
   
   async markNotificationRead(id) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
       .from('notifications')
       .update({ read: true })
@@ -190,6 +285,8 @@ class ApiClient {
   }
   
   async markAllNotificationsRead(userId) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
       .from('notifications')
       .update({ read: true })
@@ -201,6 +298,8 @@ class ApiClient {
   
   // Real-time price data
   async getPrices() {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
       .from('prices')
       .select('*')
@@ -210,6 +309,8 @@ class ApiClient {
   }
   
   async updatePrice(symbol, priceData) {
+    if (!this.supabase) await this.init();
+    
     const { data, error } = await this.supabase
       .from('prices')
       .upsert({

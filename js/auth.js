@@ -55,10 +55,31 @@ class AuthManager {
       this.currentUser = user;
       this.currentProfile = profile;
 
+      // Create profile if it doesn't exist
+      if (user && !profile) {
+        const { data: newProfile, error } = await supabase
+          .from('profiles')
+          .insert({
+            id: user.id,
+            email: user.email,
+            full_name: user.user_metadata?.full_name || '',
+            role: user.email === 'admin@Top-Margin.dev' ? 'admin' : 'user',
+            status: 'active',
+            balances: { USD: 0, BTC: 0, ETH: 0 },
+            settings: { dark_mode: true, notifications: true, email_notifications: true }
+          })
+          .select()
+          .single();
+          
+        if (!error) {
+          this.currentProfile = newProfile;
+        }
+      }
+
       // Update last login
       if (profile) {
         await supabase
-          .from('users')
+          .from('profiles')
           .update({ last_login_at: new Date().toISOString() })
           .eq('id', user.id);
       }

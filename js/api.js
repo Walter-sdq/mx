@@ -1,6 +1,4 @@
-// API client for Supabase operations
-// Use global supabase from CDN
-const supabase = window.supabaseClient || window.supabase;
+import { supabase } from './supabase.js';
 
 class ApiClient {
   constructor() {
@@ -10,7 +8,7 @@ class ApiClient {
   // Users
   async getUsers() {
     const { data, error } = await this.supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .order('created_at', { ascending: false });
     
@@ -19,7 +17,7 @@ class ApiClient {
   
   async getUserById(id) {
     const { data, error } = await this.supabase
-      .from('users')
+      .from('profiles')
       .select('*')
       .eq('id', id)
       .single();
@@ -29,7 +27,7 @@ class ApiClient {
   
   async updateUser(id, updates) {
     const { data, error } = await this.supabase
-      .from('users')
+      .from('profiles')
       .update(updates)
       .eq('id', id)
       .select()
@@ -40,7 +38,7 @@ class ApiClient {
   
   async deleteUser(id) {
     const { error } = await this.supabase
-      .from('users')
+      .from('profiles')
       .delete()
       .eq('id', id);
     
@@ -51,7 +49,10 @@ class ApiClient {
   async getTransactions(userId = null) {
     let query = this.supabase
       .from('transactions')
-      .select('*')
+      .select(`
+        *,
+        profiles!inner(email, full_name)
+      `)
       .order('created_at', { ascending: false });
     
     if (userId) {
@@ -59,6 +60,14 @@ class ApiClient {
     }
     
     const { data, error } = await query;
+    
+    // Flatten the data structure
+    const transactions = (data || []).map(transaction => ({
+      ...transaction,
+      user_email: transaction.profiles?.email,
+      user_name: transaction.profiles?.full_name
+    }));
+    
     return { data: data || [], error };
   }
   
@@ -76,7 +85,10 @@ class ApiClient {
   async getTrades(userId = null) {
     let query = this.supabase
       .from('trades')
-      .select('*')
+      .select(`
+        *,
+        profiles!inner(email, full_name)
+      `)
       .order('opened_at', { ascending: false });
     
     if (userId) {
@@ -84,6 +96,14 @@ class ApiClient {
     }
     
     const { data, error } = await query;
+    
+    // Flatten the data structure
+    const trades = (data || []).map(trade => ({
+      ...trade,
+      user_email: trade.profiles?.email,
+      user_name: trade.profiles?.full_name
+    }));
+    
     return { data: data || [], error };
   }
   
@@ -121,7 +141,10 @@ class ApiClient {
   async getWithdrawals(userId = null) {
     let query = this.supabase
       .from('withdrawals')
-      .select('*')
+      .select(`
+        *,
+        profiles!inner(email, full_name)
+      `)
       .order('created_at', { ascending: false });
     
     if (userId) {
@@ -129,6 +152,14 @@ class ApiClient {
     }
     
     const { data, error } = await query;
+    
+    // Flatten the data structure
+    const withdrawals = (data || []).map(withdrawal => ({
+      ...withdrawal,
+      user_email: withdrawal.profiles?.email,
+      user_name: withdrawal.profiles?.full_name
+    }));
+    
     return { data: data || [], error };
   }
   

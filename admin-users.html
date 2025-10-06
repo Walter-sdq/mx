@@ -439,8 +439,20 @@
   <script src="js/admin.js"></script>
 
   <script>
-    // Initialize users page when page loads
-    document.addEventListener('DOMContentLoaded', function() {
+    // Check authentication and admin role on page load
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!authManager.isAuthenticated()) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const user = authManager.getUser();
+      if (!user || user.user_metadata?.role !== 'admin') {
+        window.location.href = 'dashboard.html';
+        return;
+      }
+
+      // Initialize users page after auth check
       if (window.admin) {
         admin.loadUsers();
       }

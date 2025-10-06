@@ -436,6 +436,7 @@
                                 >
                             </div>
                             <div class="amount-note">Minimum deposit: $10.00</div>
+                            <div class="error-message" id="deposit-amount-error"></div>
                         </div>
 
                         <!-- Quick Amount Buttons -->
@@ -451,15 +452,18 @@
                             <div class="form-group">
                                 <label for="card-number">Card Number</label>
                                 <input type="text" id="card-number" placeholder="1234 5678 9012 3456" maxlength="19">
+                                <div class="error-message" id="card-number-error"></div>
                             </div>
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="card-expiry">Expiry Date</label>
                                     <input type="text" id="card-expiry" placeholder="MM/YY" maxlength="5">
+                                    <div class="error-message" id="card-expiry-error"></div>
                                 </div>
                                 <div class="form-group">
                                     <label for="card-cvv">CVV</label>
                                     <input type="text" id="card-cvv" placeholder="123" maxlength="4">
+                                    <div class="error-message" id="card-cvv-error"></div>
                                 </div>
                             </div>
                         </div>

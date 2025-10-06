@@ -146,6 +146,74 @@ export function checkPasswordStrength(password) {
   };
 }
 
+export function isValidAmount(amount, min = 0, max = Infinity) {
+  if (typeof amount === 'string') {
+    amount = parseFloat(amount);
+  }
+  if (isNaN(amount) || amount <= min || amount > max) {
+    return false;
+  }
+  // Check for max 2 decimal places
+  const decimalPlaces = (amount.toString().split('.')[1] || '').length;
+  return decimalPlaces <= 2;
+}
+
+export function validateCardNumber(cardNumber) {
+  // Remove spaces and dashes
+  const cleaned = cardNumber.replace(/[\s-]/g, '');
+  if (!/^\d{13,19}$/.test(cleaned)) {
+    return false;
+  }
+  // Luhn algorithm
+  let sum = 0;
+  let shouldDouble = false;
+  for (let i = cleaned.length - 1; i >= 0; i--) {
+    let digit = parseInt(cleaned.charAt(i), 10);
+    if (shouldDouble) {
+      digit *= 2;
+      if (digit > 9) {
+        digit -= 9;
+      }
+    }
+    sum += digit;
+    shouldDouble = !shouldDouble;
+  }
+  return sum % 10 === 0;
+}
+
+export function validateExpiry(expiry) {
+  const match = expiry.match(/^(\d{2})\/(\d{2})$/);
+  if (!match) return false;
+  const month = parseInt(match[1], 10);
+  const year = parseInt(match[2], 10) + 2000;
+  if (month < 1 || month > 12) return false;
+  const now = new Date();
+  const expiryDate = new Date(year, month - 1);
+  return expiryDate > now;
+}
+
+export function validateCVV(cvv) {
+  return /^\d{3,4}$/.test(cvv);
+}
+
+export function sanitizeInput(input) {
+  if (typeof input !== 'string') return input;
+  // Trim whitespace
+  input = input.trim();
+  // Escape HTML entities to prevent XSS
+  const entityMap = {
+    '&': '&amp;',
+    '<': '<',
+    '>': '>',
+    '"': '"',
+    "'": '&#39;',
+    '/': '&#x2F;',
+    '`': '&#x60;',
+    '=': '&#x3D;'
+  };
+  return input.replace(/[&<>"'`=\/]/g, (s) => entityMap[s]);
+}
+
 // Theme management
 // utils.js
 
@@ -334,6 +402,107 @@ export function generateId() {
   return crypto.randomUUID();
 }
 
+// Rate Limiting
+class RateLimiter {
+  constructor(requestsPerMinute = 10) {
+    this.requestsPerMinute = requestsPerMinute;
+    this.requests = [];
+  }
+
+  canMakeRequest() {
+    const now = Date.now();
+    const oneMinuteAgo = now - 60000;
+
+    // Remove old requests
+    this.requests = this.requests.filter(timestamp => timestamp > oneMinuteAgo);
+
+    return this.requests.length < this.requestsPerMinute;
+  }
+
+  recordRequest() {
+    this.requests.push(Date.now());
+  }
+
+  async throttle(func, ...args) {
+    if (!this.canMakeRequest()) {
+      const waitTime = 60000 - (Date.now() - this.requests[0]);
+      showToast(`Too many requests. Please wait ${Math.ceil(waitTime / 1000)} seconds.`, 'warning');
+      return null;
+    }
+
+    this.recordRequest();
+    return await func(...args);
+  }
+}
+
+// Global rate limiter instance
+const globalRateLimiter = new RateLimiter(10);
+
+// CSRF Protection
+class CSRFProtection {
+  constructor() {
+    this.token = null;
+    this.expiry = null;
+  }
+
+  generateToken() {
+    const token = crypto.randomUUID();
+    const expiry = Date.now() + (24 * 60 * 60 * 1000); // 24 hours
+
+    this.token = token;
+    this.expiry = expiry;
+
+    // Store in localStorage
+    localStorage.setItem('csrf_token', token);
+    localStorage.setItem('csrf_expiry', expiry.toString());
+
+    return token;
+  }
+
+  getToken() {
+    // Check if token exists and is not expired
+    const storedToken = localStorage.getItem('csrf_token');
+    const storedExpiry = localStorage.getItem('csrf_expiry');
+
+    if (storedToken && storedExpiry) {
+      const expiry = parseInt(storedExpiry, 10);
+      if (Date.now() < expiry) {
+        this.token = storedToken;
+        this.expiry = expiry;
+        return storedToken;
+      } else {
+        // Token expired, remove from storage
+        localStorage.removeItem('csrf_token');
+        localStorage.removeItem('csrf_expiry');
+      }
+    }
+
+    // Generate new token
+    return this.generateToken();
+  }
+
+  validateToken(token) {
+    return token === this.getToken();
+  }
+
+  injectTokenIntoForm(form) {
+    const token = this.getToken();
+    let csrfInput = form.querySelector('input[name="_csrf"]');
+
+    if (!csrfInput) {
+      csrfInput = document.createElement('input');
+      csrfInput.type = 'hidden';
+      csrfInput.name = '_csrf';
+      form.appendChild(csrfInput);
+    }
+
+    csrfInput.value = token;
+  }
+}
+
+// Global CSRF protection instance
+const csrfProtection = new CSRFProtection();
+
 // CSV export
 export function exportToCSV(data, filename) {
   if (!data.length) return;
@@ -373,7 +542,28 @@ document.addEventListener('DOMContentLoaded', () => {
       document.documentElement.setAttribute('data-theme', newTheme);
     });
   });
+
+  // Update username display
+  updateUsernameDisplay();
 });
+
+// Update username display across pages
+export async function updateUsernameDisplay() {
+  try {
+    if (window.authManager && window.authManager.isAuthenticated()) {
+      const profile = window.authManager.getProfile();
+      if (profile) {
+        const displayName = profile.full_name || profile.email || 'User';
+        const usernameElements = document.querySelectorAll('.username');
+        usernameElements.forEach(el => {
+          el.textContent = displayName;
+        });
+      }
+    }
+  } catch (error) {
+    console.error('Error updating username display:', error);
+  }
+}
 
 // Make functions available globally for backward compatibility
 window.formatDate = formatDate;
@@ -386,6 +576,11 @@ window.formatPercent = formatPercent;
 window.formatCompactNumber = formatCompactNumber;
 window.isValidEmail = isValidEmail;
 window.checkPasswordStrength = checkPasswordStrength;
+window.isValidAmount = isValidAmount;
+window.validateCardNumber = validateCardNumber;
+window.validateExpiry = validateExpiry;
+window.validateCVV = validateCVV;
+window.sanitizeInput = sanitizeInput;
 window.setTheme = setTheme;
 window.getTheme = getTheme;
 window.toggleTheme = toggleTheme;
@@ -398,3 +593,9 @@ window.closeModal = closeModal;
 window.debounce = debounce;
 window.generateId = generateId;
 window.exportToCSV = exportToCSV;
+window.updateUsernameDisplay = updateUsernameDisplay;
+
+// Security utilities
+window.RateLimiter = RateLimiter;
+window.globalRateLimiter = globalRateLimiter;
+window.csrfProtection = csrfProtection;

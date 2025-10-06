@@ -425,7 +425,28 @@
       }
     }
 
-    /* Responsive Design */
+    /* Enhanced Responsive Design */
+    @media (max-width: 1024px) {
+      .deposit-container {
+        max-width: 100%;
+        padding: var(--spacing-4);
+      }
+
+      .methods-list {
+        gap: var(--spacing-3);
+      }
+
+      .method-item {
+        flex: 1 1 280px;
+        min-width: 280px;
+      }
+
+      .quick-amounts {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-2);
+      }
+    }
+
     @media (max-width: 768px) {
       .deposit-container {
         padding: var(--spacing-4);
@@ -433,20 +454,82 @@
 
       .balance-breakdown {
         grid-template-columns: 1fr;
+        gap: var(--spacing-3);
+      }
+
+      .breakdown-item {
+        padding: var(--spacing-3);
+        text-align: center;
+      }
+
+      .methods-list {
+        flex-direction: column;
+        gap: var(--spacing-3);
+      }
+
+      .method-item {
+        flex: 1 1 100%;
+        min-width: unset;
+        flex-direction: row;
+        text-align: left;
+        gap: var(--spacing-3);
+        padding: var(--spacing-4);
+      }
+
+      .method-info {
+        text-align: left;
+        flex: 1;
+      }
+
+      .method-info h4 {
+        font-size: var(--font-size-base);
+      }
+
+      .method-info p {
+        font-size: var(--font-size-sm);
       }
 
       .quick-amounts {
         grid-template-columns: 1fr;
+        gap: var(--spacing-2);
       }
 
-      .method-item {
+      .quick-amount-btn {
+        padding: var(--spacing-3);
+        font-size: var(--font-size-sm);
+      }
+
+      .address-display {
         flex-direction: column;
-        text-align: center;
-        gap: var(--spacing-3);
+        gap: var(--spacing-2);
+        align-items: flex-start;
       }
 
-      .method-info {
-        text-align: center;
+      .address {
+        word-break: break-word;
+        font-size: var(--font-size-sm);
+      }
+
+      .qr-code {
+        justify-content: center;
+        padding: var(--spacing-3);
+      }
+
+      .fee-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--spacing-1);
+        padding: var(--spacing-2) 0;
+      }
+
+      .fee-item span:first-child {
+        font-size: var(--font-size-sm);
+        color: var(--text-secondary);
+      }
+
+      .fee-item span:last-child {
+        font-size: var(--font-size-base);
+        font-weight: 600;
       }
     }
 
@@ -459,10 +542,159 @@
         font-size: var(--font-size-3xl);
       }
 
+      .balance-breakdown {
+        padding: var(--spacing-3);
+        gap: var(--spacing-2);
+      }
+
+      .breakdown-item {
+        padding: var(--spacing-2);
+      }
+
+      .breakdown-item span:first-child {
+        font-size: var(--font-size-xs);
+      }
+
+      .breakdown-item span:last-child {
+        font-size: var(--font-size-sm);
+      }
+
+      .method-item {
+        padding: var(--spacing-3);
+        gap: var(--spacing-2);
+      }
+
       .method-icon {
         width: 40px;
         height: 40px;
         font-size: var(--font-size-lg);
+        flex-shrink: 0;
+      }
+
+      .method-info h4 {
+        font-size: var(--font-size-sm);
+      }
+
+      .method-info p {
+        font-size: var(--font-size-xs);
+      }
+
+      .method-status {
+        font-size: var(--font-size-xs);
+      }
+
+      .amount-input-group {
+        padding: var(--spacing-2);
+      }
+
+      .amount-input-group input {
+        font-size: var(--font-size-base);
+        padding: var(--spacing-2);
+      }
+
+      .currency-symbol {
+        font-size: var(--font-size-base);
+      }
+
+      .quick-amount-btn {
+        padding: var(--spacing-2);
+        font-size: var(--font-size-xs);
+      }
+
+      .address-display {
+        padding: var(--spacing-2);
+        gap: var(--spacing-1);
+      }
+
+      .copy-btn {
+        padding: var(--spacing-1) var(--spacing-2);
+        font-size: var(--font-size-xs);
+      }
+
+      .qr-code canvas {
+        width: 100px !important;
+        height: 100px !important;
+      }
+
+      .fee-summary .card {
+        padding: var(--spacing-4);
+      }
+
+      .fee-item {
+        font-size: var(--font-size-sm);
+      }
+
+      .deposit-note {
+        padding: var(--spacing-3);
+        font-size: var(--font-size-sm);
+      }
+
+      .deposit-note i {
+        margin-top: 2px;
+      }
+
+      .deposit-btn {
+        padding: var(--spacing-3) var(--spacing-4);
+        font-size: var(--font-size-base);
+      }
+    }
+
+    @media (max-width: 320px) {
+      .deposit-container {
+        padding: var(--spacing-2);
+      }
+
+      .balance-amount {
+        font-size: var(--font-size-2xl);
+      }
+
+      .balance-breakdown {
+        padding: var(--spacing-2);
+      }
+
+      .method-item {
+        padding: var(--spacing-2);
+      }
+
+      .method-icon {
+        width: 36px;
+        height: 36px;
+        font-size: var(--font-size-base);
+      }
+
+      .amount-input-group {
+        padding: var(--spacing-1);
+      }
+
+      .quick-amount-btn {
+        padding: var(--spacing-1);
+      }
+
+      .address-display {
+        padding: var(--spacing-1);
+      }
+
+      .copy-btn {
+        padding: var(--spacing-1);
+      }
+
+      .qr-code canvas {
+        width: 80px !important;
+        height: 80px !important;
+      }
+
+      .fee-summary .card {
+        padding: var(--spacing-3);
+      }
+
+      .deposit-note {
+        padding: var(--spacing-2);
+        font-size: var(--font-size-xs);
+      }
+
+      .deposit-btn {
+        padding: var(--spacing-2) var(--spacing-3);
+        font-size: var(--font-size-sm);
       }
     }
   </style>
@@ -685,6 +917,16 @@
     <div class="toast-container" id="toast-container"></div>
   </div>
 
+  <script src="js/auth.js"></script>
+  <script>
+    // Check authentication on page load
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (!authManager.isAuthenticated()) {
+        window.location.href = 'login.html';
+        return;
+      }
+    });
+  </script>
   <!-- ✅ FIXED SCRIPT (NO NESTING ISSUE) -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js"></script>
   <script>

@@ -216,10 +216,12 @@
                     <div class="form-group">
                         <label for="profile-name">Full Name</label>
                         <input type="text" id="profile-name" required>
+                        <div class="error-message" id="profile-name-error"></div>
                     </div>
                     <div class="form-group">
                         <label for="profile-email">Email Address</label>
                         <input type="email" id="profile-email" required>
+                        <div class="error-message" id="profile-email-error"></div>
                     </div>
                     <button type="submit" class="btn btn-primary">Update Profile</button>
                 </form>
@@ -241,15 +243,18 @@
                     <div class="form-group">
                         <label for="current-password">Current Password</label>
                         <input type="password" id="current-password" required>
+                        <div class="error-message" id="current-password-error"></div>
                     </div>
                     <div class="form-group">
                         <label for="new-password">New Password</label>
                         <input type="password" id="new-password" required>
                         <div class="password-strength" id="password-strength"></div>
+                        <div class="error-message" id="new-password-error"></div>
                     </div>
                     <div class="form-group">
                         <label for="confirm-password">Confirm New Password</label>
                         <input type="password" id="confirm-password" required>
+                        <div class="error-message" id="confirm-password-error"></div>
                     </div>
                     <button type="submit" class="btn btn-primary">Change Password</button>
                 </form>
@@ -438,20 +443,19 @@
             const fullName = document.getElementById('profile-name').value.trim();
             const email = document.getElementById('profile-email').value.trim().toLowerCase();
 
-            if (!fullName || !email) {
-                showToast('Please fill in all fields', 'error');
+            // Validate form
+            if (!validateProfileForm()) {
                 return;
             }
 
-            if (!isValidEmail(email)) {
-                showToast('Please enter a valid email address', 'error');
-                return;
-            }
+            // Sanitize inputs
+            const sanitizedName = sanitizeInput(fullName);
+            const sanitizedEmail = sanitizeInput(email);
 
             try {
                 await apiClient.updateUser(authManager.getUser().id, {
-                    full_name: fullName,
-                    email
+                    full_name: sanitizedName,
+                    email: sanitizedEmail
                 });
 
                 showToast('Profile updated successfully', 'success');
@@ -470,19 +474,8 @@
             const newPassword = document.getElementById('new-password').value;
             const confirmPassword = document.getElementById('confirm-password').value;
 
-            if (!currentPassword || !newPassword || !confirmPassword) {
-                showToast('Please fill in all password fields', 'error');
-                return;
-            }
-
-            if (newPassword !== confirmPassword) {
-                showToast('New passwords do not match', 'error');
-                return;
-            }
-
-            const strength = checkPasswordStrength(newPassword);
-            if (strength.score < 3) {
-                showToast('Password is too weak. Please use a stronger password.', 'error');
+            // Validate form
+            if (!validatePasswordForm()) {
                 return;
             }
 
@@ -491,7 +484,7 @@
                 const { error } = await supabase.auth.updateUser({
                     password: newPassword
                 });
-                
+
                 if (error) {
                     throw new Error(error.message);
                 }
@@ -508,11 +501,101 @@
             }
         }
 
+        function validateProfileForm() {
+            const nameInput = document.getElementById('profile-name');
+            const emailInput = document.getElementById('profile-email');
+            const name = nameInput.value.trim();
+            const email = emailInput.value.trim().toLowerCase();
+
+            let isValid = true;
+
+            // Name validation
+            if (!name) {
+                document.getElementById('profile-name-error').textContent = 'Full name is required';
+                nameInput.classList.add('error');
+                isValid = false;
+            } else if (name.length < 2) {
+                document.getElementById('profile-name-error').textContent = 'Name must be at least 2 characters';
+                nameInput.classList.add('error');
+                isValid = false;
+            } else {
+                document.getElementById('profile-name-error').textContent = '';
+                nameInput.classList.remove('error');
+            }
+
+            // Email validation
+            if (!email) {
+                document.getElementById('profile-email-error').textContent = 'Email is required';
+                emailInput.classList.add('error');
+                isValid = false;
+            } else if (!isValidEmail(email)) {
+                document.getElementById('profile-email-error').textContent = 'Please enter a valid email address';
+                emailInput.classList.add('error');
+                isValid = false;
+            } else {
+                document.getElementById('profile-email-error').textContent = '';
+                emailInput.classList.remove('error');
+            }
+
+            return isValid;
+        }
+
+        function validatePasswordForm() {
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+
+            let isValid = true;
+
+            // Current password validation
+            if (!currentPassword) {
+                document.getElementById('current-password-error').textContent = 'Current password is required';
+                document.getElementById('current-password').classList.add('error');
+                isValid = false;
+            } else {
+                document.getElementById('current-password-error').textContent = '';
+                document.getElementById('current-password').classList.remove('error');
+            }
+
+            // New password validation
+            if (!newPassword) {
+                document.getElementById('new-password-error').textContent = 'New password is required';
+                document.getElementById('new-password').classList.add('error');
+                isValid = false;
+            } else {
+                const strength = checkPasswordStrength(newPassword);
+                if (strength.score < 3) {
+                    document.getElementById('new-password-error').textContent = 'Password is too weak. Please use a stronger password.';
+                    document.getElementById('new-password').classList.add('error');
+                    isValid = false;
+                } else {
+                    document.getElementById('new-password-error').textContent = '';
+                    document.getElementById('new-password').classList.remove('error');
+                }
+            }
+
+            // Confirm password validation
+            if (!confirmPassword) {
+                document.getElementById('confirm-password-error').textContent = 'Please confirm your new password';
+                document.getElementById('confirm-password').classList.add('error');
+                isValid = false;
+            } else if (newPassword !== confirmPassword) {
+                document.getElementById('confirm-password-error').textContent = 'Passwords do not match';
+                document.getElementById('confirm-password').classList.add('error');
+                isValid = false;
+            } else {
+                document.getElementById('confirm-password-error').textContent = '';
+                document.getElementById('confirm-password').classList.remove('error');
+            }
+
+            return isValid;
+        }
+
         function updatePasswordStrength() {
             const password = document.getElementById('new-password').value;
             const strengthElement = document.getElementById('password-strength');
             const strength = checkPasswordStrength(password);
-            
+
             strengthElement.innerHTML = `
                 <div class="strength-bar ${strength.class}">
                     <div class="strength-fill"></div>

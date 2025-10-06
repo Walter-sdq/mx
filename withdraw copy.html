@@ -222,8 +222,8 @@
       </header>
 
       <!-- Main Content -->
-      <main class="main-content">
-        <div class="withdraw-container">
+      <main class="main-content" id="mainContent">
+        <div class="withdraw-container page active" id="homePage">
           <!-- Balance Overview -->
           <section class="balance-overview">
             <div class="card">
@@ -452,6 +452,737 @@
             Confirm Withdrawal
           </button>
         </div>
+
+<!-- ### -->
+
+        <!-- Trading Page -->
+        <div class="page" id="tradingPage">
+          <!-- Trading Header -->
+          <div class="trading-header">
+            <div class="symbol-selector" id="symbolSelector">
+              <span class="current-symbol" id="current-symbol">BTC/USD</span>
+              <i class="fas fa-chevron-down"></i>
+            </div>
+            <div class="symbol-info">
+              <div class="price-display">
+                <span class="bid-price" id="bid-price">43250.00</span>
+                <span class="ask-price" id="ask-price">43252.00</span>
+              </div>
+              <div class="price-change positive" id="symbol-change">
+                +125.50 (+0.29%)
+              </div>
+            </div>
+          </div>
+
+          <!-- Trading Chart Section -->
+          <section class="trading-chart-section">
+            <div class="tradingview-widget-container">
+              <div id="tradingview_dashboard"></div>
+            </div>
+          </section>
+
+          <!-- Enhanced Trade Panel -->
+          <div class="trade-panel">
+            <!-- Order Type Selection -->
+            <div class="trade-section">
+              <h4 class="trade-section-title">Order Type</h4>
+              <div class="order-type-buttons">
+                <button class="order-type-btn active" data-type="market">Market</button>
+                <button class="order-type-btn" data-type="limit">Limit</button>
+                <button class="order-type-btn" data-type="stop">Stop</button>
+              </div>
+            </div>
+
+            <!-- Trade Direction -->
+            <div class="trade-section">
+              <h4 class="trade-section-title">Direction</h4>
+              <div class="trade-direction-buttons">
+                <button class="direction-btn buy active" data-direction="buy">
+                  <i class="fas fa-arrow-up"></i>
+                  <span>BUY</span>
+                </button>
+                <button class="direction-btn sell" data-direction="sell">
+                  <i class="fas fa-arrow-down"></i>
+                  <span>SELL</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Volume Input -->
+            <div class="trade-section">
+              <h4 class="trade-section-title">Volume</h4>
+              <div class="volume-input-container">
+                <input type="number" class="trade-input volume-input" placeholder="Enter volume" id="volumeInput" />
+                <div class="volume-presets">
+                  <button class="volume-preset" data-volume="0.1">0.1</button>
+                  <button class="volume-preset" data-volume="0.5">0.5</button>
+                  <button class="volume-preset" data-volume="1">1</button>
+                  <button class="volume-preset" data-volume="5">5</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Price Input (for limit/stop orders) -->
+            <div class="trade-section price-section" id="priceSection" style="display: none;">
+              <h4 class="trade-section-title">Price</h4>
+              <input type="number" class="trade-input price-input" placeholder="Enter price" id="priceInput" />
+            </div>
+
+            <!-- Stop Loss & Take Profit -->
+            <div class="trade-section">
+              <h4 class="trade-section-title">Risk Management</h4>
+              <div class="risk-inputs">
+                <div class="risk-input-group">
+                  <label class="risk-label">Stop Loss</label>
+                  <input type="number" class="trade-input risk-input" placeholder="Stop loss price" id="stopLossInput" />
+                </div>
+                <div class="risk-input-group">
+                  <label class="risk-label">Take Profit</label>
+                  <input type="number" class="trade-input risk-input" placeholder="Take profit price" id="takeProfitInput" />
+                </div>
+              </div>
+            </div>
+
+            <!-- Trade Summary -->
+            <div class="trade-section">
+              <h4 class="trade-section-title">Order Summary</h4>
+              <div class="order-summary">
+                <div class="summary-row">
+                  <span class="summary-label">Symbol:</span>
+                  <span class="summary-value" id="summarySymbol">BTC/USD</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Direction:</span>
+                  <span class="summary-value" id="summaryDirection">BUY</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Volume:</span>
+                  <span class="summary-value" id="summaryVolume">0</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Price:</span>
+                  <span class="summary-value" id="summaryPrice">Market</span>
+                </div>
+                <div class="summary-row total">
+                  <span class="summary-label">Total:</span>
+                  <span class="summary-value" id="summaryTotal">$0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Execute Button -->
+            <div class="trade-section">
+              <button class="execute-trade-btn" id="executeTradeBtn">
+                <i class="fas fa-play"></i>
+                <span>Execute Trade</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Open Positions -->
+          <section class="positions-section">
+            <div class="section-header">
+              <h3>Open Positions</h3>
+              <span class="position-count" id="positionCount">0</span>
+            </div>
+            <div class="positions-list" id="positionsList">
+              <div class="empty-state">No open positions</div>
+            </div>
+          </section>
+        </div>
+
+        <!-- Transactions Page -->
+        <div class="page" id="transactionsPage">
+          <div class="page-header">
+            <h2>Transactions</h2>
+            <div class="page-actions">
+              <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search transactions..." id="transactionSearch" class="search-input">
+              </div>
+              <button class="filter-btn" id="transactionFilter">
+                <i class="fas fa-filter"></i>
+                <span>Filter</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Transaction Filters -->
+          <div class="transaction-filters" id="transactionFilters">
+            <div class="filter-tabs">
+              <button class="filter-tab active" data-filter="all">
+                <i class="fas fa-list"></i>
+                <span>All</span>
+              </button>
+              <button class="filter-tab" data-filter="deposits">
+                <i class="fas fa-arrow-down"></i>
+                <span>Deposits</span>
+              </button>
+              <button class="filter-tab" data-filter="withdrawals">
+                <i class="fas fa-arrow-up"></i>
+                <span>Withdrawals</span>
+              </button>
+              <button class="filter-tab" data-filter="trades">
+                <i class="fas fa-chart-line"></i>
+                <span>Trades</span>
+              </button>
+              <button class="filter-tab" data-filter="transfers">
+                <i class="fas fa-exchange-alt"></i>
+                <span>Transfers</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Transaction List -->
+          <div class="transactions-list" id="transactionsList">
+            <!-- Transactions will be populated by JavaScript -->
+          </div>
+
+          <!-- Transaction Pagination -->
+          <div class="pagination" id="transactionPagination">
+            <button class="pagination-btn" id="prevPage" disabled>
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <span class="pagination-info">
+              <span id="currentPage">1</span> of <span id="totalPages">1</span>
+            </span>
+            <button class="pagination-btn" id="nextPage" disabled>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- Transaction Summary -->
+          <div class="transaction-summary" id="transactionSummary">
+            <div class="summary-stats">
+              <div class="summary-stat">
+                <span class="stat-label">Total Transactions</span>
+                <span class="stat-value" id="totalTransactions">0</span>
+              </div>
+              <div class="summary-stat">
+                <span class="stat-label">Total Volume</span>
+                <span class="stat-value" id="totalVolume">$0.00</span>
+              </div>
+              <div class="summary-stat">
+                <span class="stat-label">This Month</span>
+                <span class="stat-value" id="monthlyVolume">$0.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notifications Page -->
+        <div class="page" id="notificationsPage">
+          <div class="page-header">
+            <h2>Notifications</h2>
+            <div class="page-actions">
+              <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" placeholder="Search notifications..." id="notificationSearch" class="search-input">
+              </div>
+              <div class="notification-actions">
+                <button class="action-btn small" id="markAllRead">
+                  <i class="fas fa-check-double"></i>
+                  <span>Mark All Read</span>
+                </button>
+                <button class="action-btn small secondary" id="clearAllNotifications">
+                  <i class="fas fa-trash"></i>
+                  <span>Clear All</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Notification Filters -->
+          <div class="notification-filters" id="notificationFilters">
+            <div class="filter-tabs">
+              <button class="filter-tab active" data-filter="all">
+                <i class="fas fa-bell"></i>
+                <span>All</span>
+              </button>
+              <button class="filter-tab" data-filter="unread">
+                <i class="fas fa-circle"></i>
+                <span>Unread</span>
+              </button>
+              <button class="filter-tab" data-filter="info">
+                <i class="fas fa-info-circle"></i>
+                <span>Info</span>
+              </button>
+              <button class="filter-tab" data-filter="success">
+                <i class="fas fa-check-circle"></i>
+                <span>Success</span>
+              </button>
+              <button class="filter-tab" data-filter="warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Warning</span>
+              </button>
+              <button class="filter-tab" data-filter="error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>Error</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Notification List -->
+          <div class="notifications-list" id="notificationsList">
+            <!-- Notifications will be populated by JavaScript -->
+          </div>
+
+          <!-- Notification Pagination -->
+          <div class="pagination" id="notificationPagination">
+            <button class="pagination-btn" id="prevNotificationPage" disabled>
+              <i class="fas fa-chevron-left"></i>
+            </button>
+            <span class="pagination-info">
+              <span id="currentNotificationPage">1</span> of <span id="totalNotificationPages">1</span>
+            </span>
+            <button class="pagination-btn" id="nextNotificationPage" disabled>
+              <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+
+          <!-- Notification Summary -->
+          <div class="notification-summary" id="notificationSummary">
+            <div class="summary-stats">
+              <div class="summary-stat">
+                <span class="stat-label">Total Notifications</span>
+                <span class="stat-value" id="totalNotifications">0</span>
+              </div>
+              <div class="summary-stat">
+                <span class="stat-label">Unread</span>
+                <span class="stat-value" id="unreadNotifications">0</span>
+              </div>
+              <div class="summary-stat">
+                <span class="stat-label">This Week</span>
+                <span class="stat-value" id="weeklyNotifications">0</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Support Page -->
+        <div class="page" id="supportPage">
+          <div class="support-header">
+            <div class="support-hero">
+              <i class="fas fa-headset"></i>
+              <h2>How can we help you?</h2>
+              <p>Get instant support from our expert team</p>
+            </div>
+
+            <div class="support-status">
+              <div class="status-indicator online">
+                <span class="status-dot"></span>
+                <span>Support Team Online</span>
+              </div>
+              <div class="response-time">
+                <i class="fas fa-clock"></i>
+                <span>Average response: 2 minutes</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="support-options">
+            <div class="support-card primary" onclick="startLiveChat()">
+              <div class="support-icon">
+                <i class="fas fa-comments"></i>
+              </div>
+              <div class="support-content">
+                <h3>Live Chat</h3>
+                <p>Get instant help from our support agents</p>
+                <span class="support-action">Start Chat →</span>
+              </div>
+            </div>
+
+            <div class="support-card" onclick="openSupportTicket()">
+              <div class="support-icon">
+                <i class="fas fa-ticket-alt"></i>
+              </div>
+              <div class="support-content">
+                <h3>Support Ticket</h3>
+                <p>Create a ticket for complex issues</p>
+                <span class="support-action">Create Ticket →</span>
+              </div>
+            </div>
+
+            <div class="support-card" onclick="callSupport()">
+              <div class="support-icon">
+                <i class="fas fa-phone"></i>
+              </div>
+              <div class="support-content">
+                <h3>Phone Support</h3>
+                <p>Speak directly with our support team</p>
+                <span class="support-action">Call Now →</span>
+              </div>
+            </div>
+
+            <div class="support-card" onclick="openHelpCenter()">
+              <div class="support-icon">
+                <i class="fas fa-book"></i>
+              </div>
+              <div class="support-content">
+                <h3>Help Center</h3>
+                <p>Browse our knowledge base and FAQs</p>
+                <span class="support-action">Browse Help →</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="support-contact">
+            <div class="contact-section">
+              <h3>Contact Information</h3>
+              <div class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <div>
+                  <span class="contact-label">Email</span>
+                  <span class="contact-value">support@Top-Margin .com</span>
+                </div>
+              </div>
+              <div class="contact-item">
+                <i class="fas fa-phone"></i>
+                <div>
+                  <span class="contact-label">Phone</span>
+                  <span class="contact-value">+1 (555) 123-4567</span>
+                </div>
+              </div>
+              <div class="contact-item">
+                <i class="fas fa-clock"></i>
+                <div>
+                  <span class="contact-label">Hours</span>
+                  <span class="contact-value">24/7 Available</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="support-faq">
+            <h3>Frequently Asked Questions</h3>
+            <div class="faq-list">
+              <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                  <span>How do I make a deposit?</span>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                  You can make a deposit by clicking the "Deposit" button on the home page and following the instructions for your preferred payment method.
+                </div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                  <span>How long do withdrawals take?</span>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                  Withdrawal processing times vary by method. Crypto withdrawals are usually processed within 30 minutes, while bank transfers may take 1-3 business days.
+                </div>
+              </div>
+              <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                  <span>Is my account secure?</span>
+                  <i class="fas fa-chevron-down"></i>
+                </div>
+                <div class="faq-answer">
+                  Yes, we use industry-standard security measures including 2FA, SSL encryption, and cold storage for funds. Your account is protected 24/7.
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- Profile Modal -->
+      <div class="profile-modal" id="profileModal">
+        <div class="profile-modal-content">
+          <div class="profile-modal-header">
+            <h3>User Profile</h3>
+            <button class="modal-close" id="profileModalClose">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="profile-modal-body">
+            <div class="profile-section">
+              <div class="profile-avatar-section">
+                <div class="profile-avatar-large">
+                  <img src="https://ui-avatars.com/api/?name=User&background=random&size=80&bold=true" alt="Profile Avatar">
+                  <button class="avatar-edit-btn" title="Change Avatar">
+                    <i class="fas fa-camera"></i>
+                  </button>
+                </div>
+                <h4 id="profileModalName">Loading...</h4>
+                <p id="profileModalEmail">Loading...</p>
+              </div>
+
+              <div class="profile-stats-grid">
+                <div class="profile-stat">
+                  <span class="stat-value" id="profileModalTrades">0</span>
+                  <span class="stat-label">Total Trades</span>
+                </div>
+                <div class="profile-stat">
+                  <span class="stat-value" id="profileModalWinRate">0%</span>
+                  <span class="stat-label">Win Rate</span>
+                </div>
+                <div class="profile-stat">
+                  <span class="stat-value" id="profileModalBalance">$0.00</span>
+                  <span class="stat-label">Balance</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="profile-menu-section">
+              <div class="profile-menu-item" onclick="navigateToProfile()">
+                <i class="fas fa-user"></i>
+                <span>View Full Profile</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+              <div class="profile-menu-item" onclick="openSettings()">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+              <div class="profile-menu-item" onclick="openSecurity()">
+                <i class="fas fa-shield-alt"></i>
+                <span>Security</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+              <div class="profile-menu-item" onclick="openSupport()">
+                <i class="fas fa-headset"></i>
+                <span>Support</span>
+                <i class="fas fa-chevron-right"></i>
+              </div>
+              <div class="profile-menu-item danger" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Symbol Selection Modal -->
+      <div class="symbol-modal" id="symbolModal">
+        <div class="symbol-modal-content">
+          <div class="symbol-modal-header">
+            <h3>Select Symbol</h3>
+            <button class="modal-close" id="modalClose">
+              <i class="fas fa-times"></i>
+            </button>
+          </div>
+
+          <div class="symbol-categories">
+            <div class="category-tabs">
+              <button class="category-tab active" data-category="crypto">
+                <i class="fas fa-coins"></i>
+                <span>Crypto</span>
+              </button>
+              <button class="category-tab" data-category="forex">
+                <i class="fas fa-dollar-sign"></i>
+                <span>Forex</span>
+              </button>
+              <button class="category-tab" data-category="stocks">
+                <i class="fas fa-chart-bar"></i>
+                <span>Stocks</span>
+              </button>
+            </div>
+
+            <div class="symbol-search">
+              <input type="text" placeholder="Search symbols..." id="symbolSearch" class="search-input">
+            </div>
+
+            <div class="symbol-categories-content">
+              <div class="symbol-category crypto active">
+                <div class="symbol-list" id="cryptoList">
+                  <div class="symbol-item" data-symbol="BTC/USD">
+                    <div class="symbol-info">
+                      <span class="symbol-name">BTC/USD</span>
+                      <span class="symbol-description">Bitcoin</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">$43,250.00</span>
+                      <span class="change positive">+2.45%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="ETH/USD">
+                    <div class="symbol-info">
+                      <span class="symbol-name">ETH/USD</span>
+                      <span class="symbol-description">Ethereum</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">$2,580.00</span>
+                      <span class="change positive">+1.23%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="LTC/USD">
+                    <div class="symbol-info">
+                      <span class="symbol-name">LTC/USD</span>
+                      <span class="symbol-description">Litecoin</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">$85.50</span>
+                      <span class="change negative">-0.85%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="XRP/USD">
+                    <div class="symbol-info">
+                      <span class="symbol-name">XRP/USD</span>
+                      <span class="symbol-description">Ripple</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">$0.65</span>
+                      <span class="change positive">+3.12%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="ADA/USD">
+                    <div class="symbol-info">
+                      <span class="symbol-name">ADA/USD</span>
+                      <span class="symbol-description">Cardano</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">$0.45</span>
+                      <span class="change positive">+1.87%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="DOT/USD">
+                    <div class="symbol-info">
+                      <span class="symbol-name">DOT/USD</span>
+                      <span class="symbol-description">Polkadot</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">$8.20</span>
+                      <span class="change negative">-1.45%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="symbol-category forex">
+                <div class="symbol-list" id="forexList">
+                  <div class="symbol-item" data-symbol="EUR/USD">
+                    <div class="symbol-info">
+                      <span class="symbol-name">EUR/USD</span>
+                      <span class="symbol-description">Euro / US Dollar</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">1.0850</span>
+                      <span class="change positive">+0.12%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="GBP/USD">
+                    <div class="symbol-info">
+                      <span class="symbol-name">GBP/USD</span>
+                      <span class="symbol-description">British Pound / US Dollar</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">1.2650</span>
+                      <span class="change negative">-0.08%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="USD/JPY">
+                    <div class="symbol-info">
+                      <span class="symbol-name">USD/JPY</span>
+                      <span class="symbol-description">US Dollar / Japanese Yen</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">148.50</span>
+                      <span class="change positive">+0.25%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="AUD/USD">
+                    <div class="symbol-info">
+                      <span class="symbol-name">AUD/USD</span>
+                      <span class="symbol-description">Australian Dollar / US Dollar</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">0.6580</span>
+                      <span class="change positive">+0.18%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="symbol-category stocks">
+                <div class="symbol-list" id="stocksList">
+                  <div class="symbol-item" data-symbol="AAPL">
+                    <div class="symbol-info">
+                      <span class="symbol-name">AAPL</span>
+                      <span class="symbol-description">Apple Inc.</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">$175.50</span>
+                      <span class="change positive">+1.23%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="GOOGL">
+                    <div class="symbol-info">
+                      <span class="symbol-name">GOOGL</span>
+                      <span class="symbol-description">Alphabet Inc.</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">$138.20</span>
+                      <span class="change negative">-0.45%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="MSFT">
+                    <div class="symbol-info">
+                      <span class="symbol-name">MSFT</span>
+                      <span class="symbol-description">Microsoft Corporation</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">$378.85</span>
+                      <span class="change positive">+0.87%</span>
+                    </div>
+                  </div>
+                  <div class="symbol-item" data-symbol="TSLA">
+                    <div class="symbol-info">
+                      <span class="symbol-name">TSLA</span>
+                      <span class="symbol-description">Tesla Inc.</span>
+                    </div>
+                    <div class="symbol-price">
+                      <span class="price">$248.50</span>
+                      <span class="change positive">+2.15%</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bottom Navigation -->
+      <nav class="bottom-nav">
+        <button class="nav-item active" data-page="home">
+          <i class="fas fa-home"></i>
+          <span>Home</span>
+        </button>
+        <button class="nav-item" data-page="trading">
+          <i class="fas fa-chart-line"></i>
+          <span>Trading</span>
+        </button>
+        <button class="nav-item" data-page="transactions">
+          <i class="fas fa-exchange-alt"></i>
+          <span>Transactions</span>
+        </button>
+        <button class="nav-item" data-page="notifications">
+          <i class="fas fa-bell"></i>
+          <span>Notifications</span>
+        </button>
+        <button class="nav-item" data-page="support">
+          <i class="fas fa-headset"></i>
+          <span>Support</span>
+        </button>
+      </nav>
+
+      <!-- Loading Overlay -->
+      <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner">
+          <div class="spinner"></div>
+          <p>Loading...</p>
+        </div>
+      </div>
+    </div>
+
+   
+<!-- ### -->
+
       </main>
 
       <!-- Bottom Navigation -->
@@ -459,7 +1190,7 @@
       <nav class="bottom-nav">
         <button class="nav-item active" data-page="home">
           <i class="fas fa-home"></i>
-          <span>Home</span>
+         <span>Home</span>
         </button>
         <button class="nav-item" data-page="trading">
           <i class="fas fa-chart-line"></i>
@@ -571,5 +1302,96 @@
         }
       });
     </script>
+   
+   <script>
+      // Trading Panel and Modal Functionality
+      let currentSymbol = 'BTC/USD';
+      let tradingViewWidget = null;
+
+      document.addEventListener("DOMContentLoaded", () => {
+        console.log("✅ Dashboard Loaded");
+
+        // Initialize page navigation
+        initializePageNavigation();
+
+        // Initialize trading functionality
+        initializeTrading();
+
+        // Initialize symbol modal
+        initializeSymbolModal();
+
+        // Initialize live payment generator
+        initializeLivePayments();
+
+        // Initialize TradingView widget
+        initializeTradingView('BINANCE:BTCUSDT');
+
+        // Handle window resize for TradingView responsiveness
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+          clearTimeout(resizeTimeout);
+          resizeTimeout = setTimeout(() => {
+            if (tradingViewWidget && window.TradingView) {
+              // Force TradingView to recalculate dimensions
+              const container = document.getElementById("tradingview_dashboard");
+              if (container) {
+                container.style.width = '100%';
+                container.style.height = '100%';
+                // Reinitialize widget on resize for better responsiveness
+                if (window.innerWidth <= 768) {
+                  initializeTradingView(currentSymbol);
+                }
+              }
+            }
+          }, 250);
+        });
+
+        // Handle orientation change for mobile devices
+        window.addEventListener('orientationchange', () => {
+          setTimeout(() => {
+            if (tradingViewWidget && window.TradingView) {
+              const container = document.getElementById("tradingview_dashboard");
+              if (container) {
+                container.style.width = '100%';
+                container.style.height = '100%';
+                initializeTradingView(currentSymbol);
+              }
+            }
+          }, 500);
+        });
+      });
+
+      function initializePageNavigation() {
+        const pages = document.querySelectorAll(".page");
+        const navItems = document.querySelectorAll(".bottom-nav .nav-item");
+
+        function showPage(pageName) {
+          pages.forEach((page) => page.classList.remove("active"));
+          const targetPage = document.getElementById(`${pageName}Page`);
+          if (targetPage) {
+            targetPage.classList.add("active");
+            console.log(`📄 Switched to: ${pageName}Page`);
+          } else {
+            console.warn(`⚠️ Page not found: ${pageName}Page`);
+          }
+
+          navItems.forEach((btn) => btn.classList.remove("active"));
+          const activeBtn = document.querySelector(
+            `.bottom-nav .nav-item[data-page="${pageName}"]`
+          );
+          if (activeBtn) activeBtn.classList.add("active");
+        }
+
+        navItems.forEach((btn) => {
+          btn.addEventListener("click", () => {
+            const pageName = btn.getAttribute("data-page");
+            showPage(pageName);
+          });
+        });
+
+        showPage("home");
+      }
+    </script>
+    <script src="./js/dashboard.js"></script>
   </body>
 </html>

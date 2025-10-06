@@ -45,18 +45,8 @@
       </button>
     </nav>
 
-    <script src="js/auth.js"></script>
     <script src="js/charts.js"></script>
     <script src="js/prices.js"></script>
-    <script>
-      // Check authentication on page load
-      document.addEventListener('DOMContentLoaded', async () => {
-        if (!authManager.isAuthenticated()) {
-          window.location.href = 'login.html';
-          return;
-        }
-      });
-    </script>
     <script>
         // Example: Render live BTC/USD chart
         const priceEngine = new window.PriceEngine();

@@ -297,16 +297,6 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toast-container"></div>
 
-    <script src="js/auth.js"></script>
-    <script>
-      // Check authentication on page load
-      document.addEventListener('DOMContentLoaded', async () => {
-        if (!authManager.isAuthenticated()) {
-          window.location.href = 'login.html';
-          return;
-        }
-      });
-    </script>
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="js/customer-support.js"></script>

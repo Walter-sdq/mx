@@ -273,6 +273,3 @@ class RealTimePriceEngine {
 }
 
 export const realTimePrices = new RealTimePriceEngine();
-
-// Make globally available
-window.realTimePrices = realTimePrices;

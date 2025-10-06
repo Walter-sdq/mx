@@ -1,11 +1,16 @@
 // Supabase client configuration
 // Use CDN import for browser compatibility
-const SUPABASE_URL = "https://cwwcyqhzmelevlcrrecc.supabase.co"; // <-- Replace with your Supabase URL
-const SUPABASE_KEY =
+export const SUPABASE_URL = "https://cwwcyqhzmelevlcrrecc.supabase.co"; // <-- Replace with your Supabase URL
+export const SUPABASE_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImN3d2N5cWh6bWVsZXZsY3JyZWNjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTUyMDg3OTIsImV4cCI6MjA3MDc4NDc5Mn0.iE6sZQHqb_wjGk19DBcKtw-xePnpzVqd-Lfw2DafKho"; // <-- Replace with your Supabase anon key
 
 // Initialize supabase client with error handling
 let supabase = null;
+// Promise that resolves when supabase client is initialized (or null on timeout)
+let _resolveSupabaseReady;
+export const supabaseReady = new Promise((res) => {
+  _resolveSupabaseReady = res;
+});
 
 function initializeSupabase() {
   if (window.supabase && !supabase) {
@@ -16,7 +21,13 @@ function initializeSupabase() {
         detectSessionInUrl: true,
       },
     });
-    console.log('Supabase client initialized');
+    console.log("Supabase client initialized");
+    // resolve readiness promise
+    try {
+      _resolveSupabaseReady(supabase);
+    } catch (e) {
+      /* ignore */
+    }
   }
 }
 
@@ -24,21 +35,61 @@ function initializeSupabase() {
 if (window.supabase) {
   initializeSupabase();
 } else {
-  // Wait for supabase to load
-  const checkSupabase = setInterval(() => {
-    if (window.supabase) {
-      clearInterval(checkSupabase);
-      initializeSupabase();
-    }
-  }, 100);
+  // Try to dynamically load the supabase-js CDN script (if not already present)
+  const CDN_SRC =
+    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/index.min.js";
 
-  // Timeout after 10 seconds
-  setTimeout(() => {
-    clearInterval(checkSupabase);
-    if (!supabase) {
-      console.error('Supabase client failed to initialize');
+  function loadSupabaseScript() {
+    // If another loader already created the script, wait for window.supabase
+    if (window.supabase) {
+      initializeSupabase();
+      return;
     }
-  }, 10000);
+
+    // Avoid adding multiple script tags
+    if (document.querySelector(`script[src="${CDN_SRC}"]`)) {
+      // Script exists but window.supabase not ready yet - set a short poll
+      const check = setInterval(() => {
+        if (window.supabase) {
+          clearInterval(check);
+          initializeSupabase();
+        }
+      }, 100);
+      return;
+    }
+
+    const script = document.createElement("script");
+    script.src = CDN_SRC;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      // Give a tick for the global to be available
+      setTimeout(() => initializeSupabase(), 50);
+    };
+    script.onerror = (err) => {
+      console.error("Failed to load supabase-js from CDN:", err);
+      try {
+        _resolveSupabaseReady(null);
+      } catch (e) {
+        /* ignore */
+      }
+    };
+    document.head.appendChild(script);
+
+    // Timeout after 10 seconds
+    setTimeout(() => {
+      if (!supabase) {
+        console.error("Supabase client failed to initialize (timeout)");
+        try {
+          _resolveSupabaseReady(null);
+        } catch (e) {
+          /* ignore */
+        }
+      }
+    }, 10000);
+  }
+
+  loadSupabaseScript();
 }
 
 // Export the supabase client for use in other modules
@@ -173,4 +224,3 @@ export async function updateUserProfile(userId, updates) {
 
   return { data, error };
 }
-

@@ -194,20 +194,6 @@
   <script src="js/auth.js"></script>
 
   <script>
-    // Check authentication and admin role on page load
-    document.addEventListener('DOMContentLoaded', async () => {
-      if (!authManager.isAuthenticated()) {
-        window.location.href = 'login.html';
-        return;
-      }
-
-      const user = authManager.getUser();
-      if (!user || user.user_metadata?.role !== 'admin') {
-        window.location.href = 'dashboard.html';
-        return;
-      }
-    });
-
     // Logout admin function
     async function logoutAdmin() {
       try {

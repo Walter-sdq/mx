@@ -1346,7 +1346,6 @@ html, body {
                                 >
                             </div>
                             <div class="amount-note">Minimum withdrawal: $10.00</div>
-                            <div class="error-message" id="withdraw-amount-error"></div>
                         </div>
 
                         <!-- Quick Amount Buttons -->
@@ -1396,7 +1395,6 @@ html, body {
                             <div class="form-group">
                                 <label for="crypto-wallet">Wallet Address</label>
                                 <input type="text" id="crypto-wallet" placeholder="Enter wallet address" required>
-                                <div class="error-message" id="crypto-wallet-error"></div>
                             </div>
                         </div>
 
@@ -1505,11 +1503,6 @@ html, body {
         import { formatCurrency, showToast, showLoading } from './js/utils.js';
         
         document.addEventListener('DOMContentLoaded', () => {
-            // Initialize CSRF protection
-            if (window.csrfProtection) {
-                window.csrfProtection.injectTokenIntoForm(document.getElementById('withdraw-form'));
-            }
-
             initWithdrawPage();
             initializePageNavigation();
         });
@@ -1596,125 +1589,56 @@ html, body {
                 });
             });
 
-            // Amount input with validation
-            amountInput.addEventListener('input', () => {
-                validateWithdrawAmount();
-                updateFeeSummary();
-            });
+            // Amount input
+            amountInput.addEventListener('input', updateFeeSummary);
 
             // Form submission
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                if (validateWithdrawForm(selectedMethod)) {
-                    await processWithdrawal(selectedMethod);
-                }
+                await processWithdrawal(selectedMethod);
             });
-
-            function validateWithdrawAmount() {
-                const errorElement = document.getElementById('withdraw-amount-error');
-                const amount = parseFloat(amountInput.value);
-                const profile = authManager.getProfile();
-                const balances = profile.balances || { USD: 0 };
-
-                let isValid = true;
-                let message = '';
-
-                if (!amountInput.value) {
-                    message = 'Withdrawal amount is required';
-                    isValid = false;
-                } else if (!isValidAmount(amount, 10, balances.USD)) {
-                    message = `Amount must be between $10.00 and ${formatCurrency(balances.USD)}`;
-                    isValid = false;
-                }
-
-                errorElement.textContent = message;
-                amountInput.classList.toggle('error', !isValid);
-                return isValid;
-            }
-
-            function validateWithdrawForm(method) {
-                const amountValid = validateWithdrawAmount();
-                let cryptoValid = true;
-
-                if (method === 'crypto') {
-                    cryptoValid = validateCryptoWallet();
-                }
-
-                return amountValid && cryptoValid;
-            }
-
-            function validateCryptoWallet() {
-                const walletInput = document.getElementById('crypto-wallet');
-                const errorElement = document.getElementById('crypto-wallet-error');
-                const wallet = walletInput.value.trim();
-
-                let isValid = true;
-                let message = '';
-
-                if (!wallet) {
-                    message = 'Wallet address is required';
-                    isValid = false;
-                } else if (wallet.length < 20) {
-                    message = 'Wallet address appears to be too short';
-                    isValid = false;
-                }
-
-                errorElement.textContent = message;
-                walletInput.classList.toggle('error', !isValid);
-                return isValid;
-            }
 
             function updateFeeSummary() {
                 const amount = parseFloat(amountInput.value) || 0;
                 const fee = 2.50; // Fixed withdrawal fee
                 const total = Math.max(0, amount - fee);
-
+                
                 document.getElementById('withdraw-fee-amount').textContent = formatCurrency(amount);
                 document.getElementById('withdraw-fee-processing').textContent = formatCurrency(fee);
                 document.getElementById('withdraw-fee-total').textContent = formatCurrency(total);
             }
 
             async function processWithdrawal(method) {
-                // Validate CSRF token first
-                const csrfToken = document.querySelector('#withdraw-form input[name="_csrf"]').value;
-                if (!window.csrfProtection || !window.csrfProtection.validateToken(csrfToken)) {
-                    showToast('Security validation failed. Please refresh the page and try again.', 'error');
-                    return;
-                }
-
                 const amount = parseFloat(amountInput.value);
                 const profile = authManager.getProfile();
                 const balances = profile.balances || { USD: 0 };
+                
+                if (!amount || amount < 10) {
+                    showToast('Minimum withdrawal amount is $10.00', 'error');
+                    return;
+                }
 
-                // Sanitize inputs
-                const sanitizedAmount = amount;
-                let sanitizedAddress = '';
-
-                if (method === 'crypto') {
-                    sanitizedAddress = sanitizeInput(document.getElementById('crypto-wallet').value);
-                } else if (method === 'paypal') {
-                    sanitizedAddress = sanitizeInput(profile.email);
-                } else {
-                    sanitizedAddress = '****1234'; // Bank account
+                if (amount > balances.USD) {
+                    showToast('Insufficient balance', 'error');
+                    return;
                 }
 
                 const submitBtn = document.getElementById('withdraw-submit');
-
+                
                 try {
                     submitBtn.disabled = true;
                     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
                     showLoading(true);
 
-                    // Rate limit the withdrawal request
-                    await globalRateLimiter.throttle(async () => {
-
                     // Create withdrawal request
                     const withdrawal = {
                         user_id: authManager.getUser().id,
-                        amount: sanitizedAmount,
+                        amount: amount,
                         currency: 'USD',
                         method: method,
-                        address_or_account: sanitizedAddress,
+                        address_or_account: method === 'bank' ? '****1234' : 
+                                          method === 'paypal' ? profile.email : 
+                                          document.getElementById('crypto-wallet')?.value || '',
                         status: 'pending'
                     };
                     
@@ -1755,9 +1679,6 @@ html, body {
                     setTimeout(() => {
                         window.location.href = 'dashboard.html';
                     }, 1500);
-
-                    });
-
 
                 } catch (error) {
                     console.error('Withdrawal error:', error);
